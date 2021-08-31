@@ -62,5 +62,6 @@ paginate = 5
         name = "About Manabie"
         url = "https://manabie.com/"
       [[languages.en.menu.main]]
-        identifier = "Careers"
-        name = "https://manabie.breezy.hr/"
+        identifier = "careers"
+	name = "Careers"
+        url = "https://manabie.breezy.hr/"
