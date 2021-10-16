@@ -1,67 +1,67 @@
 baseurl = "/"
 languageCode = "en-us"
-theme = "terminal"
-paginate = 5
+title = "Manabie Tech Blog"
+theme = "hugo-theme-bootstrap4-blog"
+enableRobotsTXT = true
+# number of posts to show on home/category/tag pages (Default: 10)
+paginate = 3
+copyright = "Except where otherwise noted, content on this site is licensed under a [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/)."
+enableGitInfo = true
+
+#[imaging]
+# Default resample filter used for resizing. Default is Box,
+# # a simple and fast averaging filter appropriate for downscaling.
+# # See https://github.com/disintegration/imaging
+#resampleFilter = "CatmullRom"
+
+# Default JPEG quality setting. Default is 75.
+#quality = 82
+
+[permalinks]
+  posts = "/:year/:month/:slug/"
+  page = "/:slug/"
 
 [params]
-  # dir name of your main content (default is `content/posts`).
-  # the list of set content will show up on your index page (baseurl).
-  contentTypeName = "posts"
+  # Site author
+  # author = ""
 
-  # ["orange", "blue", "red", "green", "pink"]
-  themeColor = "blue"
+  # Description/subtitle for homepage (can be Markdown)
+  description = "Sharing the humble technical knowledge we're using to improve education"
 
-  # if you set this to 0, only submenu trigger will be visible
-  showMenuItems = 2
+  # Format dates with Go's time formatting
+  date_format = "Mon Jan 02, 2006"
 
-  # show selector to switch language
-  showLanguageSelector = false
+  # verification string for Google Webmaster Tools
+  # google_verify_meta = "BAi69DROASu2b2mkVNA_EyUsobfH7Mq8BmSg2Rn-Zp4"
 
-  # set theme to full screen width
-  fullWidthTheme = false
+  # verification string for Bing Webmaster Tools
+  # bing_verify_meta = "2CA373095D945D1AA256B1CD8A3DF872"
 
-  # center theme with default width
-  centerTheme = false
+  # verification string for Yandex Webmaster Tools
+  # yandex_verify_meta = "96b099438f75a04a"
 
-  # set a custom favicon (default is a `themeColor` square)
-  # favicon = "favicon.ico"
+  # show sharing icons on pages/posts (default: true)
+  #sharingicons = true
 
-  # set post to show the last updated
-  # If you use git, you can set `enableGitInfo` to `true` and then post will automatically get the last updated
-  showLastUpdated = false
-  # Provide a string as a prefix for the last update date. By default, it looks like this: 2020-xx-xx [Updated: 2020-xx-xx] :: Author
-  # updatedDatePrefix = "Updated"
+  [params.sidebar]
+    # Optional about block for sidebar (can be Markdown)
+    # about = ""
 
-  # set all headings to their default size (depending on browser settings)
-  # it's set to `true` by default
-  # oneHeadingSize = false
+    # How many posts to show on the sidebar (Default: 5)
+    #num_recent_posts = 2
 
-[languages]
-  [languages.en]
-    languageName = "English"
-    title = "Terminal"
-    subtitle = "A simple, retro theme for Hugo"
-    owner = ""
-    keywords = ""
-    copyright = ""
-    menuMore = "Show more"
-    readMore = "Read more"
-    readOtherPosts = "Read other posts"
-    newerPosts = "Newer posts"
-    olderPosts = "Older posts"
-    missingContentMessage = "Page not found..."
-    missingBackButtonLabel = "Back to home page"
+  [params.social]
+    # twitter handle for the site (ideally not a person, eg: nytimes, flickr, etc)
+    # twitter = ""
 
-    [languages.en.params.logo]
-      logoText = "Terminal"
-      logoHomeLink = "/"
+[[menu.sidebar]]
+  name = "About Us"
+  url = "https://manabie.com"
 
-    [languages.en.menu]
-      [[languages.en.menu.main]]
-        identifier = "about"
-        name = "About Manabie"
-        url = "https://manabie.com/"
-      [[languages.en.menu.main]]
-        identifier = "careers"
-	name = "Careers"
-        url = "https://manabie.breezy.hr/"
+[[menu.sidebar]]
+  name = "Careers"
+  url = "https://manabie.breezy.hr"
+
+# Default content language for Hugo 0.17's multilingual support (default is "en")
+# See: https://github.com/spf13/hugo/blob/master/docs/content/content/multilingual.md
+DefaultContentLanguage = "en"
