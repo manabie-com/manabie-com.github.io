@@ -7,6 +7,7 @@ enableRobotsTXT = true
 paginate = 3
 copyright = "Except where otherwise noted, content on this site is licensed under a [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/)."
 enableGitInfo = true
+enableEmoji = true
 
 #[imaging]
 # Default resample filter used for resizing. Default is Box,
@@ -65,3 +66,12 @@ enableGitInfo = true
 # Default content language for Hugo 0.17's multilingual support (default is "en")
 # See: https://github.com/spf13/hugo/blob/master/docs/content/content/multilingual.md
 DefaultContentLanguage = "en"
+
+[languages]
+[languages.en]
+  languageName = 'English'
+  weight = 2
+
+[languages.vi]
+  languageName = 'Tiếng Việt'
+  weight = 1
