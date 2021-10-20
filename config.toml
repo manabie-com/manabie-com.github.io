@@ -8,6 +8,7 @@ paginate = 3
 copyright = "Except where otherwise noted, content on this site is licensed under a [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/)."
 enableGitInfo = true
 enableEmoji = true
+disqusShortname = 'manabie'
 
 #[imaging]
 # Default resample filter used for resizing. Default is Box,
