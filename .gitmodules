@@ -3,4 +3,4 @@
 	url = https://github.com/panr/hugo-theme-terminal.git
 [submodule "themes/hugo-theme-bootstrap4-blog"]
 	path = themes/hugo-theme-bootstrap4-blog
-	url = https://github.com/alanorth/hugo-theme-bootstrap4-blog.git
+	url = https://github.com/manabie-com/hugo-theme-bootstrap4-blog.git

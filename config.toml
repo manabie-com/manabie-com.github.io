@@ -9,7 +9,10 @@ copyright = "Except where otherwise noted, content on this site is licensed unde
 enableGitInfo = true
 enableEmoji = true
 disqusShortname = 'manabie'
-
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+  author = "author"
 #[imaging]
 # Default resample filter used for resizing. Default is Box,
 # # a simple and fast averaging filter appropriate for downscaling.
