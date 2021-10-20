@@ -1,6 +1,7 @@
 +++
+date = "2021-10-20T14:28:23+07:00"
 author = "nvcnvn"
-description = "Write unit-test for you repository layer using query snapshot."
+description = "Write unit-test for your repository layer using query snapshot."
 title = "Snapshot test your Postgresql in Golang pgx driver"
 categories = ["DevSecOps", "Testing"]
 tags = ["Postgresql", "unit-test", "Golang"]
@@ -8,26 +9,27 @@ slug = "snapshot-test-your-postgresql-in-golang-pgx-driver"
 +++
 
 #### How about using a containerized DB?
-In some applications, the repository layer don't have much logic (maybe concat some `WHERE` conditions), only 
-propagate the SQL statement to DB - where the real complexity happen with all the fake data and logic.  
+Sometimes, the repository layer doesn't have much logic (maybe concat some `WHERE` conditions), only propagate the SQL 
+statement to DB.  
+
 Testing with a simple containerized DB is a good option where you can:
 * verify the syntax, and
-* checking the logic
+* checking the logic, where the real complexity happen with all the fake data and logic
 
-Good option? Yes but not the best option for all the cases. For example the [UI snapshot test](https://jestjs.io/docs/snapshot-testing)   technique have their place whenever we don't want to start a real browser for testing your UI code, "snapshot test" 
-your SQL statement can have their place also. I hope can show you some of it advantage of it.
+Good option? Yes but not the best option for all the cases. For example, the [UI snapshot test](https://jestjs.io/docs/snapshot-testing)   technique has its place whenever we don't want to start a real browser for testing your UI code.
+*Snapshot* test your SQL statement can have their place also. Hopefully, I can show you some of its advantages.
 
 #### A better tool for you
-Before going further, I think https://github.com/cockroachdb/copyist is a good tool for you if you're using the std sql 
-interface. In Manabie, we're using pgx custom interface so we need to write some testing helper but the idea is the same. 
+Before going further, https://github.com/cockroachdb/copyist is a good tool for you if you're using the std sql interface. 
+We're using pgx custom interface so we need to write some testing helper but the idea is the same. 
 
 #### OK, now the snapshot test
-The goal is making SQL syntax "easier" to work with in your unit-test code. This is where I love Postgresql and the open 
-source community, you want to understand Postgresql syntax? just simply import Postgresql parser to your program, 
-https://github.com/pganalyze/pg_query_go help you to do that.
+The goal is to make SQL syntax "easier" to work within your unit-test code. This is where I love Postgresql and the 
+open-source community, you want to understand Postgresql syntax? just simply import Postgresql parser to your program, 
+https://github.com/pganalyze/pg_query_go helps you to do that.
 ##### A lazy fully snapshot test
-* increase code coverage percentage just too be looking good :shit:
-* avoid "accident change" when refactor :+1:
+* increase code coverage percentage just to be looking good :shit:
+* avoid "accident change" when refactoring :+1:
 * check Postgresql syntax :+1:
 
 Example use case: a function to fetch all user's invoices. In this example we have 2 tables:
@@ -55,7 +57,7 @@ func Test_parsingUsersInvoicesQuery(t *testing.T) {
 	t.Log(json)
 }
 ```
-Then run you test
+Then run your test
 ```
 go test -v
 --- FAIL: Test_parsingUsersInvoicesQuery (0.00s)
@@ -65,16 +67,16 @@ FAIL
 exit status 1
 FAIL    examples        0.005s
 ```
-Oops, whats wrong with my `WHERE` condition? I think you already know I intention put the wrong join condition, and with 
-a short query like this its very easy to spot. But I guess at some time you must have written something more complex 
-than a CRUD queries, this is where it can be helpful, beside that, this test return the result in a small fraction of a 
-second.  
-Correcting the `JOIN invoices WHERE` to `JOIN invoices ON` and return the test, a formatted version can be found here 
-https://gist.github.com/nvcnvn/d73d441b7878c47e85a654eef61819db  
-The output show how Postgresql pare and managing the SQL syntax tree, not some thing trivial in general but in our case 
-you can compare the tree with our original query since it fairly simple.
+Oops, what's wrong with my `WHERE` condition? I think you already know I intentionally put the wrong join condition 
+and with a short query like this, it's very easy to spot. But I guess at some time you must have written something 
+more complex than CRUD queries, this is where it can be helpful, besides that, this test returns the result in a small 
+fraction of a second.  
+Correcting the `JOIN invoices WHERE` to `JOIN invoices ON` and returning the test, a formatted version of the JSON can be 
+found here https://gist.github.com/nvcnvn/d73d441b7878c47e85a654eef61819db  
+The output shows how Postgresql pares and manages the SQL syntax tree, not something trivial in general but in our case 
+you can compare the tree with the original query since it is fairly simple.
 ##### More than a text compare
-Some time, adding new line, space and tab not changing the sematic of the query, we have small helper for this issue.
+Sometimes, adding a new line, space, and tab does not change the semantic of the query, we have a small helper for this issue.
 ```json
                            "ColumnRef":{
                               "fields":[
@@ -92,14 +94,16 @@ Some time, adding new line, space and tab not changing the sematic of the query,
                               "location":49
                            }
 ```
-Because this is a legit parser, it come with a location of each token, we don't really care about the location. 
+Because this is a legit parser, it comes with a location of each token, we don't care about the location. 
 https://github.com/kinbiko/jsonassert is with `"<<PRESENCE>>"` is very handy for this case. Using together with a 
-simple regex replace all, we can have this JSON "template" stored for compare later, the flow is:
+simple regex replaces all, we can have this JSON "template" stored for comparing later, the flow is:
 * run the test the first time, record the JSON string
-* modify all the location field to check their presence only (ignore the value)
-* then for each later test we use the query passed and compare with the stored template
+* modify all the location fields to check their presence only (ignore the value)
+* then for each later test we use the query passed and compare it with the stored template
 
-##### avoid messing with "...interface{}"
+https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/snapshot-test-your-postgresql-in-golang/examples/helper_test.go#L33
+
+##### avoid messing with `...interface{ }`
 Assuming this code working already:
 ```go
 type UsersInvoicesFilter struct {
@@ -111,7 +115,7 @@ func FetchUsersInvoices(ctx context.Context, tx pgx.Tx, filter UsersInvoicesFilt
 	rows, err := tx.Query(ctx, FetchUsersInvoicesStmt, &filter.IDs, &filter.CreatedAt)
 ```
 
-One day, you come up with an idea that we should have a generic interface for filter in general, something like:
+One day, you come up with an idea that we should have a generic interface for the filter in general, something like:
 ```go
 type Filter interface {
 	Args() []interface{}
@@ -132,9 +136,9 @@ and then, to use it
 func FetchUsersInvoices(ctx context.Context, tx pgx.Tx, filter Filter) ([]*Invoice, error) {
 	rows, err := tx.Query(ctx, FetchUsersInvoicesStmt, filter.Args())
 ```
-See the issue? I think you see it now because we're on a post talking about testing. But let write a test for a bad day. 
+See the issue? I think you see it now because we're on a post talking about testing. But let's write a test for the bad day. 
 The idea is since our unit test can understand the tree structure, then we let it check if the number of args send to 
-`tx.Query` method matching the number of `WHERE` conditions. https://github.com/tidwall/gjson can be use for this.  
+`tx.Query` method matches the number of `WHERE` conditions. https://github.com/tidwall/gjson can be used for this.  
 Short example:
 ```go
 	actual, expected := len(m.queryArgsLogs[0]),
@@ -143,4 +147,32 @@ Short example:
 		m.t.Errorf("WHERE conditions have %d but function call send %d", expected, actual)
 	}
 ```
-We have the mock written in `helper_test.go` for recording the Query call args.
+We have the mock written in [helper_test.go](https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/snapshot-test-your-postgresql-in-golang/examples/helper_test.go) for recording the Query call args.  
+
+Let run the test:
+```
+go test -v       
+=== RUN   Test_FetchUsersInvoices
+    helper_test.go:68: WHERE conditions have 2 but function call send 1
+--- FAIL: Test_FetchUsersInvoices (0.01s)
+FAIL
+exit status 1
+FAIL    examples        0.013s
+```
+ah ok, now I know I need to expand the `filter.Args()` with `filter.Args()...`
+##### more than just increasing code coverage percentage
+With a fairly small amount of test code (not counting the helper that can be reused by the whole team), we can have some 
+code coverage already, without the need of starting any docker container.  
+```
+go test -v -cover
+=== RUN   Test_FetchUsersInvoices
+--- PASS: Test_FetchUsersInvoices (0.01s)
+PASS
+coverage: 53.3% of statements
+ok      examples        0.012s
+```
+But the Manabie backend team use these kinds of test as an automatic code-review, for example when we have a rule that 
+all the queries touching a table need to have a special filter, this comes to handy since we can code that rule to the 
+`MockDB` to check it. Of course, we have a lot of `if..else` in our mock, but it shortened our code-review documents.  
+I think this is post long enough, please refer to our example folder https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/snapshot-test-your-postgresql-in-golang/examples 
+and try it. Maybe make sure the number of `Scan` args match with the `SELECT` target.  
