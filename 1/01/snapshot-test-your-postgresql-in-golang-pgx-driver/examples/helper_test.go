@@ -31,14 +31,7 @@ func (m *MockDB) Query(ctx context.Context, sql string, arguments ...interface{}
 	m.queryArgsLogs = append(m.queryArgsLogs, arguments)
 
 	if m.recording {
-		id, err := pg_query.Fingerprint(sql)
-		if err != nil {
-			panic(err)
-		}
-
-		recName := id + ".rec.json"
-		os.WriteFile(recName, []byte(makeLocationFieldEasierToCompare(json)), fs.FileMode(0644))
-		panic("panic on recording mode, record file name: " + recName)
+		m.recordingStmtLog(sql, json)
 	}
 
 	return &MockRows{
@@ -55,6 +48,17 @@ func (m *MockDB) Query(ctx context.Context, sql string, arguments ...interface{}
 			return nil
 		},
 	}, nil
+}
+
+func (m *MockDB) recordingStmtLog(sql, parsedJSON string) {
+	id, err := pg_query.Fingerprint(sql)
+	if err != nil {
+		panic(err)
+	}
+
+	recName := id + ".rec.json"
+	os.WriteFile(recName, []byte(makeLocationFieldEasierToCompare(parsedJSON)), fs.FileMode(0644))
+	panic("panic on recording mode, record file name: " + recName)
 }
 
 func (m *MockDB) assertNumberOfSQueryArgs(jsonPath string) {
