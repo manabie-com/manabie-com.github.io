@@ -184,7 +184,7 @@ func FetchUsersInvoices(ctx context.Context, tx pgx.Tx, filter Filter) ([]*Invoi
 	rows, err := tx.Query(ctx, FetchUsersInvoicesStmt, filter.Args())
 ```
 See the issue?  
-I have misused `filter.Args()`, the correct usage should be ``filter.Args()...`. This mistake can be avoided by unit-test. 
+I have misused `filter.Args()`, the correct usage should be `filter.Args()...`. This mistake can be avoided by unit-test. 
 The idea is understand the SQL tree structure, then let it check if the number of args send to 
 `tx.Query` method matches the number of `WHERE` conditions.  
 https://github.com/tidwall/gjson can be used for this, example:
