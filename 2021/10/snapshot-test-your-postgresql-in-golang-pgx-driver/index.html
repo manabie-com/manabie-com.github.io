@@ -7,12 +7,12 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/">
 <meta property="article:published_time" content="2021-10-20T14:28:23+07:00">
-<meta property="article:modified_time" content="2021-10-20T16:33:55+07:00">
+<meta property="article:modified_time" content="2021-10-24T17:48:18+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Snapshot test your Postgresql in Golang pgx driver">
 <meta name=twitter:description content="Write unit-test for your repository layer using query snapshot.">
 <meta name=generator content="Hugo 0.88.1">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Snapshot test your Postgresql in Golang pgx driver","url":"/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/","wordCount":"1017","datePublished":"2021-10-20T14:28:23+07:00","dateModified":"2021-10-20T16:33:55+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Testing, Postgresql, unit-test, Golang","description":"Write unit-test for your repository layer using query snapshot."}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Snapshot test your Postgresql in Golang pgx driver","url":"/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/","wordCount":"1145","datePublished":"2021-10-20T14:28:23+07:00","dateModified":"2021-10-24T17:48:18+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Testing, Postgresql, unit-test, Golang","description":"Write unit-test for your repository layer using query snapshot."}</script>
 <link rel=canonical href=/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/>
 <title>Snapshot test your Postgresql in Golang pgx driver | Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -45,6 +45,9 @@ in
 <span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/postgresql/ rel=tag>Postgresql</a>, <a href=/tags/unit-test/ rel=tag>unit-test</a>, <a href=/tags/golang/ rel=tag>Golang</a>
 </p>
 </header>
+<p>If your unit-test understand SQL syntax, you can cover many behaviors of your code without the need of starting a real DB.
+Want to understand Postgresql syntax? just simply import Postgresql parser to your program,
+<a href=https://github.com/pganalyze/pg_query_go>https://github.com/pganalyze/pg_query_go</a> helps you to do that.</p>
 <h4 id=how-about-using-a-containerized-db>How about using a containerized DB?</h4>
 <p>Sometimes, the repository layer doesn&rsquo;t have much logic (maybe concat some <code>WHERE</code> conditions), only propagate the SQL
 statement to DB.</p>
@@ -59,10 +62,52 @@ statement to DB.</p>
 <p>Before going further, <a href=https://github.com/cockroachdb/copyist>https://github.com/cockroachdb/copyist</a> is a good tool for you if you&rsquo;re using the std sql interface.
 We&rsquo;re using pgx custom interface so we need to write some testing helper but the idea is the same.</p>
 <h4 id=ok-now-the-snapshot-test>OK, now the snapshot test</h4>
-<p>The goal is to make SQL syntax &ldquo;easier&rdquo; to work within your unit-test code. This is where I love Postgresql and the
-open-source community, you want to understand Postgresql syntax? just simply import Postgresql parser to your program,
-<a href=https://github.com/pganalyze/pg_query_go>https://github.com/pganalyze/pg_query_go</a> helps you to do that.</p>
-<h5 id=a-lazy-fully-snapshot-test>A lazy fully snapshot test</h5>
+<p>In this post, we use a simple example query but you can see the real benefit with complex query that make you hate your
+ORM lib.<br>
+Here is our example:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>UsersInvoicesFilter</span> <span style=color:#66d9ef>struct</span> {
+	<span style=color:#a6e22e>IDs</span>       []<span style=color:#66d9ef>string</span>
+	<span style=color:#a6e22e>CreatedAt</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Time</span>
+}
+
+<span style=color:#66d9ef>const</span> <span style=color:#a6e22e>FetchUsersInvoicesStmt</span> = <span style=color:#e6db74>`SELECT
+</span><span style=color:#e6db74>	invoices.invoice_id,
+</span><span style=color:#e6db74>	invoices.user_id,
+</span><span style=color:#e6db74>	users.billing_address,
+</span><span style=color:#e6db74>	invoices.amount
+</span><span style=color:#e6db74>FROM users LEFT JOIN invoices ON users.user_id = invoices.user_id
+</span><span style=color:#e6db74>WHERE users.user_id = ANY($1) AND invoices.created_at &gt;= $2`</span>
+
+<span style=color:#66d9ef>func</span> <span style=color:#a6e22e>FetchUsersInvoices</span>(<span style=color:#a6e22e>ctx</span> <span style=color:#a6e22e>context</span>.<span style=color:#a6e22e>Context</span>, <span style=color:#a6e22e>tx</span> <span style=color:#a6e22e>pgx</span>.<span style=color:#a6e22e>Tx</span>, <span style=color:#a6e22e>filter</span> <span style=color:#a6e22e>UsersInvoicesFilter</span>) ([]<span style=color:#f92672>*</span><span style=color:#a6e22e>Invoice</span>, <span style=color:#66d9ef>error</span>) {
+	<span style=color:#a6e22e>rows</span>, <span style=color:#a6e22e>err</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>tx</span>.<span style=color:#a6e22e>Query</span>(<span style=color:#a6e22e>ctx</span>, <span style=color:#a6e22e>FetchUsersInvoicesStmt</span>, <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>filter</span>.<span style=color:#a6e22e>IDs</span>, <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>filter</span>.<span style=color:#a6e22e>CreatedAt</span>)
+	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>err</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
+		<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>nil</span>, <span style=color:#a6e22e>err</span>
+	}
+	<span style=color:#66d9ef>defer</span> <span style=color:#a6e22e>rows</span>.<span style=color:#a6e22e>Close</span>()
+
+	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>invoices</span> []<span style=color:#f92672>*</span><span style=color:#a6e22e>Invoice</span>
+	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>rows</span>.<span style=color:#a6e22e>Next</span>() {
+		<span style=color:#a6e22e>invoice</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>Invoice</span>{}
+		<span style=color:#a6e22e>err</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>rows</span>.<span style=color:#a6e22e>Scan</span>(
+			<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>invoice</span>.<span style=color:#a6e22e>InvoiceID</span>,
+			<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>invoice</span>.<span style=color:#a6e22e>UserID</span>,
+			<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>invoice</span>.<span style=color:#a6e22e>BillingAddress</span>,
+			<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>invoice</span>.<span style=color:#a6e22e>Amount</span>,
+		)
+		<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>err</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
+			<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>nil</span>, <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Errorf</span>(<span style=color:#e6db74>&#34;scanning invoice data error: %w&#34;</span>, <span style=color:#a6e22e>err</span>)
+		}
+		<span style=color:#a6e22e>invoices</span> = append(<span style=color:#a6e22e>invoices</span>, <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>invoice</span>)
+	}
+
+	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>err</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>rows</span>.<span style=color:#a6e22e>Err</span>(); <span style=color:#a6e22e>err</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
+		<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>nil</span>, <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Errorf</span>(<span style=color:#e6db74>&#34;unexpected error: %w&#34;</span>, <span style=color:#a6e22e>err</span>)
+	}
+
+	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>invoices</span>, <span style=color:#66d9ef>nil</span>
+}
+</code></pre></div><p>All seasoned Go developers must see this code block familiar, we introduce some examples that unit-test can help to cover.</p>
+<h5 id=validating-postgressql-syntax>Validating PostgresSQL syntax</h5>
 <ul>
 <li>increase code coverage percentage just to be looking good 💩</li>
 <li>avoid &ldquo;accident change&rdquo; when refactoring 👍</li>
@@ -81,7 +126,7 @@ open-source community, you want to understand Postgresql syntax? just simply imp
 	invoices.amount
 <span style=color:#66d9ef>FROM</span> users <span style=color:#66d9ef>JOIN</span> invoices <span style=color:#66d9ef>WHERE</span> users.user_id <span style=color:#f92672>=</span> invoices.user_id
 <span style=color:#66d9ef>WHERE</span> users.user_id <span style=color:#f92672>=</span> <span style=color:#66d9ef>ANY</span>(<span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>1</span>) <span style=color:#66d9ef>AND</span> invoices.created_at <span style=color:#f92672>&gt;=</span> <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>2</span>
-</code></pre></div><p>Now, import <code>pg_query "github.com/pganalyze/pg_query_go/v2"</code> and then testing the basic syntax with</p>
+</code></pre></div><p>Now, import <code>pg_query "github.com/pganalyze/pg_query_go/v2"</code> and then test the basic syntax with</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Test_parsingUsersInvoicesQuery</span>(<span style=color:#a6e22e>t</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>T</span>) {
 	<span style=color:#a6e22e>json</span>, <span style=color:#a6e22e>err</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>pg_query</span>.<span style=color:#a6e22e>ParseToJSON</span>(<span style=color:#a6e22e>FetchUsersInvoicesStmt</span>)
 	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>err</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
@@ -100,13 +145,13 @@ exit status 1
 FAIL    examples        0.005s
 </code></pre><p>Oops, what&rsquo;s wrong with my <code>WHERE</code> condition? I think you already know I intentionally put the wrong join condition
 and with a short query like this, it&rsquo;s very easy to spot. But I guess at some time you must have written something
-more complex than CRUD queries, this is where it can be helpful, besides that, this test returns the result in a small
+more complex than CRUD queries, this is where it can be helpful. Besides that, this test returns the result in a small
 fraction of a second.<br>
 Correcting the <code>JOIN invoices WHERE</code> to <code>JOIN invoices ON</code> and returning the test, a formatted version of the JSON can be
 found here <a href=https://gist.github.com/nvcnvn/d73d441b7878c47e85a654eef61819db>https://gist.github.com/nvcnvn/d73d441b7878c47e85a654eef61819db</a><br>
-The output shows how Postgresql pares and manages the SQL syntax tree, not something trivial in general but in our case
+The output shows how Postgresql parses and manages the SQL syntax tree, not something trivial in general but in our case
 you can compare the tree with the original query since it is fairly simple.</p>
-<h5 id=more-than-a-text-compare>More than a text compare</h5>
+<h5 id=not-only-text-compare-but-understand-sql-semantic>Not only text compare but understand SQL semantic</h5>
 <p>Sometimes, adding a new line, space, and tab does not change the semantic of the query, we have a small helper for this issue.</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>                           <span style=color:#e6db74>&#34;ColumnRef&#34;</span><span style=color:#960050;background-color:#1e0010>:</span>{
                               <span style=color:#f92672>&#34;fields&#34;</span>:[
@@ -132,7 +177,7 @@ simple regex replaces all, we can have this JSON &ldquo;template&rdquo; stored f
 <li>then for each later test we use the query passed and compare it with the stored template</li>
 </ul>
 <p><a href=https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/snapshot-test-your-postgresql-in-golang/examples/helper_test.go#L33>https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/snapshot-test-your-postgresql-in-golang/examples/helper_test.go#L33</a></p>
-<h5 id=avoid-messing-with-interface->avoid messing with <code>...interface{ }</code></h5>
+<h5 id=avoid-mistake-when-refactor>avoid mistake when refactor</h5>
 <p>Assuming this code working already:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>UsersInvoicesFilter</span> <span style=color:#66d9ef>struct</span> {
 	<span style=color:#a6e22e>IDs</span>       []<span style=color:#66d9ef>string</span>
@@ -158,17 +203,16 @@ simple regex replaces all, we can have this JSON &ldquo;template&rdquo; stored f
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#75715e>// FetchUsersInvoices(context.Background(), mockDB, &amp;UsersInvoicesFilter{})
 </span><span style=color:#75715e></span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>FetchUsersInvoices</span>(<span style=color:#a6e22e>ctx</span> <span style=color:#a6e22e>context</span>.<span style=color:#a6e22e>Context</span>, <span style=color:#a6e22e>tx</span> <span style=color:#a6e22e>pgx</span>.<span style=color:#a6e22e>Tx</span>, <span style=color:#a6e22e>filter</span> <span style=color:#a6e22e>Filter</span>) ([]<span style=color:#f92672>*</span><span style=color:#a6e22e>Invoice</span>, <span style=color:#66d9ef>error</span>) {
 	<span style=color:#a6e22e>rows</span>, <span style=color:#a6e22e>err</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>tx</span>.<span style=color:#a6e22e>Query</span>(<span style=color:#a6e22e>ctx</span>, <span style=color:#a6e22e>FetchUsersInvoicesStmt</span>, <span style=color:#a6e22e>filter</span>.<span style=color:#a6e22e>Args</span>())
-</code></pre></div><p>See the issue? I think you see it now because we&rsquo;re on a post talking about testing. But let&rsquo;s write a test for the bad day.
-The idea is since our unit test can understand the tree structure, then we let it check if the number of args send to
-<code>tx.Query</code> method matches the number of <code>WHERE</code> conditions. <a href=https://github.com/tidwall/gjson>https://github.com/tidwall/gjson</a> can be used for this.<br>
-Short example:</p>
+</code></pre></div><p>See the issue?<br>
+I have misused <code>filter.Args()</code>, the correct usage should be ``filter.Args()&mldr;<code>. This mistake can be avoided by unit-test. The idea is understand the SQL tree structure, then let it check if the number of args send to </code>tx.Query<code>method matches the number of</code>WHERE` conditions.<br>
+<a href=https://github.com/tidwall/gjson>https://github.com/tidwall/gjson</a> can be used for this, example:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>	<span style=color:#a6e22e>actual</span>, <span style=color:#a6e22e>expected</span> <span style=color:#f92672>:=</span> len(<span style=color:#a6e22e>m</span>.<span style=color:#a6e22e>queryArgsLogs</span>[<span style=color:#ae81ff>0</span>]),
 		len(<span style=color:#a6e22e>gjson</span>.<span style=color:#a6e22e>Get</span>(<span style=color:#a6e22e>m</span>.<span style=color:#a6e22e>statementLogs</span>[<span style=color:#ae81ff>0</span>], <span style=color:#e6db74>&#34;stmts.0.stmt.SelectStmt.whereClause.BoolExpr.args&#34;</span>).<span style=color:#a6e22e>Array</span>())
 	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>actual</span> <span style=color:#f92672>!=</span> <span style=color:#a6e22e>expected</span> {
 		<span style=color:#a6e22e>m</span>.<span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>Errorf</span>(<span style=color:#e6db74>&#34;WHERE conditions have %d but function call send %d&#34;</span>, <span style=color:#a6e22e>expected</span>, <span style=color:#a6e22e>actual</span>)
 	}
 </code></pre></div><p>We have the mock written in <a href=https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/snapshot-test-your-postgresql-in-golang/examples/helper_test.go>helper_test.go</a> for recording the Query call args.</p>
-<p>Let run the test:</p>
+<p>Let run the test with the bad code:</p>
 <pre tabindex=0><code>go test -v       
 === RUN   Test_FetchUsersInvoices
     helper_test.go:68: WHERE conditions have 2 but function call send 1
@@ -176,8 +220,7 @@ Short example:</p>
 FAIL
 exit status 1
 FAIL    examples        0.013s
-</code></pre><p>ah ok, now I know I need to expand the <code>filter.Args()</code> with <code>filter.Args()...</code></p>
-<h5 id=more-than-just-increasing-code-coverage-percentage>more than just increasing code coverage percentage</h5>
+</code></pre><h5 id=more-than-just-increasing-code-coverage-percentage>more than just increasing code coverage percentage</h5>
 <p>With a fairly small amount of test code (not counting the helper that can be reused by the whole team), we can have some
 code coverage already, without the need of starting any docker container.</p>
 <pre tabindex=0><code>go test -v -cover
@@ -188,9 +231,9 @@ coverage: 53.3% of statements
 ok      examples        0.012s
 </code></pre><p>But the Manabie backend team use these kinds of test as an automatic code-review, for example when we have a rule that
 all the queries touching a table need to have a special filter, this comes to handy since we can code that rule to the
-<code>MockDB</code> to check it. Of course, we have a lot of <code>if..else</code> in our mock, but it shortened our code-review documents.<br>
+<code>MockDB</code> to check it.<br>
 I think this is post long enough, please refer to our example folder <a href=https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/snapshot-test-your-postgresql-in-golang/examples>https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/snapshot-test-your-postgresql-in-golang/examples</a>
-and try it. Maybe make sure the number of <code>Scan</code> args match with the <code>SELECT</code> target.</p>
+and try it. Maybe write a unit test to check the number of <code>Scan</code> args match with the <code>SELECT</code> target.</p>
 <hr>
 <footer>
 <div class=meta_item>
