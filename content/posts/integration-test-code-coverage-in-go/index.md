@@ -15,12 +15,15 @@ In Golang, code coverage is easy to generate when testing packages, simply test 
 
 It's a bit trickier in integration tests because we have to exit all of the go services to make them generate coverage reports.
 
-The steps we ended up taking to find the final percent was to  
+The steps we ended up taking to find the final percentage was to  
 
+Part 1:
 - compile services with `go test -c`,
 - add an http killswitch
+Part 2:
 - start test services & test them
 - stop the services by calling the http killswitch endpoint
+Part 3:
 - collect coverage reports from containers
 - merge them with gocovmerge.
 - get a shiny code coverage percentage.
@@ -147,7 +150,7 @@ Using `go test -c` to build test binaries is a nice little trick I learned about
 
 ## Part 2: Running Things
 
-Now that our services are built in test mode, we can add them to our Dockerfile, with a little wrapper script to restart them endleslessly.
+Now that our services are built in test mode, we can add them to our Dockerfile, with a little wrapper script to restart them endlessly.
 
 ```Dockerfile
 FROM debian
@@ -210,6 +213,9 @@ go tool cover -func=cover/merged.cov | grep -E '^total\:' | sed -E 's/\s+/ /g'
 
 Note: We use a `.cov` extention on the `merged.cov` to make it easy to use `cover/*.out` in scripting.
 
-And that's about it. For us at Manabie, we are using this final coverage percentage in our Github Actions pipeline to ensure that our integration test coverage does not drop. 
+And that's it! Victory! We can see our total coverage.
 
-Anwyays, that's all for now folks.
+### Conclusion
+
+Now our build pipeline prints out our integration test coverage percentage collected from all our go services, and combined into a final figure. For us at Manabie, we log this percentage in our CI tests, and require PRs to have at least the same percentage to be merged. This helps to ensure we don't forget to test something, and that we can trust our code to work as expected.
+ 
