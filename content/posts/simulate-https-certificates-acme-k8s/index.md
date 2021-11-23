@@ -276,4 +276,7 @@ I admit that a lot of effort just for preparing this, Pebble provide you tool to
 designed for cert-manager and other smart teams to test their ACME client implementation. For our team, we need to 
 spend even more time (mostly writing bash script) to make this process of setup new local cluster with only one command, 
 we see this an opportunity to simulate the production environment, bring the development closer to production environment 
-and it worth every single line of code.
+and it worth every single line of code.  
+
+Almost forgot to add link to example here:
+- https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/simulate-https-certs-acme-local-k8s
