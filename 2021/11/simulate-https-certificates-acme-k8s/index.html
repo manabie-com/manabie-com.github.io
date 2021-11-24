@@ -7,12 +7,12 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2021/11/simulate-https-certificates-acme-k8s/">
 <meta property="article:published_time" content="2021-11-23T14:28:23+07:00">
-<meta property="article:modified_time" content="2021-11-25T01:29:31+07:00">
+<meta property="article:modified_time" content="2021-11-25T01:46:15+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Simulate Let’s Encrypt certificate issuing in local Kubernetes">
 <meta name=twitter:description content="Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster">
 <meta name=generator content="Hugo 0.89.4">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Simulate Let’s Encrypt certificate issuing in local Kubernetes","url":"/2021/11/simulate-https-certificates-acme-k8s/","wordCount":"1649","datePublished":"2021-11-23T14:28:23+07:00","dateModified":"2021-11-25T01:29:31+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Infrastructure, Security, k8s, cert-manager, CoreDNS, acme, http-01","description":"Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Simulate Let’s Encrypt certificate issuing in local Kubernetes","url":"/2021/11/simulate-https-certificates-acme-k8s/","wordCount":"1649","datePublished":"2021-11-23T14:28:23+07:00","dateModified":"2021-11-25T01:46:15+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Infrastructure, Security, k8s, cert-manager, CoreDNS, acme, http-01","description":"Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"}</script>
 <link rel=canonical href=/2021/11/simulate-https-certificates-acme-k8s/>
 <title>Simulate Let’s Encrypt certificate issuing in local Kubernetes | Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -139,7 +139,7 @@ One solution for this, believe it or not, is to deploy your own fake Let&rsquo;s
 <blockquote>
 <p>A miniature version of Boulder, Pebble is a small ACME test server not suited for use as a production CA.</p>
 </blockquote>
-<p>We have ready for you a minimal installation of Pebble ready for you already (link at the end of post).<br>
+<p>We have prepared for you a minimal installation of Pebble already (link at the end of post).<br>
 Let&rsquo;s install it in another namespace to simulate a different network 😂</p>
 <pre tabindex=0><code>kubectl create ns emulator
 kubectl apply -f ./examples/pebble.yaml -n emulator
@@ -206,9 +206,9 @@ We can modify the CoreDNS config so the internal cluster can resolve to our inte
 because it&rsquo;s similar to how the domain owner needs to point the domain to the server&rsquo;s IP.
 I hope that when some one reading this post, k8s still use <code>CoreDNS</code> and installed it in the <code>kube-system</code> namespace:</p>
 <ul>
-<li>kubectl -n kube-system describe configmap coredns
-You will see the config file somewhat like this</li>
+<li>kubectl -n kube-system describe configmap coredns</li>
 </ul>
+<p>You will see the config file somewhat like what we&rsquo;re trying to modify below</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>ip<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>kubectl get svc ingress-nginx-controller --no-headers -n ingress-nginx | awk <span style=color:#e6db74>&#39;{print$3}&#39;</span><span style=color:#66d9ef>)</span>
 cat <span style=color:#e6db74>&lt;&lt;EOF | kubectl apply -f -
 </span><span style=color:#e6db74>kind: ConfigMap
@@ -274,7 +274,7 @@ quickstart-example-tls   True    quickstart-example-tls   37s
 More details here: https://curl.haxx.se/docs/sslcerts.html
 </code></pre><p>When you make HTTPS requests, the process invokes much more complex steps. The OS or browser use a pre-installed certificate
 to validate your server cert - one of them is Let&rsquo;s Encrypt root cert, and of course, our pebble install have a test cert
-no one trusts (no one should trust the cert using in this example - if you&rsquo;re not lazy like me, generate your own).<br>
+no one trust (no one should trust the cert using in this example - if you&rsquo;re not lazy like me, generate your own).<br>
 For now, just add an option to ignore the validation <code>curl -k -H 'Host: example.example.com' https://$(minikube ip)</code> and
 you will see some HTML.</p>
 <h4 id=testing-things-in-your-browser>Testing things in your browser</h4>
@@ -284,15 +284,15 @@ We need to get the intermediate cert and use it to make the call successful:</p>
 curl --cacert pebble.intermediate.pem.crt -v https://example.example.com
 </code></pre><p>And you should see some HTML. If you really want to, you can add the certificate to your chrome via:</p>
 <ul>
-<li>Settings > Privacy and security > Security > Manage certificates > Authorities tab
-Choose the option for using it to verify the website, then you finally can access <a href=https://example.example.com>https://example.example.com</a> without
-a red warning, remember to remove that cert after you finish testing.</li>
+<li>Settings > Privacy and security > Security > Manage certificates > Authorities tab</li>
 </ul>
+<p>Choose the option for using it to verify the website, then you finally can access <a href=https://example.example.com>https://example.example.com</a> without
+a red warning, remember to remove that cert after you finish testing.</p>
 <h4 id=too-much-for-a-post-already>Too much for a post already</h4>
 <p>I admit that a lot of effort just for preparing this, Pebble provide you tool to inject some chaos into the flow and
 designed for cert-manager and other competing teams to test their ACME client implementation.<br>
-For our team, we need to spend even more time (mostly writing bash script) to make this process of setting up a new
-local cluster with only one command, and we have change to testing out many different Ingress implementations
+For our team, we need to spend time (mostly writing bash script) to make this process of setting up a new
+local cluster with only one command, and we have chance to testing out many different Ingress implementations
 (actually we&rsquo;re using Istio Gateway).<br>
 We see this as an opportunity to simulate the production environment, bring the
 development closer to the production environment and it is worth every single line of code.</p>
