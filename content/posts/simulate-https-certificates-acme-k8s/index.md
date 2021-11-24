@@ -65,9 +65,8 @@ We have:
 
 If you're working with a cluster on GKE or EKS, they will create a real IP, a network LB and assign that to your cluster.  
 
-See the new assigned NodePort `10.99.82.10`?  
-Then you can test the thing out with `curl -H 'Host: example.example.com' 'http://10.99.82.10'` to receive a 404 page.  
-Above command is equivalent with you modifying your `hosts` file to access localhost via example.example.com.  
+Then you can test the thing out with `curl -H 'Host: example.example.com' "http://$(minikube ip)"` to check the output.  
+Above command is equivalent with you modifying your `hosts` file to access localhost via example.example.com in browser.  
 Next, let install cert-manager in the same namespace:  
 ```bash
 helm repo add jetstack https://charts.jetstack.io
@@ -124,6 +123,7 @@ NAME                     READY   STATUS    RESTARTS   AGE
 pebble-885bdd44c-cpv6r   1/1     Running   0          19s
 ```
 Now go back to default namespace and install the issuer point to our local Pebble:
+- kubectl apply -f ./examples/pebble-issuer.yaml -n default
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -163,9 +163,9 @@ cert-manager create a new `cm-acme-http-solver` service to handle the challenge 
 - kubectl get challenge
 ```
 NAME                                           STATE     DOMAIN                AGE
-pk-pebble-issuer-2n5gm-3378267180-1105783005   pending   example.example.com   3m43s
+quickstart-example-tls-rbxhn-3378267180-4102043678   pending   example.example.com   3m43s
 ```
-- kubectl describe challenge pk-pebble-issuer-2n5gm-3378267180-1105783005
+- kubectl describe challenge quickstart-example-tls-rbxhn-3378267180-4102043678
 ```
 Status:
   Presented:   true
