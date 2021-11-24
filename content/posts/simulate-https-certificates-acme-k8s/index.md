@@ -113,7 +113,7 @@ One solution for this, believe it or not, is to deploy your own fake Let's Encry
 https://github.com/letsencrypt/pebble
 > A miniature version of Boulder, Pebble is a small ACME test server not suited for use as a production CA.
 
-We have ready for you a minimal installation of Pebble ready for you already (link at the end of post).  
+We have prepared for you a minimal installation of Pebble already (link at the end of post).  
 Let's install it in another namespace to simulate a different network :joy:
 ```
 kubectl create ns emulator
@@ -186,7 +186,8 @@ We can modify the CoreDNS config so the internal cluster can resolve to our inte
 because it's similar to how the domain owner needs to point the domain to the server's IP.
 I hope that when some one reading this post, k8s still use `CoreDNS` and installed it in the `kube-system` namespace: 
 - kubectl -n kube-system describe configmap coredns
-You will see the config file somewhat like this
+
+You will see the config file somewhat like what we're trying to modify below
 ```bash
 ip=$(kubectl get svc ingress-nginx-controller --no-headers -n ingress-nginx | awk '{print$3}')
 cat <<EOF | kubectl apply -f -
@@ -264,7 +265,7 @@ More details here: https://curl.haxx.se/docs/sslcerts.html
 ```
 When you make HTTPS requests, the process invokes much more complex steps. The OS or browser use a pre-installed certificate 
 to validate your server cert - one of them is Let's Encrypt root cert, and of course, our pebble install have a test cert 
-no one trusts (no one should trust the cert using in this example - if you're not lazy like me, generate your own).  
+no one trust (no one should trust the cert using in this example - if you're not lazy like me, generate your own).  
 For now, just add an option to ignore the validation `curl -k -H 'Host: example.example.com' https://$(minikube ip)` and 
 you will see some HTML.
 
@@ -277,13 +278,14 @@ curl --cacert pebble.intermediate.pem.crt -v https://example.example.com
 ```
 And you should see some HTML. If you really want to, you can add the certificate to your chrome via:
 - Settings > Privacy and security > Security > Manage certificates > Authorities tab
+
 Choose the option for using it to verify the website, then you finally can access https://example.example.com without 
 a red warning, remember to remove that cert after you finish testing.  
 #### Too much for a post already
 I admit that a lot of effort just for preparing this, Pebble provide you tool to inject some chaos into the flow and 
 designed for cert-manager and other competing teams to test their ACME client implementation.  
-For our team, we need to spend even more time (mostly writing bash script) to make this process of setting up a new 
-local cluster with only one command, and we have change to testing out many different Ingress implementations
+For our team, we need to spend time (mostly writing bash script) to make this process of setting up a new 
+local cluster with only one command, and we have chance to testing out many different Ingress implementations
 (actually we're using Istio Gateway).  
 We see this as an opportunity to simulate the production environment, bring the 
 development closer to the production environment and it is worth every single line of code.   
