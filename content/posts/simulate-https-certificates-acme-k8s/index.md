@@ -9,7 +9,7 @@ slug = "simulate-https-certificates-acme-k8s"
 +++
 
 We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will 
-show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS request 
+show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS certificate issue 
 flow to allow our Platform engineers to test their config and allow our Front-end engineers to connect their application 
 to local server with a self-signed HTTPS certificate.  
 
@@ -27,11 +27,14 @@ Let's Encrypt provide a better description or you can read the RFC 8555 for not 
 - https://datatracker.ietf.org/doc/html/rfc8555#section-4
 
 #### Setup your minikube
+*Example code at the end of the post*.  
 Cert-manager have a great tutorial here:
 - https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller
-You should follow the post. They provide many explanations. 
+
+You should follow the post. They provide many explanations.  
 Their post assumes you're testing on a real k8s cluster (GKE or any public cloud provider offers some free resource for testing). 
-Our post is for minikube. Some dependencies required:
+Our post is for minikube. Some dependencies required:  
+
 - minikube (we're using v1.24.0)
 - helm (v3.7.0)
 ```bash
@@ -286,4 +289,4 @@ We see this as an opportunity to simulate the production environment, bring the
 development closer to the production environment and it is worth every single line of code.   
 
 Almost forgot to add link to example here:
-- https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/simulate-https-certs-acme-local-k8s
+- https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples
