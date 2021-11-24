@@ -7,12 +7,12 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2021/11/simulate-https-certificates-acme-k8s/">
 <meta property="article:published_time" content="2021-11-23T14:28:23+07:00">
-<meta property="article:modified_time" content="2021-11-24T15:01:48+07:00">
+<meta property="article:modified_time" content="2021-11-25T01:29:31+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Simulate Let’s Encrypt certificate issuing in local Kubernetes">
 <meta name=twitter:description content="Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster">
 <meta name=generator content="Hugo 0.89.4">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Simulate Let’s Encrypt certificate issuing in local Kubernetes","url":"/2021/11/simulate-https-certificates-acme-k8s/","wordCount":"1640","datePublished":"2021-11-23T14:28:23+07:00","dateModified":"2021-11-24T15:01:48+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Infrastructure, Security, k8s, cert-manager, CoreDNS, acme, http-01","description":"Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Simulate Let’s Encrypt certificate issuing in local Kubernetes","url":"/2021/11/simulate-https-certificates-acme-k8s/","wordCount":"1649","datePublished":"2021-11-23T14:28:23+07:00","dateModified":"2021-11-25T01:29:31+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Infrastructure, Security, k8s, cert-manager, CoreDNS, acme, http-01","description":"Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"}</script>
 <link rel=canonical href=/2021/11/simulate-https-certificates-acme-k8s/>
 <title>Simulate Let’s Encrypt certificate issuing in local Kubernetes | Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -46,7 +46,7 @@ in
 </p>
 </header>
 <p>We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will
-show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS request
+show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS certificate issue
 flow to allow our Platform engineers to test their config and allow our Front-end engineers to connect their application
 to local server with a self-signed HTTPS certificate.</p>
 <h4 id=lets-encrypt-acme--http-01-challenge-for-dummy>Let’s Encrypt ACME & HTTP-01 challenge for dummy</h4>
@@ -65,12 +65,15 @@ cert-manager to speak to them, the process can simplify as:</p>
 <li><a href=https://datatracker.ietf.org/doc/html/rfc8555#section-4>https://datatracker.ietf.org/doc/html/rfc8555#section-4</a></li>
 </ul>
 <h4 id=setup-your-minikube>Setup your minikube</h4>
-<p>Cert-manager have a great tutorial here:</p>
+<p><em>Example code at the end of the post</em>.<br>
+Cert-manager have a great tutorial here:</p>
 <ul>
-<li><a href=https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller>https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller</a>
-You should follow the post. They provide many explanations.
+<li><a href=https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller>https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller</a></li>
+</ul>
+<p>You should follow the post. They provide many explanations.<br>
 Their post assumes you&rsquo;re testing on a real k8s cluster (GKE or any public cloud provider offers some free resource for testing).
-Our post is for minikube. Some dependencies required:</li>
+Our post is for minikube. Some dependencies required:</p>
+<ul>
 <li>minikube (we&rsquo;re using v1.24.0)</li>
 <li>helm (v3.7.0)</li>
 </ul>
@@ -295,7 +298,7 @@ We see this as an opportunity to simulate the production environment, bring the
 development closer to the production environment and it is worth every single line of code.</p>
 <p>Almost forgot to add link to example here:</p>
 <ul>
-<li><a href=https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/simulate-https-certs-acme-local-k8s>https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/simulate-https-certs-acme-local-k8s</a></li>
+<li><a href=https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples>https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples</a></li>
 </ul>
 <hr>
 <footer>
