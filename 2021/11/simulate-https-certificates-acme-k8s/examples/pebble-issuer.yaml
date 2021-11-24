@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: pebble-issuer
+spec:
+  acme:
+    skipTLSVerify: true
+    email: example@example.com
+    server: https://pebble.emulator:14000/dir
+    privateKeySecretRef:
+      name: pk-pebble-issuer
+    solvers:
+      - selector:
+        http01:
+          ingress:
+            class: nginx
