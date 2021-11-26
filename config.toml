@@ -9,6 +9,7 @@ copyright = "Except where otherwise noted, content on this site is licensed unde
 enableGitInfo = true
 enableEmoji = true
 disqusShortname = 'manabie'
+googleAnalytics = 'G-EJ2GNQJNM6'
 [taxonomies]
   tag = "tags"
   category = "categories"
