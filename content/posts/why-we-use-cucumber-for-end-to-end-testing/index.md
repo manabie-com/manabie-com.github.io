@@ -14,15 +14,27 @@ What is the world said:
 
 > Cucumber is a software tool that supports behavior-driven development (BDD).Central to the Cucumber BDD approach is its ordinary language parser called Gherkin. It allows expected software behaviors to be specified in a logical language that customers can understand. As such, Cucumber allows the execution of feature documentation written in business-facing text. It is often used for testing other software. It runs automated acceptance tests written in a behavior-driven development (BDD) style.
 
-## What is BDD?
+### What is Behavior-driven development?
 
+The world said:
 
+> In software engineering, behavior-driven development (BDD) is an agile software development process that encourages collaboration among developers, quality assurance testers, and customer representatives in a software project
+
+BDD is
+
+-   specification by example.
+-   focuses on behavior first
+-   a refinement of the Agile process, not an overhaul.
+-   is a paradigm shift
+
+For more detail: https://automationpanda.com/2017/01/25/bdd-101-introducing-bdd/
 
 ## Why we use Cucumber for end-to-end testing?
 
 Cucumber is following syntax called Gherkin to explain and validate executable specifications written in plain text.
 
 To define Gherkin in a simple way, it is:
+
 -   Define test cases as plain text, using Gherkin language.
 -   It is designed to be non-technical and human-readable, becomes a ubiquitous language between tech and non-tech peoples. And collectively describes use cases relating to a software system.
 
@@ -49,15 +61,18 @@ Technical person also have same look, but need to implement some things to can i
 
 In this steps, you can use any language to do like: JS, Golang, ...
 
-
 End-to-end testing is not only software testing. But also is documentation, source of truth
 
-Cucumber provides easy way to
+That's why cucumber becomes is one of the best choices for us
 
 -   Implementation end-to-end testing quickly with many plugin supports
 -   Behavior-driven development. Document how the system actually behaves.
 -   Using Gherkin language supports human-readable easy
 
-
 ## Reference
-1. 
+
+1. [Cucumber](<https://en.wikipedia.org/wiki/Cucumber_(software)>)
+2. [Behavior-driven development Wiki](https://en.wikipedia.org/wiki/Behavior-driven_development)
+3. [Introduce BDD](https://automationpanda.com/2017/01/25/bdd-101-introducing-bdd/)
+4. [BDD in Cucumber](https://cucumber.io/docs/bdd/)
+5. [End-to-end testing](https://www.guru99.com/end-to-end-testing.html)
