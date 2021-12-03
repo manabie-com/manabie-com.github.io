@@ -2,7 +2,7 @@
 
 Before knowing why we use cucumber for End-to-end testing. Let understand what is end-to-end testing and cucumber
 
-## What is End to end testings?
+## What is End to end testing?
 
 End to end testing (E2E testing) is a software testing method that validates entire software from beginning to end.
 
@@ -14,10 +14,15 @@ What is the world said:
 
 > Cucumber is a software tool that supports behavior-driven development (BDD).Central to the Cucumber BDD approach is its ordinary language parser called Gherkin. It allows expected software behaviors to be specified in a logical language that customers can understand. As such, Cucumber allows the execution of feature documentation written in business-facing text. It is often used for testing other software. It runs automated acceptance tests written in a behavior-driven development (BDD) style.
 
+## What is BDD?
+
+
+
+## Why we use Cucumber for end-to-end testing?
+
 Cucumber is following syntax called Gherkin to explain and validate executable specifications written in plain text.
 
 To define Gherkin in a simple way, it is:
-
 -   Define test cases as plain text, using Gherkin language.
 -   It is designed to be non-technical and human-readable, becomes a ubiquitous language between tech and non-tech peoples. And collectively describes use cases relating to a software system.
 
@@ -44,7 +49,8 @@ Technical person also have same look, but need to implement some things to can i
 
 In this steps, you can use any language to do like: JS, Golang, ...
 
-End-to-end testing is not only software testing. But also is documentation, source of truth system
+
+End-to-end testing is not only software testing. But also is documentation, source of truth
 
 Cucumber provides easy way to
 
