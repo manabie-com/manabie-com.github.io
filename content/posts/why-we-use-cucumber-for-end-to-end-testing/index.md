@@ -1,3 +1,13 @@
++++
+date = "2021-12-03T14:37:23+07:00"
+author = "vctqs1"
+description = "What is the purpose of Cucumber and End-to-end testing? Why do we need to invest in them?"
+title = "Why we use Cucumber for end-to-end testing?"
+categories = ["Automation", "End-to-end", "BDD"]
+tags = ["bdd", "end-to-end", "cucumber", "automation", "test"]
+slug = "why-we-use-cucumber-for-end-to-end-testing"
++++
+
 # Why we use Cucumber for end-to-end testing?
 
 Before knowing why we use cucumber for End-to-end testing. Let understand what is end-to-end testing and cucumber
