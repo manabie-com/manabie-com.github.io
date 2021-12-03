@@ -43,13 +43,13 @@ For example:
 ```feature
 Scenario: Bob applies for a Frontend engineer at Manabie
   Given Bob receives the test challenge for Frontend engineer at Manabie
-  When Bob submit the challenge after complete
+  When Bob submits the challenge after complete
   Then Manabie reviews his submission
 ```
 
-Gherkin also has their rule and syntax. As you see Scenario, Given, When and Then is Gherkin keyword
+Gherkin also has their rule and syntax. As you see Scenario, Given, When, and Then is Gherkin keyword
 
-Each keyword represents for each purpose.
+Each keyword represents each purpose.
 
 As non-technical person, they can understand it well as a plain text with step by step.
 
@@ -57,15 +57,15 @@ As non-technical person, they can understand it well as a plain text with step b
 -   Which they do
 -   Which they're result
 
-Technical person also have same look, but need to implement some things to can integrate with our system. It's called step definitions in Cucumber.
+The technical person also has same look, but needs to implement some things to can integrate with our system. It's called step definitions in Cucumber.
 
-In this steps, you can use any language to do like: JS, Golang, ...
+In this step, you can use any language to do like JS, Golang, ...
 
 End-to-end testing is not only software testing. But also is documentation, source of truth
 
 That's why cucumber becomes is one of the best choices for us
 
--   Implementation end-to-end testing quickly with many plugin supports
+-   Implementation of end-to-end testing quickly with many plugin supports
 -   Behavior-driven development. Document how the system actually behaves.
 -   Using Gherkin language supports human-readable easy
 
