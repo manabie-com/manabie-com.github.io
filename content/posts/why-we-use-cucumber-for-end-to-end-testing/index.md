@@ -71,8 +71,8 @@ That's why cucumber becomes is one of the best choices for us
 
 ## Reference
 
-1. [Cucumber](<https://en.wikipedia.org/wiki/Cucumber_(software)>)
+1. [Cucumber Wiki](<https://en.wikipedia.org/wiki/Cucumber_(software)>)
 2. [Behavior-driven development Wiki](https://en.wikipedia.org/wiki/Behavior-driven_development)
 3. [Introduce BDD](https://automationpanda.com/2017/01/25/bdd-101-introducing-bdd/)
-4. [BDD in Cucumber](https://cucumber.io/docs/bdd/)
+4. [Cucumber](https://cucumber.io/docs/)
 5. [End-to-end testing](https://www.guru99.com/end-to-end-testing.html)
