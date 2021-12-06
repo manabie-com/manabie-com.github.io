@@ -26,18 +26,9 @@ What is the world said:
 
 ### What is Behavior-driven development?
 
-The world said:
+In software engineering, behavior-driven development (BDD) is an agile software development process that encourages collaboration among developers, quality assurance testers, and customer representatives in a software project
 
-> In software engineering, behavior-driven development (BDD) is an agile software development process that encourages collaboration among developers, quality assurance testers, and customer representatives in a software project
-
-BDD is
-
--   specification by example.
--   focuses on behavior first
--   a refinement of the Agile process, not an overhaul.
--   is a paradigm shift
-
-For more detail: https://automationpanda.com/2017/01/25/bdd-101-introducing-bdd/
+BDD extends from TDD (Test driven development). Instead of focus on test-first in software development BDD focuses on behavior
 
 ## Why we use Cucumber for end-to-end testing?
 
