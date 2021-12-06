@@ -26,9 +26,9 @@ What is the world said:
 
 ### What is Behavior-driven development?
 
-In software engineering, behavior-driven development (BDD) is an agile software development process that encourages collaboration among developers, quality assurance testers, and customer representatives in a software project
+In software engineering, behavior-driven development (BDD) is an agile software development process that encourages collaboration among developers, quality assurance testers, and customer representatives in a software project.
 
-BDD extends from TDD (Test driven development). Instead of focus on test-first in software development BDD focuses on behavior
+BDD extends from TDD (Test driven development). Instead of focus on test-first in software development BDD focuses on behavior.
 
 ## Why we use Cucumber for end-to-end testing?
 
@@ -42,13 +42,13 @@ To define Gherkin in a simple way, it is:
 For example:
 
 ```feature
-Scenario: Bob applies for a Frontend engineer at Manabie
-  Given Bob receives the test challenge for Frontend engineer at Manabie
-  When Bob submits the challenge after complete
-  Then Manabie reviews his submission
+Scenario: Bob try to find Manabie on Google
+  Given Bob go to Google website
+  When Bob search Manabie
+  Then Manabie appears on result list
 ```
 
-Gherkin also has their rule and syntax. As you see Scenario, Given, When, and Then is Gherkin keyword
+Gherkin also has their rule and syntax. As you see Scenario, Given, When, and Then is Gherkin keyword.
 
 Each keyword represents each purpose.
 
@@ -62,13 +62,13 @@ The technical person also has same look, but needs to implement some things to c
 
 In this step, you can use any language to do like JS, Golang, ...
 
-End-to-end testing is not only software testing. But also is documentation, source of truth
+End-to-end testing is not only software testing. But also is documentation, source of truth.
 
 That's why cucumber becomes is one of the best choices for us
 
--   Implementation of end-to-end testing quickly with many plugin supports
+-   Implementation of end-to-end testing quickly with many plugin supports.
 -   Behavior-driven development. Document how the system actually behaves.
--   Using Gherkin language supports human-readable easy
+-   Using Gherkin language supports human-readable easy.
 
 ## Reference
 
