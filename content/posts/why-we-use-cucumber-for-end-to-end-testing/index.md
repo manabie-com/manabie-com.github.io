@@ -64,11 +64,10 @@ In this step, you can use any language to do like JS, Golang, ...
 
 End-to-end testing is not only software testing. But also is documentation, source of truth.
 
-That's why cucumber becomes is one of the best choices for us
-
--   Implementation of end-to-end testing quickly with many plugin supports.
--   Behavior-driven development. Document how the system actually behaves.
--   Using Gherkin language supports human-readable easy.
+**That's why cucumber becomes is one of the best choices for us**
+-   Cucumber is a popular tools, we can implement of end-to-end testing quickly with many plugin supports like report.
+-   Behavior-driven development focus on behavior and it can be become our document how the system actually behaves for millions/billions test cases. More effective than, it can be training document for our members and customers
+-   Using Gherkin language supports human-readable ease. Both technical and non-technical are able to read and understand the products.
 
 ## Reference
 
