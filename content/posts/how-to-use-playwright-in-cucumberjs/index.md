@@ -27,12 +27,63 @@ Playwright is a framework for Web Testing and Automation. It allows testing Chro
     + Install [Node.js](https://nodejs.org/en/) (12 or higher)
     + Install Cucumber modules with [yarn](https://yarnpkg.com/en/) or [npm](https://www.npmjs.com/)
         - yarn:
-            ```bashscript
+            ```bash
             yarn add -D @cucumber/cucumber
             ```
         - npm:
-            ```bashscript
+            ```bash
             npm i -D @cucumber/cucumber
             ```
+    + Install Playwright
+        - yarn:
+            ```bash
+            yarn add playwright
+            ```
+        - npm:
+            ```bash
+            npm i -D playwright
+            ```
+    + create `features/search_manabie_on_google.feature`
+        ```feature
+        Feature: Search Manabie on google
+
+            Scenario: Bob try to find Manabie on Google
+                Given Bob go to Google website
+                When Bob search Manabie
+                Then Manabie appears on result list
+        ```
+    + create `features/support/world.js`
+        ```javascript
+        const { setWorldConstructor } = require("@cucumber/cucumber");
+        const playwright = require('playwright');
+
+        class CustomWorld {
+            constructor() {
+                this.variable = 0;
+            }
+
+            async openUrl(url) {
+                const browser = await playwright.chromium.launch({
+                    headless: false,
+                });
+                const context = await browser.newContext();
+                this.page = await context.newPage();
+                await this.page.goto(url);
+            }
+        }
+
+        setWorldConstructor(CustomWorld);
+        ```
+    + Run
+        ```bash
+        ./node_modules/.bin/cucumber-js --exit
+        ```
+    + after run
+        ```bash
+        1 scenario (1 passed)
+        3 steps (3 passed)
+        0m03.739s (executing steps: 0m03.729s)
+        ```
 ### References
-- https://cucumber.io/
+- https://github.com/cucumber/cucumber-js
+- https://github.com/microsoft/playwright
