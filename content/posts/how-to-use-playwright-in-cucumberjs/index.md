@@ -16,7 +16,30 @@ Before begin, we will give a brief introduction to Cucumber and Playwright.
 
 Cucumber is a tool that supports [Behaviour-Driven Development](https://cucumber.io/docs/bdd)(BDD), If you’re new to Behaviour-Driven Development read [BDD introduction](https://cucumber.io/docs/bdd/) first.
 
-[Cucumber-js](https://github.com/cucumber/cucumber-js) is an open-source software testing tool written in Javascript, while the tests are written in Gherkin, a non-technical and human-readable language.
+#### [Cucumberjs](https://github.com/cucumber/cucumber-js)
+-  is an open-source software testing tool written in Javascript, while the tests are written in Gherkin, a non-technical and human-readable language.
+
+#### Gherkin Syntax
+Gherkin uses a set of special keywords to give structure and meaning to executable specifications. Each keyword is translated to many spoken languages; in this reference we’ll use English.
+
+Each line that isn’t a blank line has to start with a Gherkin keyword, followed by any text you like. The only exceptions are the feature and scenario descriptions.
+
+The primary keywords are:
+
+- Feature
+- Rule (as of Gherkin 6)
+- Example (or Scenario)
+- Given, When, Then, And, But for steps (or *)
+- Background
+- Scenario Outline (or Scenario Template)
+- Examples (or Scenarios)
+
+There are a few secondary keywords as well:
+
+- `"""` (Doc Strings)
+- `|` (Data Tables)
+- `@` (Tags)
+- `#` (Comments)
 
 ### Playwright
 
