@@ -12,7 +12,7 @@ This tutorial helps you run automate your test using Playwright in Cucumber.
 
 Before begin, we will give a brief introduction to Cucumber and Playwright.
 
-### Cucumber
+### [Cucumber](https://cucumber.io/)
 
 Cucumber is a tool that supports [Behaviour-Driven Development](https://cucumber.io/docs/bdd)(BDD), If you’re new to Behaviour-Driven Development read [BDD introduction](https://cucumber.io/docs/bdd/) first.
 
@@ -41,9 +41,19 @@ There are a few secondary keywords as well:
 - `@` (Tags)
 - `#` (Comments)
 
-### Playwright
+### [Playwright](https://github.com/microsoft/playwright)
 
 Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast.
+#### Capabilities
+Playwright is built to automate the broad and growing set of web browser capabilities used by Single Page Apps and Progressive Web Apps.
+
+- Scenarios that span multiple page, domains and iframes
+- Auto-wait for elements to be ready before executing actions (like click, fill)
+- Intercept network activity for stubbing and mocking network requests
+- Emulate mobile devices, geolocation, permissions
+- Support for web components via shadow-piercing selectors
+- Native input events for mouse and keyboard
+- Upload and download files
 
 ### Getting Started with Cucumber and Playwright Example
 
