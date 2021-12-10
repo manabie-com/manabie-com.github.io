@@ -41,6 +41,8 @@ There are a few secondary keywords as well:
 - `@` (Tags)
 - `#` (Comments)
 
+- See [this one](), if you want know why we use Cucumber.
+
 ### [Playwright](https://github.com/microsoft/playwright)
 
 Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast.
@@ -58,19 +60,19 @@ Playwright is built to automate the broad and growing set of web browser capabil
 ### Getting Started with Cucumber and Playwright Example
 
 #### Prerequisites and Installations
-
+- Prerequisites:
+  - [Node.js](https://nodejs.org/en/) (12 or higher)
 - Installations:
-  - Install [Node.js](https://nodejs.org/en/) (12 or higher)
   - Install Cucumber modules with [yarn](https://yarnpkg.com/en/) or [npm](https://www.npmjs.com/)
     - yarn:
 
         ```bash
-        yarn add -D @cucumber/cucumber
+        yarn add @cucumber/cucumber
         ```
     - npm:
 
         ```bash
-        npm i -D @cucumber/cucumber
+        npm i @cucumber/cucumber
         ```
 
   - Install Playwright
@@ -80,7 +82,7 @@ Playwright is built to automate the broad and growing set of web browser capabil
         ```
     - npm:
         ```bash
-        npm i -D playwright
+        npm i playwright
         ```
     - Add the following files:
       - `features/search_manabie_on_google.feature`
@@ -151,6 +153,9 @@ Playwright is built to automate the broad and growing set of web browser capabil
         3 steps (3 passed)
         0m03.739s (executing steps: 0m03.729s)
         ```
+
+### Conclusion
+Cucumber and Playwright is great framework. I hope this article will be of some use to you. [Here is source code](/content/posts/how-to-use-playwright-in-cucumberjs/example), thanks you.
 
 ### References
 

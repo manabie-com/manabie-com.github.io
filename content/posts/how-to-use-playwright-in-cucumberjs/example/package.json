@@ -1,8 +1,6 @@
 {
-  "devDependencies": {
-    "@cucumber/cucumber": "^8.0.0-rc.1"
-  },
   "dependencies": {
+    "@cucumber/cucumber": "^8.0.0-rc.1",
     "playwright": "^1.17.1"
   }
 }
