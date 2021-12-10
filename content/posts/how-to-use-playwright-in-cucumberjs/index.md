@@ -41,7 +41,7 @@ There are a few secondary keywords as well:
 - `@` (Tags)
 - `#` (Comments)
 
-- See [this one](), if you want know why we use Cucumber.
+See [this one](_wait_), if you want know why we use Cucumber.
 
 ### [Playwright](https://github.com/microsoft/playwright)
 
@@ -155,7 +155,7 @@ Playwright is built to automate the broad and growing set of web browser capabil
         ```
 
 ### Conclusion
-Cucumber and Playwright is great framework. I hope this article will be of some use to you. [Here is source code](/content/posts/how-to-use-playwright-in-cucumberjs/example), thanks you.
+Cucumber and Playwright is great framework. I hope this article will be of some use to you. [Here is source code](/content/posts/how-to-use-playwright-in-cucumberjs/example), thank you.
 
 ### References
 
