@@ -16,7 +16,7 @@ Before getting to know why we use cucumber for End-to-end testing. Let's underst
 
 End to end testing (E2E testing) is a software testing method that validates the entire software. From the beginning to the end.
 
-The purpose of end-to-end testing is to simulate what a real user scenario and testing whole software for dependencies, data integrity and communication with other systems, interfaces, network connectivity and databases to exercise complete production like scenario.
+The purpose of end-to-end testing is to simulate how a real user interacts with the application, list out the scenarios, and test the whole software for dependencies, data integrity and communication with other systems, interfaces, network connectivity and databases to exercise complete production like scenario.
 
 ## What is Cucumber?
 
