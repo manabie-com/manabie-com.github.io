@@ -1,6 +1,6 @@
-Feature: Google search
+Feature: Search job openings at Manabie
 
-    Scenario: Bob try to find Manabie on Google
-        Given Bob go to Google website
-        When Bob search Manabie
-        Then Manabie appears on result list
+    Scenario: Bob search job openings at Manabie
+        Given Bob go to Manabie website
+        When Bob click Careers
+        Then See all job openings at Manabie

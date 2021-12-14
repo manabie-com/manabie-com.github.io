@@ -1,17 +1,14 @@
-// features/support/steps.js
 const { Given, When, Then } = require("@cucumber/cucumber");
-const assert = require("assert").strict;
 
-Given("Bob go to Google website", async function () {
-    await this.openUrl('http://google.com/');
+Given("Bob go to Manabie website", { timeout: 60 * 1000 }, async function () {
+    await this.openUrl('http://manabie.com/');
 });
 
-When("Bob search Manabie", async function () {
-    await this.page.click('[aria-label="Tìm kiếm"]');
-    await this.page.fill('[aria-label="Tìm kiếm"]', 'manabie');
-    await this.page.press('[aria-label="Tìm kiếm"]', 'Enter')
+When("Bob click Careers", async function () {
+    await this.page.click('text=Careers');
 });
 
-Then("Manabie appears on result list", async function () {
-    await this.page.waitForSelector('text=https://www.manabie.vn');
+Then("See all job openings at Manabie", async function () {
+    await this.page.click('text=View Openings');
+    await this.page.waitForSelector('text=Our Openings');
 });

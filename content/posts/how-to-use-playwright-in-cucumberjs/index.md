@@ -88,12 +88,12 @@ Playwright is built to automate the broad and growing set of web browser capabil
       - `features/search_manabie_on_google.feature`
 
         ```feature
-        Feature: Search Manabie on google
+        Feature: Search job openings at Manabie
 
-            Scenario: Bob try to find Manabie on Google
-                Given Bob go to Google website
-                When Bob search Manabie
-                Then Manabie appears on result list
+            Scenario: Bob search job openings at Manabie
+                Given Bob go to Manabie website
+                When Bob click Careers
+                Then See all job openings at Manabie
         ```
       - `features/support/world.js`
 
@@ -102,10 +102,6 @@ Playwright is built to automate the broad and growing set of web browser capabil
         const playwright = require('playwright');
 
         class CustomWorld {
-            constructor() {
-                this.variable = 0;
-            }
-
             async openUrl(url) {
                 const browser = await playwright.chromium.launch({
                     headless: false,
@@ -123,20 +119,18 @@ Playwright is built to automate the broad and growing set of web browser capabil
 
         ```javascript
         const { Given, When, Then } = require("@cucumber/cucumber");
-        const assert = require("assert").strict;
 
-        Given("Bob go to Google website", async function () {
-            await this.openUrl('http://google.com/');
+        Given("Bob go to Manabie website", { timeout: 60 * 1000 }, async function () {
+            await this.openUrl('http://manabie.com/');
         });
 
-        When("Bob search Manabie", async function () {
-            await this.page.click('[aria-label="Tìm kiếm"]');
-            await this.page.fill('[aria-label="Tìm kiếm"]', 'manabie');
-            await this.page.press('[aria-label="Tìm kiếm"]', 'Enter')
+        When("Bob click Careers", async function () {
+            await this.page.click('text=Careers');
         });
 
-        Then("Manabie appears on result list", async function () {
-            await this.page.waitForSelector('text=https://www.manabie.vn');
+        Then("See all job openings at Manabie", async function () {
+            await this.page.click('text=View Openings');
+            await this.page.waitForSelector('text=Our Openings');
         });
         ```
 

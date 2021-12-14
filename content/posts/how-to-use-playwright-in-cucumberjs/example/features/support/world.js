@@ -2,10 +2,6 @@ const { setWorldConstructor } = require("@cucumber/cucumber");
 const playwright = require('playwright');
 
 class CustomWorld {
-    constructor() {
-        this.variable = 0;
-    }
-
     async openUrl(url) {
         const browser = await playwright.chromium.launch({
             headless: false,
