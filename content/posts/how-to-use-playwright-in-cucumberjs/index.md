@@ -85,7 +85,7 @@ Playwright is built to automate the broad and growing set of web browser capabil
         npm i playwright
         ```
     - Add the following files:
-      - `features/search_manabie_on_google.feature`
+      - `features/search_job_openings_at_manabie.feature`
 
         ```feature
         Feature: Search job openings at Manabie
