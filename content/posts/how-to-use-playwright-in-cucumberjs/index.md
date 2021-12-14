@@ -41,7 +41,7 @@ There are a few secondary keywords as well:
 - `@` (Tags)
 - `#` (Comments)
 
-See [this one](_wait_), if you want know why we use Cucumber.
+See [this one](https://blog.manabie.io/2021/12/why-we-use-cucumber-for-end-to-end-testing/), if you want know why we use Cucumber.
 
 ### [Playwright](https://github.com/microsoft/playwright)
 
