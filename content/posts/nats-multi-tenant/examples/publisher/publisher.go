@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/nats-io/nats.go"
@@ -34,6 +37,13 @@ func main() {
 	// Create students by publishing messages
 	err = createStudent(js)
 	checkErr(err)
+
+	sig := make(chan os.Signal, 1)
+	defer close(sig)
+	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
+
+	<-sig
+	nc.Drain()
 }
 
 // createStudent publishes stream of events

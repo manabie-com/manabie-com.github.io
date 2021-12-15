@@ -36,8 +36,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("Student with StudentID:%d has been consumed\n", student.StudentID)
-	}, nats.Durable("durable-push"), nats.ManualAck(), nats.MaxDeliver(5), nats.AckWait(time.Second))
+		log.Printf("Student with StudentID:%d has been processed\n", student.StudentID)
+	}, nats.Durable("durable-push"), nats.ManualAck(), nats.MaxDeliver(2), nats.AckWait(time.Second))
 
 	sig := make(chan os.Signal, 1)
 	defer close(sig)

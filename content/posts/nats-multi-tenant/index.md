@@ -82,7 +82,7 @@ accounts {
 ##### **Accounts**
 
 Accounts allow grouping of clients, isolating them from clients in other accounts, thus enabling ***multi-tenant*** in 
-the server. In the configuration above we have an account named **A** which has third users ***Admin, Bob and Tom***. We 
+the server. In the configuration above we have an account named **A** which has three users ***Admin, Bob and Tom***. We 
 can add one or more accounts to the configuration, an account has one or more users.
 
 ##### **Users**
@@ -114,10 +114,182 @@ messages by `student.Created`. Tom is a consumer, receives messages and processe
 can create *consumer queue* by `$JS.API.CONSUMER.*.student.*` and `$JS.API.CONSUMER.DURABLE.CREATE.student.*`, then 
 ack messages by `$JS.ACK.student.>`.
 
-#### **Let's run a test**
+#### **Let's make a test**
 
-You can go to [my demo]()
+You can go to [my demo](https://github.com/manabie-com/manabie-com.github.io/tree/setup-nats-multi-tenant/content/posts/nats-multi-tenant/examples) 
+for more detail.
 
 ##### **Setup config and docker-compose**
 
+In this demo I just configure one account and three users, you can custom the test with more than accounts. We run command 
+`docker-compose up` to start nats server, the logs when start nats successfully.
 
+```bash
+n1    | [1] 2021/12/14 08:12:08.709249 [INF] Starting nats-server
+n1    | [1] 2021/12/14 08:12:08.709303 [INF]   Version:  2.6.6
+n1    | [1] 2021/12/14 08:12:08.709306 [INF]   Git:      [878afad]
+n1    | [1] 2021/12/14 08:12:08.709310 [INF]   Name:     NBWOQ2DYVAYSY3HXYVJXGGURKJY6TBPC2JCKEQYND7GTSSJODGYUCMLK
+n1    | [1] 2021/12/14 08:12:08.709318 [INF]   Node:     Cq4JgPlu
+n1    | [1] 2021/12/14 08:12:08.709321 [INF]   ID:       NBWOQ2DYVAYSY3HXYVJXGGURKJY6TBPC2JCKEQYND7GTSSJODGYUCMLK
+n1    | [1] 2021/12/14 08:12:08.709325 [WRN] Plaintext passwords detected, use nkeys or bcrypt
+n1    | [1] 2021/12/14 08:12:08.709336 [INF] Using configuration file: /jetstream.config
+n1    | [1] 2021/12/14 08:12:08.710457 [INF] Starting JetStream
+n1    | [1] 2021/12/14 08:12:08.710696 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+n1    | [1] 2021/12/14 08:12:08.710708 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+n1    | [1] 2021/12/14 08:12:08.710712 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+n1    | [1] 2021/12/14 08:12:08.710714 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+n1    | [1] 2021/12/14 08:12:08.710717 [INF] 
+n1    | [1] 2021/12/14 08:12:08.710720 [INF]          https://docs.nats.io/jetstream
+n1    | [1] 2021/12/14 08:12:08.710722 [INF] 
+n1    | [1] 2021/12/14 08:12:08.710725 [INF] ---------------- JETSTREAM ----------------
+n1    | [1] 2021/12/14 08:12:08.710737 [INF]   Max Memory:      4.00 GB
+n1    | [1] 2021/12/14 08:12:08.710742 [INF]   Max Storage:     10.00 GB
+n1    | [1] 2021/12/14 08:12:08.710745 [INF]   Store Directory: "/data/jetstream"
+```
+
+##### **Golang code**
+* **Publisher** folder try connect to nats with user *Bob* then checking and creating streams `student` after that publish
+three messages with subject `student.Created`. Go to publisher folder then run command `go run publisher.go`.
+
+```bash
+2021/12/14 15:21:02 Student with StudentID:1 has been published
+2021/12/14 15:21:02 Student with StudentID:2 has been published
+2021/12/14 15:21:02 Student with StudentID:3 has been published
+```
+
+* **Consumer** folder try connect to nats with user *Tom* then [creating subscription](https://github.com/manabie-com/manabie-com.github.io/blob/a9b1ec1f6b87c3b408516014a06850869c7b30f8/content/posts/nats-multi-tenant/examples/consumer/consumer.go#L29) 
+and processing messages with subject `student.Created`. Go to consumer folder then run command `go run consumer.go`.
+
+```bash
+2021/12/14 15:26:15 Student with StudentID:1 has been processed
+2021/12/14 15:26:15 Student with StudentID:2 has been processed
+2021/12/14 15:26:15 Student with StudentID:3 has been processed
+```
+
+* What's happen when Tom don't have permission to ack messages? Let's test. We will remove `$JS.ACK.student.>` in user 
+Tom. Then restart nats server. As expected, Tom doesn't have permission to ack messages
+
+The logs in consumer will look like that.
+```bash
+nats: Permissions Violation for Publish to "$JS.ACK.student.durable-push.1.70.97.1639472208769956133.2" on connection [12]
+nats: Permissions Violation for Publish to "$JS.ACK.student.durable-push.1.71.98.1639472208770655160.1" on connection [12]
+nats: Permissions Violation for Publish to "$JS.ACK.student.durable-push.1.72.99.1639472208771104510.0" on connection [12]
+```
+The logs in nats server will look like that.
+```bash
+n1    | [1] 2021/12/14 08:56:56.427316 [ERR] 172.25.0.1:49916 - cid:12 - "v1.13.0:go" - Publish Violation - User "Tom", Subject "$JS.ACK.student.durable-push.1.70.97.1639472208769956133.2"
+n1    | [1] 2021/12/14 08:56:56.427353 [ERR] 172.25.0.1:49916 - cid:12 - "v1.13.0:go" - Publish Violation - User "Tom", Subject "$JS.ACK.student.durable-push.1.71.98.1639472208770655160.1"
+n1    | [1] 2021/12/14 08:56:56.427369 [ERR] 172.25.0.1:49916 - cid:12 - "v1.13.0:go" - Publish Violation - User "Tom", Subject "$JS.ACK.student.durable-push.1.72.99.1639472208771104510.0"
+```
+##### **Nats-box**
+
+We can see the connection of users in account by [nats-box](https://github.com/nats-io/nats-box). 
+Go to terminal and run `docker run -ti --network host natsio/nats-box`, then we will connect to nats server by Admin 
+`nats context save --server=nats://localhost:4223 --user=Admin --password=123456 --select server` if connect successfully, the result like this
+
+```bash
+NATS Configuration Context "server"
+
+      Server URLs: nats://localhost:4223
+         Username: Admin
+         Password: *********
+             Path: /root/.config/nats/context/server.json
+       Connection: OK
+```
+Then we run command `nats server report accounts --json`, the result:
+
+```bash
+[
+  {
+    "account": "A",
+    "connections": 3,
+    "connection_info": [
+      {
+        "cid": 10,
+        "ip": "172.26.0.1",
+        "port": 53406,
+        "start": "2021-12-15T01:58:17.622191984Z",
+        "last_activity": "2021-12-15T01:58:17.626455989Z",
+        "rtt": "449µs",
+        "uptime": "16m32s",
+        "idle": "16m32s",
+        "pending_bytes": 0,
+        "in_msgs": 4,
+        "out_msgs": 4,
+        "in_bytes": 168,
+        "out_bytes": 731,
+        "subscriptions": 1,
+        "lang": "go",
+        "version": "1.13.0",
+        "authorized_user": "Bob",
+        "account": "A",
+        "subscriptions_list": [
+          "_INBOX.a1ZGIA7xxpq6odeC0nRjid.*"
+        ]
+      },
+      {
+        "cid": 13,
+        "ip": "172.26.0.1",
+        "port": 53476,
+        "start": "2021-12-15T01:58:58.408294005Z",
+        "last_activity": "2021-12-15T01:59:02.421454384Z",
+        "rtt": "530µs",
+        "uptime": "15m51s",
+        "idle": "15m47s",
+        "pending_bytes": 0,
+        "in_msgs": 26,
+        "out_msgs": 26,
+        "in_bytes": 125,
+        "out_bytes": 2146,
+        "subscriptions": 2,
+        "lang": "go",
+        "version": "1.13.0",
+        "authorized_user": "Tom",
+        "account": "A",
+        "subscriptions_list": [
+          "_INBOX.pAs3HKEavN4xPgq0R3ISuv.*",
+          "_INBOX.KUZs5Iu1AS627v4hxQDEDT"
+        ]
+      },
+      {
+        "cid": 16,
+        "ip": "172.26.0.1",
+        "port": 54208,
+        "start": "2021-12-15T02:14:50.121066448Z",
+        "last_activity": "2021-12-15T02:14:50.121668124Z",
+        "rtt": "602µs",
+        "uptime": "0s",
+        "idle": "0s",
+        "pending_bytes": 0,
+        "in_msgs": 0,
+        "out_msgs": 0,
+        "in_bytes": 0,
+        "out_bytes": 0,
+        "subscriptions": 1,
+        "name": "NATS CLI Version development",
+        "lang": "go",
+        "version": "1.11.0",
+        "authorized_user": "Admin",
+        "account": "A",
+        "subscriptions_list": [
+          "_INBOX.4FRAGOb5MzOIGS1ZsYAtYI"
+        ]
+      }
+    ],
+    "in_msgs": 30,
+    "out_msgs": 30,
+    "in_bytes": 293,
+    "out_bytes": 2877,
+    "subscriptions": 4
+  }
+]
+```
+You can see the result above, we have an account A and three users (Admin, Bob, Tom) are connecting to nats. Nats say 
+`solating them from clients in other accounts`, so we can test by add account **B** in our configuration then connect nats-box 
+by **AdminB** then run `nats server report accounts --json`. 
+
+#### **Summary**
+
+Currently, the Manabie team are using this way to apply nats multi-tenant in our backend code, this way quite easy to configure permission for users 
+we just go to file config and add permission into a user you want. You can go to [my demo](https://github.com/manabie-com/manabie-com.github.io/tree/setup-nats-multi-tenant/content/posts/nats-multi-tenant/examples) 
+and try to run this example. Thank you for your reading!
