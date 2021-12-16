@@ -1,0 +1,44 @@
+{{- define "metrics.volume.tpl" -}}
+name: {{ .Chart.Name }}-config
+configMap:
+  name: {{ .Chart.Name }}
+  items:
+  - key: nginx.conf
+    path: nginx.conf
+{{- end -}}
+
+{{- define "metrics.volume-mount.tpl" -}}
+name: {{ .Chart.Name }}-config
+mountPath: /etc/nginx/conf.d/nginx.conf
+subPath: nginx.conf
+{{- end -}}
+
+{{- define "metrics.container.tpl" -}}
+name: {{ .Chart.Name }}-exporter
+image: nginx/nginx-prometheus-exporter:0.9.0
+imagePullPolicy: {{ .Values.image.pullPolicy }}
+ports:
+  - name: exporter
+    containerPort: 9113
+    protocol: TCP
+args:
+  - -nginx.scrape-uri=http://localhost:8080/stub_status
+resources:
+  {{- toYaml .Values.resources | nindent 12 }}
+{{- end -}}
+
+{{- define "metrics.configmap.tpl" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}
+data:
+  nginx.conf: |
+    server {
+        listen       8080;
+        server_name  localhost;
+        location /stub_status {
+            stub_status;
+        }
+    }
+{{- end -}}
