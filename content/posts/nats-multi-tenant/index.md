@@ -1,23 +1,23 @@
 +++
 date = "2021-12-10T14:28:23+07:00"
 author = "duchh"
-description = "Write the way to set up nats multi-tenant."
-title = "Set up nats multi-tenant in golang"
-categories = ["Golang", "Nats-Jetstream"]
-tags = ["Golang", "Nats-Jetstream", "Multi-tenant"]
-slug = "set-up-nats-multi-tenant-in-golang" 
+description = "Write the way to set up NATS multi-tenant."
+title = "Set up NATS multi-tenant in golang"
+categories = ["Golang", "NATS-Jetstream"]
+tags = ["Golang", "NATS-Jetstream", "Multi-tenant"]
+slug = "set-up-NATS-multi-tenant-in-golang" 
 +++
 
-***In this blog post, we will learn how to set up Nats Multi-tenant in golang.***
+***In this blog post, we will learn how to set up NATS Multi-tenancy in golang.***
 
-#### **Nats-Jetstream**
+#### **NATS-Jetstream**
 
-Nats has a built-in distributed persistence system called Jetstream which features new functionalities and higher 
+NATS has a built-in distributed persistence system called Jetstream which features new functionalities and higher 
 qualities of service on top of the base Core NATS functionalities and qualities of service.
 
-Jetstream was created to solve the problems identified with streaming in technology today. Some technologies address 
+Jetstream was created to solve the problems identified with streaming technologies today. Some technologies address 
 these better than others, but no current streaming technology is truly multi-tenant, horizontally scalable,... Today I just 
-talk about the way set up nats multi-tenant in golang.
+talk how we can set up NATS multi-tenancy in golang.
 
 #### **Concepts**
 
@@ -34,9 +34,9 @@ accounts {
                 permissions: {
                     publish: {
                         allow: [
-                            "$JS.API.INFO", # allow user can send request API to nats server
-                            "$JS.API.STREAM.>", # allow user do anything with all streams in nats server
-                            "$JS.API.CONSUMER.>" # allow user do anything with all consumers in nats server
+                            "$JS.API.INFO", # allow user can send request API to NATS server
+                            "$JS.API.STREAM.>", # allow user do anything with all streams in NATS server
+                            "$JS.API.CONSUMER.>" # allow user do anything with all consumers in NATS server
                         ]
                     }
                 }
@@ -47,7 +47,7 @@ accounts {
                 permissions: {
                     publish: {
                         allow: [
-                            "$JS.API.INFO", # allow user can send request API to nats server
+                            "$JS.API.INFO", # allow user can send request API to NATS server
                             "$JS.API.STREAM.*.student", # allow user interact with stream (example: create, delete,...)
                             "student.Created" # allow user publish messages with subject `student.Created`
                         ]
@@ -60,7 +60,7 @@ accounts {
                 permissions: {
                     publish: {
                         allow: [
-                            "$JS.API.INFO", # allow user can send request API to nats server
+                            "$JS.API.INFO", # allow user can send request API to NATS server
                             "$JS.API.STREAM.NAMES", # allow user get all stream's names
                             "$JS.API.CONSUMER.*.student.*", # allow user interact with consumer (example: create, delete,...)
                             "$JS.API.CONSUMER.DURABLE.CREATE.student.*", # allow user create consumer queue
@@ -92,7 +92,7 @@ of services that must work together to provide some functionality.
 
 ##### **Permission**
 
-Nats has concept [widlcard subject](https://docs.nats.io/nats-concepts/subjects#wildcards) will use a lot in our example, 
+NATS has concept [widlcard subject](https://docs.nats.io/nats-concepts/subjects#wildcards) will use a lot in our example, 
 so you should understand this concept before going next.
 
 Another concept is [Jetstream wire API Reference](https://docs.nats.io/reference/reference-protocols/nats_api_reference), 
@@ -101,7 +101,7 @@ you can easily interact with the Jetstream infrastructure programmatically.
 In [permissions](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/authorization#permission-map) 
 above we have two section *publish* and *subscribe*. 
 * **Publish** consist of subject, list of subjects, API reference the user can publish. All users 
-need to have `$JS.API.INFO` permission, because this API allow user can send others API to nats server.
+need to have `$JS.API.INFO` permission, because this API allow user can send others API to NATS server.
 
 * **Subscribe** consist of subject, list of subjects, API reference the user can subscribe. To receiving messages 
 published, the consumer needs to be able to subscribe to the request subjects. The request subject is an inbox. Typically 
@@ -109,7 +109,7 @@ inboxes start with the prefix ``_INBOX.`` followed by a generated string. The ``
 that begin with ``_INBOX.``.
 
 In example above, Admin can do anything with streams and consumers (create, update, delete,...). Bob is a publisher, 
-publishes messages to nats with streams `student`. Bob can create streams by `$JS.API.STREAM.*.student` and publish 
+publishes messages to NATS with streams `student`. Bob can create streams by `$JS.API.STREAM.*.student` and publish 
 messages by `student.Created`. Tom is a consumer, receives messages and processes them related streams `student`. Tom 
 can create *consumer queue* by `$JS.API.CONSUMER.*.student.*` and `$JS.API.CONSUMER.DURABLE.CREATE.student.*`, then 
 ack messages by `$JS.ACK.student.>`.
@@ -122,7 +122,7 @@ for more detail.
 ##### **Setup config and docker-compose**
 
 In this demo I just configure one account and three users, you can custom the test with more than accounts. We run command 
-`docker-compose up` to start nats server, the logs when start nats successfully.
+`docker-compose up` to start NATS server, the logs when start NATS successfully.
 
 ```bash
 n1    | [1] 2021/12/14 08:12:08.709249 [INF] Starting nats-server
@@ -148,7 +148,7 @@ n1    | [1] 2021/12/14 08:12:08.710745 [INF]   Store Directory: "/data/jetstream
 ```
 
 ##### **Golang code**
-* **Publisher** folder try connect to nats with user *Bob* then checking and creating streams `student` after that publish
+* **Publisher** folder try connect to NATS with user *Bob* then checking and creating streams `student` after that publish
 three messages with subject `student.Created`. Go to publisher folder then run command `go run publisher.go`.
 
 ```bash
@@ -157,7 +157,7 @@ three messages with subject `student.Created`. Go to publisher folder then run c
 2021/12/14 15:21:02 Student with StudentID:3 has been published
 ```
 
-* **Consumer** folder try connect to nats with user *Tom* then [creating subscription](https://github.com/manabie-com/manabie-com.github.io/blob/a9b1ec1f6b87c3b408516014a06850869c7b30f8/content/posts/nats-multi-tenant/examples/consumer/consumer.go#L29) 
+* **Consumer** folder try connect to NATS with user *Tom* then [creating subscription](https://github.com/manabie-com/manabie-com.github.io/blob/a9b1ec1f6b87c3b408516014a06850869c7b30f8/content/posts/nats-multi-tenant/examples/consumer/consumer.go#L29) 
 and processing messages with subject `student.Created`. Go to consumer folder then run command `go run consumer.go`.
 
 ```bash
@@ -167,7 +167,7 @@ and processing messages with subject `student.Created`. Go to consumer folder th
 ```
 
 * What's happen when Tom don't have permission to ack messages? Let's test. We will remove `$JS.ACK.student.>` in user 
-Tom. Then restart nats server. As expected, Tom doesn't have permission to ack messages
+Tom. Then restart NATS server. As expected, Tom doesn't have permission to ack messages
 
 The logs in consumer will look like that.
 ```bash
@@ -175,16 +175,16 @@ nats: Permissions Violation for Publish to "$JS.ACK.student.durable-push.1.70.97
 nats: Permissions Violation for Publish to "$JS.ACK.student.durable-push.1.71.98.1639472208770655160.1" on connection [12]
 nats: Permissions Violation for Publish to "$JS.ACK.student.durable-push.1.72.99.1639472208771104510.0" on connection [12]
 ```
-The logs in nats server will look like that.
+The logs in NATS server will look like that.
 ```bash
 n1    | [1] 2021/12/14 08:56:56.427316 [ERR] 172.25.0.1:49916 - cid:12 - "v1.13.0:go" - Publish Violation - User "Tom", Subject "$JS.ACK.student.durable-push.1.70.97.1639472208769956133.2"
 n1    | [1] 2021/12/14 08:56:56.427353 [ERR] 172.25.0.1:49916 - cid:12 - "v1.13.0:go" - Publish Violation - User "Tom", Subject "$JS.ACK.student.durable-push.1.71.98.1639472208770655160.1"
 n1    | [1] 2021/12/14 08:56:56.427369 [ERR] 172.25.0.1:49916 - cid:12 - "v1.13.0:go" - Publish Violation - User "Tom", Subject "$JS.ACK.student.durable-push.1.72.99.1639472208771104510.0"
 ```
-##### **Nats-box**
+##### **NATS-box**
 
 We can see the connection of users in account by [nats-box](https://github.com/nats-io/nats-box). 
-Go to terminal and run `docker run -ti --network host natsio/nats-box`, then we will connect to nats server by Admin 
+Go to terminal and run `docker run -ti --network host natsio/nats-box`, then we will connect to NATS server by Admin 
 `nats context save --server=nats://localhost:4223 --user=Admin --password=123456 --select server` if connect successfully, the result like this
 
 ```bash
@@ -284,12 +284,12 @@ Then we run command `nats server report accounts --json`, the result:
   }
 ]
 ```
-You can see the result above, we have an account A and three users (Admin, Bob, Tom) are connecting to nats. Nats say 
-`solating them from clients in other accounts`, so we can test by add account **B** in our configuration then connect nats-box 
+You can see the result above, we have an account A and three users (Admin, Bob, Tom) are connecting to NATS. NATS say 
+`solating them from clients in other accounts`, so we can test by add account **B** in our configuration then connect NATS-box 
 by **AdminB** then run `nats server report accounts --json`. 
 
 #### **Summary**
 
-Currently, the Manabie team are using this way to apply nats multi-tenant in our backend code, this way quite easy to configure permission for users 
+Currently, the Manabie team are using this way to apply NATS multi-tenant in our backend code, this way quite easy to configure permission for users 
 we just go to file config and add permission into a user you want. You can go to [my demo](https://github.com/manabie-com/manabie-com.github.io/tree/setup-nats-multi-tenant/content/posts/nats-multi-tenant/examples) 
 and try to run this example. Thank you for your reading!
