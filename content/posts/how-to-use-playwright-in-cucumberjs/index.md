@@ -3,12 +3,12 @@ date = ""
 author = "nploi"
 description = "How to use Playwright in cucumberjs"
 title = "How to use Playwright in cucumberjs"
-categories = ["e2e test"]
-tags = ["k8s", "playwright", "cucumberjs"]
+categories = ["DevSecOps", "Testing"]
+tags = ["bdd", "end-to-end", "cucumber", "automation", "test"]
 slug = "how-to-use-playwright-in-cucumberjs"
 +++
 
-This tutorial helps you run automate your test using Playwright in Cucumber.
+This tutorial helps you run `web` automation tests by using Playwright in Cucumber.
 
 Before begin, we will give a brief introduction to Cucumber and Playwright.
 
@@ -91,9 +91,9 @@ Playwright is built to automate the broad and growing set of web browser capabil
         Feature: Search job openings at Manabie
 
             Scenario: Bob search job openings at Manabie
-                Given Bob go to Manabie website
-                When Bob click Careers
-                Then See all job openings at Manabie
+                Given Bob opens Manabie website
+                When Bob goes to Careers section
+                Then Bob sees all job openings at Manabie
         ```
       - `features/support/world.js`
 
@@ -120,15 +120,15 @@ Playwright is built to automate the broad and growing set of web browser capabil
         ```javascript
         const { Given, When, Then } = require("@cucumber/cucumber");
 
-        Given("Bob go to Manabie website", { timeout: 60 * 1000 }, async function () {
+        Given("Bob opens Manabie website", { timeout: 60 * 1000 }, async function () {
             await this.openUrl('http://manabie.com/');
         });
 
-        When("Bob click Careers", async function () {
+        When("Bob goes to Careers section", async function () {
             await this.page.click('text=Careers');
         });
 
-        Then("See all job openings at Manabie", async function () {
+        Then("Bob sees all job openings at Manabie", async function () {
             await this.page.click('text=View Openings');
             await this.page.waitForSelector('text=Our Openings');
         });
