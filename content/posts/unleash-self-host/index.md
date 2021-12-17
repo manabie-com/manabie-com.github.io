@@ -99,7 +99,7 @@ the output will be similar to this:
 
 #### 3. Deploying Unleash
 
-##### 1. Unleash server
+##### i. Unleash server
 
 Because we have not installed anything yet, there should be nothing in the `default` namespace.
 Let's check:
@@ -161,7 +161,7 @@ any feature flags yet). We will add them in the next section.
 
 ![Unleash Features Page](./unleash-features-page.png)
 
-##### 2. Add new feature flags and retrieve it client-side
+##### ii. Add new feature flags and retrieve it client-side
 
 By default, clients do not have access to the server since we are enabling authentication for Unleash.
 You need to follow [this guide](https://docs.getunleash.io/user_guide/api-token) to create an API
@@ -228,7 +228,7 @@ Then, we can enable the feature by clicking on the toggle:
 
 It is now enabled (`"enabled":true`).
 
-##### 3. Add Unleash proxy
+##### iii. Add Unleash proxy
 
 Usually, we would use [Unleash SDKs](https://docs.getunleash.io/sdks) to interact with Unleash.
 However, for the [front-end SDKs](https://docs.getunleash.io/sdks#front-end-sdks):
@@ -268,3 +268,22 @@ then you can make request to the proxy from your machine:
     $ curl -H "Authorization: proxy-secret" http://localhost:4243/proxy
     {"toggles":[{"name":"my-feature","enabled":true,"variant":{"name":"disabled","enabled":false}}]}
 ```
+
+#### 4. Afterwords
+
+- `curl` is only used here for the sake of simplicity. In practice, we would use [Unleash's official
+SDKs](https://docs.getunleash.io/sdks)
+- Sensitive data such as Postgresql's password should be encrypted and stored in a secret.
+- Do not use the admin account that Unleash created, or at least change its password.
+In our case, add an admin account with a safe password at bootstrap.
+- When deploying the proxy, we need to manually create the API token using the UI. This can be
+tedious and error prone when deploying to a new environment. In practice, we also create
+an API token at bootstrap for the proxy, too.
+
+### Conclusion
+
+In this blog, we have covered:
+
+- Deploying Unleash in a local Kubernetes cluster (using Minikube)
+- Creating a simple feature toggle and use `curl` to retrieve it
+- Deploying Unleash with the proxy enabled
