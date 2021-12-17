@@ -1,5 +1,5 @@
 +++
-date = "2021-12-16T15:11:00+07:00"
+date = "2021-12-17T21:24:00+07:00"
 author = "anhpngt"
 description = "Self-hosting Unleash with Kubernetes"
 title = "Self-hosting Unleash with Kubernetes"
