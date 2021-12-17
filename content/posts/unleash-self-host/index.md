@@ -157,28 +157,67 @@ Login with the default account that Unleash created for us:
 then you will go to the `features` page (which is empty right now since we have not added
 any feature flags yet). We will add them in the next section.
 
-![Unleash Features Page](./unleash-features.png)
+![Unleash Features Page](./unleash-features-page.png)
 
-##### 2. Add new feature flags and test them
-
-In the Unleash features page `http://localhost:4242/unleash/features`, click on `Create feature toggle`.
-Choose:
-
-- Name: `my-first-feature`
-- Toggle type: `Release`
-- Description can be left empty
-
-then press `Create`. You should see `my-first-feature` toggle:
-
-![my-first-feature](./my-first-feature.png)
+##### 2. Add new feature flags and retrieve it client-side
 
 By default, clients do not have access to the server since we are enabling authentication for Unleash.
 You need to follow [this guide](https://docs.getunleash.io/user_guide/api-token) to create an API
 token. I am adding a new API token with:
 
-- Username: `client`
+- Username: `myclient`
 - Token Type: `Client`
 - Project: `ALL`
-- Environment: `default`
+- Environment: `development`
 
-![API token](./api-token.png)
+![API token](./unleash-api-token.png)
+
+Then, we can use the API token to make API requests to the server. In my case, my secret value is
+`*:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e`.
+
+```sh
+    $ curl -H "Authorization: *:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e" http://localhost:4242/unleash/api/client/features
+    {"version":2,"features":[],"query":{"environment":"development"}}
+```
+
+It returns `"features':[]` because we have not added any feature toggles yet.
+In the Unleash features page `http://localhost:4242/unleash/features`, click on `Create feature toggle`.
+Choose:
+
+- Name: `my-feature`
+- Toggle type: `Release`
+- Description can be left empty
+
+then press `Create`. You should see `my-feature` toggle:
+
+![my-feature toggle page](./unleash-my-feature.png)
+
+```sh
+    $ curl -H "Authorization: *:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e" http://localhost:4242/unleash/api/client/features
+    {"version":2,"features":[{"strategies":[],"enabled":false,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
+```
+
+We can see the feature toggle `my-feature` now. Let's enable it.
+Right now, `my-feature` cannot be enabled for `development` be cause it does not
+have a `Strategy` for `development` environment yet.
+
+We need to:
+
+- Go to `Strategies` tab
+- Click on `Add new strategy`
+- Drag and drop the `Standard` strategy card from the left panel to the right.
+(you can also click on the `+` icon)
+- Click `Save` to save the strategy
+
+![Standard strategy added for development](./unleash-add-strategies.png)
+
+Then, we can enable the feature by clicking on the toggle:
+
+![Enable my-feature](./unleash-enable-feature.png)
+
+```sh
+    $ curl -H "Authorization: *:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e" http://localhost:4242/unleash/api/client/features
+    {"version":2,"features":[{"strategies":[{"name":"default","constraints":[],"parameters":{}}],"enabled":true,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
+```
+
+It is now enabled (`"enabled":true`).
