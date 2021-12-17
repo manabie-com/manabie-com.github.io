@@ -35,7 +35,20 @@ Common labels
 */}}
 {{- define "unleash.labels" -}}
 helm.sh/chart: {{ include "unleash.chart" . }}
+app.kubernetes.io/name: {{ include "unleash.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{ include "unleash.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{- define "postgres.labels" -}}
+helm.sh/chart: {{ include "unleash.chart" . }}
+app.kubernetes.io/name: {{ include "unleash.name" . }}-postgres
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "postgres.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -49,3 +62,9 @@ Selector labels
 app.kubernetes.io/name: {{ include "unleash.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{- define "postgres.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "unleash.name" . }}-postgres
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
