@@ -221,3 +221,23 @@ Then, we can enable the feature by clicking on the toggle:
 ```
 
 It is now enabled (`"enabled":true`).
+
+##### 3. Add Unleash proxy
+
+Usually, we would use [Unleash SDKs](https://docs.getunleash.io/sdks) to interact with Unleash.
+However, for the [front-end SDKs](https://docs.getunleash.io/sdks#front-end-sdks):
+
+> For security and performance reasons, the front-end SDKs do not communicate directly with your Unleash instance. Instead, they go via the [Unleash Proxy](https://docs.getunleash.io/sdks/unleash-proxy).
+
+Therefore, in cases where we need, for example [React SDK](https://docs.getunleash.io/sdks/proxy-react),
+we need to also set up the proxy.
+
+I have already added the proxy in the deployment chart. We can enable deploying it
+by setting `unleashProxy.enabled` to `true` (so that the blocks `{{- if .Values.unleashProxy.enabled }}`
+would evaluate to true).
+
+With that in mind, let's redeploy Unleash with the proxy enabled:
+
+```sh
+    helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml --set=unleashProxy.enabled=true
+```
