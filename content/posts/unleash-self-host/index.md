@@ -1,10 +1,10 @@
 +++
-date = "2021-12-09T15:11:00+07:00"
+date = "2021-12-16T15:11:00+07:00"
 author = "anhpngt"
 description = "Self-hosting Unleash with Kubernetes"
 title = "Self-hosting Unleash with Kubernetes"
 categories = ["DevSecOps", "Feature"]
-tags = ["Unleash", "Kubernetes", "helm"]
+tags = ["unleash", "k8s", "helm"]
 slug = "unleash-self-host"
 +++
 
@@ -59,8 +59,102 @@ try installing the listed versions first.
 
 #### 2. Setting up the project
 
-```sh
-$ helm start
-$ helm cache add 
+First, clone the example from Github repository:
 
+```sh
+    git clone https://github.com/manabie-com/manabie-com.github.io
 ```
+
+Then, let's start `minikube` and cache some required images. With this, we will not have to
+re-download them everytime we start `minikube`.
+
+```sh
+    minikube start
+    minikube cache add postgres:14.1-alpine3.15
+    minikube cache add unleashorg/unleash-server:4.3.1
+    minikube cache add unleashorg/unleash-proxy:0.4.0
+```
+
+the output will be similar to this:
+
+```sh
+    😄  minikube v1.24.0 on Ubuntu 21.10
+    ✨  Automatically selected the docker driver
+    👍  Starting control plane node minikube in cluster minikube
+    🚜  Pulling base image ...
+    🔥  Creating docker container (CPUs=2, Memory=7900MB) ...
+    🐳  Preparing Kubernetes v1.22.3 on Docker 20.10.8 ...
+        ▪ Generating certificates and keys ...
+        ▪ Booting up control plane ...
+        ▪ Configuring RBAC rules ...
+    🔎  Verifying Kubernetes components...
+        ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+    🌟  Enabled addons: storage-provisioner, default-storageclass
+    🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+    ❗  "minikube cache" will be deprecated in upcoming versions, please switch to "minikube image load"
+    ❗  "minikube cache" will be deprecated in upcoming versions, please switch to "minikube image load"
+    ❗  "minikube cache" will be deprecated in upcoming versions, please switch to "minikube image load"
+```
+
+#### 3. Deploying Unleash
+
+##### 1. Installation
+
+Because we have not installed anything yet, there should be nothing in the `default` namespace.
+Let's check:
+
+```sh
+    $ kubectl get pods
+    No resources found in default namespace.
+```
+
+If you encounter errors like `The connection to the server localhost:8080 was refused - did you specify the right host or port?`,
+then probably you have not run `minikube start` yet.
+
+If everything is fine, we can proceed to installing `unleash` in our cluster:
+
+```sh
+    $ cd manabie-com.github.io/content/posts/unleash-self-host/examples
+    $ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml
+    Release "unleash" does not exist. Installing it now.
+    NAME: unleash
+    LAST DEPLOYED: Fri Dec 17 14:55:30 2021
+    NAMESPACE: default
+    STATUS: deployed
+    REVISION: 1
+    TEST SUITE: None
+```
+
+Checking the pods again
+
+```sh
+    $ kubectl get pods
+    NAME                       READY   STATUS    RESTARTS      AGE
+    unleash-77df4956fc-xnqft   2/2     Running   1 (96s ago)   97s
+```
+
+The status is `Running` and readiness is `2/2`, so it is ready to serve requests.
+
+To access the server, we need to expose it from within `minikube` cluster to our host machine
+by port-forwarding in a separate terminal:
+
+```sh
+    $ kubectl port-forward deploy/unleash 4242
+    Forwarding from 127.0.0.1:4242 -> 4242
+    Forwarding from [::1]:4242 -> 4242
+```
+
+Go to `http://localhost:4242/unleash` in your browser, you should see the Unleash login page:
+
+![Unleash Login Page](./unleash-login.png)
+
+Login with:
+
+- Username: `admin`
+- Password: `unleash4all` (this is the default Unleash password)
+
+then you will go to the `features` page (which is empty right now since we have not added
+any feature flags yet).
+
+![Unleash Features Page](./unleash-features.png)
+
