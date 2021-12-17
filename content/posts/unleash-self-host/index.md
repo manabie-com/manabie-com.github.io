@@ -72,7 +72,7 @@ re-download them everytime we start `minikube`.
 ```sh
     minikube start
     minikube cache add postgres:14.1-alpine3.15
-    minikube cache add unleashorg/unleash-server:4.3.1
+    minikube cache add unleashorg/unleash-server:4.4.4
     minikube cache add unleashorg/unleash-proxy:0.4.0
 ```
 
@@ -130,11 +130,13 @@ Checking the pods again
 
 ```sh
     $ kubectl get pods
-    NAME                       READY   STATUS    RESTARTS      AGE
-    unleash-77df4956fc-xnqft   2/2     Running   1 (96s ago)   97s
+    NAME                                READY   STATUS    RESTARTS      AGE
+    unleash-5584bbcb89-lkb2c            1/1     Running   1 (80s ago)   82s
+    unleash-postgres-5bd6969647-4g4sg   1/1     Running   0             82s
 ```
 
-The status is `Running` and readiness is `2/2`, so it is ready to serve requests.
+The Unleash server is deployed in pod `unleash-xxxxxxxxxx-yyyyy` (`unleash-5584bbcb89-lkb2c` in this case).
+Its status is `Running` and readiness is `1/1`, so it is ready to serve requests.
 
 To access the server, we need to expose it from within `minikube` cluster to our host machine
 by port-forwarding in a separate terminal:
@@ -173,10 +175,10 @@ token. I am adding a new API token with:
 ![API token](./unleash-api-token.png)
 
 Then, we can use the API token to make API requests to the server. In my case, my secret value is
-`*:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e`.
+`*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e`.
 
 ```sh
-    $ curl -H "Authorization: *:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e" http://localhost:4242/unleash/api/client/features
+    $ curl -H "Authorization: *:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e" http://localhost:4242/unleash/api/client/features
     {"version":2,"features":[],"query":{"environment":"development"}}
 ```
 
@@ -193,7 +195,7 @@ then press `Create`. You should see `my-feature` toggle:
 ![my-feature toggle page](./unleash-my-feature.png)
 
 ```sh
-    $ curl -H "Authorization: *:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e" http://localhost:4242/unleash/api/client/features
+    $ curl -H "Authorization: *:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e" http://localhost:4242/unleash/api/client/features
     {"version":2,"features":[{"strategies":[],"enabled":false,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
 ```
 
@@ -216,7 +218,7 @@ Then, we can enable the feature by clicking on the toggle:
 ![Enable my-feature](./unleash-enable-feature.png)
 
 ```sh
-    $ curl -H "Authorization: *:development.befaafb67fa915704e2435357a309afaf29a3a29c142d87638596e7e" http://localhost:4242/unleash/api/client/features
+    $ curl -H "Authorization: *:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e" http://localhost:4242/unleash/api/client/features
     {"version":2,"features":[{"strategies":[{"name":"default","constraints":[],"parameters":{}}],"enabled":true,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
 ```
 
@@ -239,5 +241,7 @@ would evaluate to true).
 With that in mind, let's redeploy Unleash with the proxy enabled:
 
 ```sh
-    helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml --set=unleashProxy.enabled=true
+    helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml \
+        --set=unleashProxy.enabled=true \
+        --set=unleashProxy.apiToken="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
 ```
