@@ -46,6 +46,7 @@ on and off. It would be disastrous if it does not.
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [minikube](https://minikube.sigs.k8s.io/docs/)
 - [helm](https://helm.sh/)
+- curl
 
 Using `helm` is a bit of an overkill here. However, our Manabie's CI/CD pipeline uses `helm` to deploy
 so we will use it here as well.
@@ -98,7 +99,7 @@ the output will be similar to this:
 
 #### 3. Deploying Unleash
 
-##### 1. Installation
+##### 1. Unleash server
 
 Because we have not installed anything yet, there should be nothing in the `default` namespace.
 Let's check:
@@ -148,13 +149,36 @@ Go to `http://localhost:4242/unleash` in your browser, you should see the Unleas
 
 ![Unleash Login Page](./unleash-login.png)
 
-Login with:
+Login with the default account that Unleash created for us:
 
 - Username: `admin`
-- Password: `unleash4all` (this is the default Unleash password)
+- Password: `unleash4all`
 
 then you will go to the `features` page (which is empty right now since we have not added
-any feature flags yet).
+any feature flags yet). We will add them in the next section.
 
 ![Unleash Features Page](./unleash-features.png)
 
+##### 2. Add new feature flags and test them
+
+In the Unleash features page `http://localhost:4242/unleash/features`, click on `Create feature toggle`.
+Choose:
+
+- Name: `my-first-feature`
+- Toggle type: `Release`
+- Description can be left empty
+
+then press `Create`. You should see `my-first-feature` toggle:
+
+![my-first-feature](./my-first-feature.png)
+
+By default, clients do not have access to the server since we are enabling authentication for Unleash.
+You need to follow [this guide](https://docs.getunleash.io/user_guide/api-token) to create an API
+token. I am adding a new API token with:
+
+- Username: `client`
+- Token Type: `Client`
+- Project: `ALL`
+- Environment: `default`
+
+![API token](./api-token.png)
