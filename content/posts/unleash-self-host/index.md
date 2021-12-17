@@ -178,7 +178,8 @@ Then, we can use the API token to make API requests to the server. In my case, m
 `*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e`.
 
 ```sh
-    $ curl -H "Authorization: *:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e" http://localhost:4242/unleash/api/client/features
+    $ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+    $ curl -H "Authorization: $UNLEASH_API_TOKEN" http://localhost:4242/unleash/api/client/features
     {"version":2,"features":[],"query":{"environment":"development"}}
 ```
 
@@ -195,7 +196,9 @@ then press `Create`. You should see `my-feature` toggle:
 ![my-feature toggle page](./unleash-my-feature.png)
 
 ```sh
-    $ curl -H "Authorization: *:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e" http://localhost:4242/unleash/api/client/features
+    # If you are reusing the same terminal, skip the export step
+    $ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+    $ curl -H "Authorization: $UNLEASH_API_TOKEN" http://localhost:4242/unleash/api/client/features
     {"version":2,"features":[{"strategies":[],"enabled":false,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
 ```
 
@@ -218,7 +221,8 @@ Then, we can enable the feature by clicking on the toggle:
 ![Enable my-feature](./unleash-enable-feature.png)
 
 ```sh
-    $ curl -H "Authorization: *:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e" http://localhost:4242/unleash/api/client/features
+    $ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+    $ curl -H "Authorization: $UNLEASH_API_TOKEN" http://localhost:4242/unleash/api/client/features
     {"version":2,"features":[{"strategies":[{"name":"default","constraints":[],"parameters":{}}],"enabled":true,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
 ```
 
@@ -241,7 +245,26 @@ would evaluate to true).
 With that in mind, let's redeploy Unleash with the proxy enabled:
 
 ```sh
-    helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml \
+    $ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+    $ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml \
         --set=unleashProxy.enabled=true \
-        --set=unleashProxy.apiToken="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+        --set=unleashProxy.secrets="proxy-secret" \
+        --set=unleashProxy.apiToken="$UNLEASH_API_TOKEN"
+```
+
+Here, we are using the API token created in the previous step for the proxy.
+
+The `unleashProxy.secrets` is the secret that clients use to make request to the proxy.
+
+Then port-forward from port `4243` to access the proxy:
+
+```sh
+    kubectl port-forward deploy/unleash 4243
+```
+
+then you can make request to the proxy from your machine:
+
+```sh
+    $ curl -H "Authorization: proxy-secret" http://localhost:4243/proxy
+    {"toggles":[{"name":"my-feature","enabled":true,"variant":{"name":"disabled","enabled":false}}]}
 ```
