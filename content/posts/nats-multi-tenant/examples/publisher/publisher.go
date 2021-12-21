@@ -78,7 +78,7 @@ func createStream(js nats.JetStreamContext) error {
 		_, err = js.AddStream(&nats.StreamConfig{
 			Name:      streamName,
 			Subjects:  []string{streamSubjects},
-			Retention: nats.InterestPolicy,
+			Retention: nats.LimitsPolicy,
 			MaxAge:    time.Minute * 10000,
 		})
 		if err != nil {
