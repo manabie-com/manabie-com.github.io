@@ -41,14 +41,14 @@ To create the k8s deployment, we use the command:
 
 ```
 
-With each resource, we can create a file (deployment.yaml, service.yaml, configmap.yaml, secret.yaml,...) and use the kubectl command to apply them. But we have a problem. If we work with microservices and we have multiple services => the number of yaml files is very large, and it make us difficult to manage them.
+With each resource, we can create a file (deployment.yaml, service.yaml, configmap.yaml, secret.yaml,...) and use the kubectl command to apply them. But we have a problem. If we work with microservices and we have multiple services => the number of yaml files is very large, and makes it difficult for us to manage them.
 
 We need a solution to manage all of them in a common template => Helm can solve this problem
 
-Before go to next part, you need to download and install minikube on your local device.
+Before going to next part, you need to download and install minikube on your local device.
 
 ## Introduction to helm chart
-**Helm is a tool that streamlines installing and managing Kubernetes applications.** To work with helm chart, we need to install helm command. This link is about how to install: <a>https://helm.sh/docs/intro/install</a>
+**Helm is a tool that streamlines installing and managing Kubernetes applications.** To work with helm charts, we need to install the helm command. This link is about how to install: <a>https://helm.sh/docs/intro/install</a>
 
 I will introduce you to the structure of the helm chart. To create a chart, we can use my example command:
 ```bash
@@ -56,8 +56,8 @@ I will introduce you to the structure of the helm chart. To create a chart, we c
   helm create mynginx
 
 ```
-That command will create an mynginx folder. Let take a look in mynginx folder, we have some folders and files:
-- charts: this folder will contain another subchart which our chart will depend on. I will talk more about subchart it in the next section
+That command will create a mynginx folder. Let's take a look in the mynginx folder where we have some folders and files:
+- charts: this folder will contain another subchart which our chart will depend on. I will talk more about that subchart in the next section
 - templates: this folder contains yaml files about the k8s resource. We can add more, remove or modify the files in this folder
 - Chart.yaml: this file is the description about the chart information
 - _helpers.tpl: this file defines some yaml key-value which we can import to yaml files in templates folders
@@ -105,13 +105,13 @@ Let take a look about the file template/deployments.yaml:
 
 ```
 
-This yaml file looks like the template of k8s resource. But it has some {{ }}, the statement in {{ }} can be a value, operator, expression,.... Let me explain some popular thing:
+This yaml file looks like the template of k8s resource, except we see alot of this {{ }} syntax. The statement in {{ }} can be a value, operator, expression, etc. Let me explain some popular uses:
 
-- {{ include … }}: this syntax help us to import the yaml template that is defined in file **_helpers.tpl**
-- {{ .Values.&#60;key&#62; }}: get the **value** at the position **key** of files values.yaml and fill that value to the k8s template yaml file
-- {{ -if &#60;expression &#62; }} &#60;some yaml line&#62; {{- end }}:  check if the expression return true, the &#60;some yaml line&#62; will be added to the template files
+- {{ include … }}: this syntax helps us to import the yaml template that is defined in file **_helpers.tpl**
+- {{ .Values.&#60;key&#62; }}: gets the **value** at the position **key** of files values.yaml and fill that value to the k8s template yaml file
+- {{ -if &#60;expression &#62; }} &#60;some yaml line&#62; {{- end }}: if the expression returns true, the &#60;some yaml line&#62; will be added to the template file
 - {{ with .Values.key }} {{- toYaml . }}   {{- end }}, {{- toYaml .Values.key }}: get the **value** at the position **key** of files **values.yaml** and convert it to yaml format.
-- indent &#60;n&#62;: align the format with n tabs
+- indent &#60;n&#62;: indents the content with n tabs
 - nindent &#60;n&#62;: same with indent but the yaml code is created in the new line 
 
 Look at the **_helper.tpl**, there are some basic things we need to know:
