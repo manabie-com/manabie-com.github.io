@@ -9,19 +9,27 @@ slug = "integration-test-code-coverage-in-go"
 +++
 # Test Coverage of Go Services during Integration Tests
 
-Code coverage is a handy measurement. It's useful to help know your code is being tested, which helps you to know your code is working. It can also be used as a check before github pull requests can be merged.
 
-In Golang, code coverage is easy to generate when testing packages, simply test them with `-cover` flags.
+In Golang, getting code coverage with `go test` is easy. But it's still rather hard for integration tests. 
 
-It's a bit trickier in integration tests because we have to exit all of the go services to make them generate coverage reports.
+Here I want to introduce the method we used at Manabie to collect and measure code coverage on our servers from integration tests.
 
-The steps we ended up taking to find the final percentage was to  
+## About our integration tests
+
+At Manabie we use Kubernetes for container orchestration. To perform integration tests, we deploy our services, and then run a test container with a go program with a whole lot of integration tests. 
+
+On dev environments, we start up minikube, deploy the services, and then run the test container as well. In CI, we start a vcluster instead of a minikube.
+
+Collecting coverage in this setting is a little more complicated, but doable. The main idea is to compile the services with `go test -cover` instead of `go build`, and then get the services to exit in a timely manner after testing is finished.
+
+
+What's on the agenda:
 
 Part 1:
 - compile services with `go test -c`,
 - add an http killswitch
 Part 2:
-- start test services & test them
+- run services & run tests
 - stop the services by calling the http killswitch endpoint
 Part 3:
 - collect coverage reports from containers
@@ -33,44 +41,43 @@ Part 3:
 
 We want to run our service with `go test` so we can use it's `cover` flags to enable code coverage output.
 
-To do this, we need to first create a test function that works like our main, so that we can use `go test` to run our server.
+To do this, we need to first create a test function that works like our `func main()`, so that we can use `go test` to run our server.
 
-That is to say, take:
+For example:
 
 ```go
 func main() {
-    // start the service
+    server.Run()
 }
 ```
 
-and make it:
+becomes
 
 
 ```go
-// main.go
+func run() {
+	server.Run().
+}
 
 func main() {
-    runService()
+    run()
 }
 
-func runService() {
-  // start the service.
-}
 ```
 
-```go
-// main_test.go
+so that we can write a test like this that starts the server:
 
+```go
 func TestRun(t *testing.T) {
-    runService()
+    run()
 }
 ```
 
 For the coverage to be output, TestRun function needs to finish. We can't just kill the process, or go test will not output a coverage profile.
 
-So we can set up an HTTP server, because it's really easy in Go. It will listen for a request which is our signal to let the function complete. Later, we can run curl to tell our services to stop.
+Because the service does not know when the tests are complete, we have to set up a mechanism to stop it remotely. We can set up a simple HTTP server. When it gets a request, it will gracefully terminate our service. Later, we can call it with curl.
 
-Our simple HTTP server calls a context's CancelFunc when it receives a request.
+Our Kill HTTP server calls a context's CancelFunc when it receives a request.
 
 ```go
 type killServer struct {
@@ -90,13 +97,8 @@ func newKillServer(addr string, cancel context.CancelFunc) *killServer {
 func (s *killServer) Start() {
 	s.server.Handler = s
 
-	fmt.Println("Started KillServer")
-
 	err := s.server.ListenAndServe()
-
-	if err == http.ErrServerClosed {
-		fmt.Println("KillServer Closed")
-	} else {
+	if err != nil {
 		fmt.Println("KillServer Error:", err)
 	}
 }
@@ -110,7 +112,7 @@ func (s *killServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 ```
 
-And our TestRun uses the context to exit once the context is canceled.
+Our TestRun uses the same context to run the service.
 
 ```go
 func TestRun(t *testing.T) {
@@ -126,29 +128,25 @@ func TestRun(t *testing.T) {
 }
 ```
 
-Next, we can compile the service with: `go test -c ./ -cover -covermode=count -coverpkg=./...` to create a `.test` binary, and run it with:
+To test out our killswitch locally, we can compile the service with: `go test -c ./ -cover -covermode=count -coverpkg=./...` to create a `.test` binary, and run it with:
 
 ```bash
 ./my-service.test -test.coverprofile my-service.out
-# server started...
 ```
-
-Now our server is running as it normally would, but with go's test tooling built in. All of the code it runs is counted for code coverage now.
 
 In another terminal, we run some tests and then kill it with the HTTP signal.
 
 ```bash
-./run-tests.sh
+./run-tests.sh # here we could make test calls to the server.
 
-curl localhost:19999 # kills the server in the other terminal
+curl localhost:19999 # and then kill the remote server when were done
 ```
 
-A file named `my-service.out` should be created with coverage information from our run.
+Finally, a file named `my-service.out` should be created with coverage information from our server.
 
+Using `go test -c` to build test binaries is a nice little trick I learned about recently. It plays nicely with containers too.
 
-Using `go test -c` to build test binaries is a nice little trick I learned about recently. I suppose we could accomplish the same thing by just running all our servers with the `go test` command directly, instead of compiling them into binary, but then we would need go installed in our containers.
-
-## Part 2: Running Things
+## Part 2: Running Things in Kubernetes
 
 Now that our services are built in test mode, we can add them to our Dockerfile, with a little wrapper script to restart them endlessly.
 
@@ -163,20 +161,18 @@ COPY ./server_with_restart.sh /server_with_restart.sh
 ENTRYPOINT [ "/server_with_restart.sh" ]
 ```
 
-server_with_restart.sh
 
 ```sh
 #!/bin/sh
+# server_with_restart.sh
 
 while true; do
-    echo "Test server started. Built with 'go test -cover -c'"
+    echo "Service started in coverage mode"
 
     /server.test \
         -test.coverprofile=cover.out \
-        "$@" || exit 1; # exit if process exited with error
-    
-    # Server was probably stopped by http kill signal
-    # to collect code coverage. Restart.        
+        "$@" || exit 1;
+        
     echo "Server restarting.."
 done
 ```
@@ -188,7 +184,7 @@ Now start those containers, and run your tests.
 
 Now to generate, download and merge our coverage.
 
-To trigger generation, we just have to send an HTTP request to our killserver on port 19999. Not too hard, we can just install curl in our kubernetes container, and run it from the outside with exec.
+To trigger generation, we just have to send an HTTP request to our killserver on port 19999. Not too hard, we can just install curl in our kubernetes container, and run it with:
 
 ```bash
 kubectl exec my-service -- curl -s localhost:19999
@@ -217,5 +213,6 @@ And that's it! Victory! We can see our total coverage.
 
 ### Conclusion
 
-Now our build pipeline prints out our integration test coverage percentage collected from all our go services, and combined into a final figure. For us at Manabie, we log this percentage in our CI tests, and require PRs to have at least the same percentage to be merged. This helps to ensure we don't forget to test something, and that we can trust our code to work as expected.
- 
+Now our build pipeline prints out our integration test coverage percentage collected from all our go services, and combined into a final figure. 
+
+For us at Manabie, we output this percent in our CI logs, and soon will add a rule that prevents pull requests from being mergable if they decreases this percent.
