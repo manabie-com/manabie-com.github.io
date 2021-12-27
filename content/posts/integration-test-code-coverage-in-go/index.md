@@ -4,7 +4,7 @@ author = "ds0nt"
 description = "After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure"
 title = "Test Coverage of Go Services during Integration Tests"
 categories = ["DevSecOps", "Testing"]
-tags = ["Kubernetes", "Docker", "integration-test", "Golang", "microservices", "code-coverage"]
+tags = ["Kubernetes", "Docker", "integration-test", "Golang", "microservices", "code-coverage", "gocovmerge"]
 slug = "integration-test-code-coverage-in-go"
 +++
 # Test Coverage of Go Services during Integration Tests
