@@ -1,5 +1,5 @@
 +++
-date = "2021-11-05T17:10:49+07:00"
+date = "2021-12-27T17:10:49+07:00"
 author = "ds0nt"
 description = "After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure"
 title = "Test Coverage of Go Services during Integration Tests"
