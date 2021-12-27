@@ -146,57 +146,69 @@ Finally, a file named `my-service.out` should be created with coverage informati
 
 Using `go test -c` to build test binaries is a nice little trick I learned about recently. It plays nicely with containers too.
 
-## Part 2: Running Things in Kubernetes
+## Part 2: Running in our Kubernetes Cluster
 
-Now that our services are built in test mode, we can add them to our Dockerfile, with a little wrapper script to restart them endlessly.
-
-```Dockerfile
-FROM debian
-
-WORKDIR /
-# coverage test
-COPY ./server.test /server.test
-COPY ./server_with_restart.sh /server_with_restart.sh
-
-ENTRYPOINT [ "/server_with_restart.sh" ]
-```
+Now we can add them to our Dockerfile. Also, we're going to add a little wrapper script to restart them endlessly. If we let the entrypoint process end, our container and coverage files will be deleted after the killswitch is called, which is not what we want.
 
 
 ```sh
 #!/bin/sh
 # server_with_restart.sh
 
+# this script passes arguments into server.test with
+# the addition of -test.coverprofile=cover.out
+
 while true; do
     echo "Service started in coverage mode"
-
-    /server.test \
-        -test.coverprofile=cover.out \
-        "$@" || exit 1;
+    /server.test -test.coverprofile=cover.out "$@" || exit 1;
         
     echo "Server restarting.."
 done
 ```
 
-Now start those containers, and run your tests.
+We need a Dockerfile with the `server.test` binary, `curl`, and the restart script.
 
+```Dockerfile
+FROM alpine
+
+WORKDIR /
+
+RUN apk --no-cache add curl
+
+COPY ./server_with_restart.sh /server_with_restart.sh
+COPY ./server.test /server.test
+
+ENTRYPOINT [ "/server_with_restart.sh" ]
+```
+
+Next, build the new docker image and deploy it in your kubernetes cluster, possibly with helm. Make sure you don't so override the Dockerfile's entrypoint. However, you can pass args as usual into the deployment container, which will pass into the server.test command.
+
+Next, run your tests. In our case, we built an integration testing program named `gandalf` that we run in our cluster:
+
+```
+helm install gandalf ./deployments/gandalf
+kubectl exec -it gandalf -- /gandalf-tests
+```
+
+Coverage will be recorded by the server.test.
 
 ## Part 3: Collecting Coverage
 
 Now to generate, download and merge our coverage.
 
-To trigger generation, we just have to send an HTTP request to our killserver on port 19999. Not too hard, we can just install curl in our kubernetes container, and run it with:
+To output the coverage we just have to send an HTTP request to our killserver on port 19999.
 
 ```bash
 kubectl exec my-service -- curl -s localhost:19999
 ```
 
-Then copy the file out of the container:
+Then copy the file to our local filesystem:
 
 ```bash
 kubectl exec -i my-service -- cat /cover.out > cover/my-service.out
 ```
 
-Do this for each service, and then merge the coverage profiles together.
+Do this for each service being tested, and then merge the coverage profiles together.
 
 ```bash
 go install github.com/wadey/gocovmerge@latest
@@ -209,10 +221,10 @@ go tool cover -func=cover/merged.cov | grep -E '^total\:' | sed -E 's/\s+/ /g'
 
 Note: We use a `.cov` extention on the `merged.cov` to make it easy to use `cover/*.out` in scripting.
 
-And that's it! Victory! We can see our total coverage.
+Inspect the contents of your new `merged.cov` file and try not to get drunk with power.
 
 ### Conclusion
 
 Now our build pipeline prints out our integration test coverage percentage collected from all our go services, and combined into a final figure. 
 
-For us at Manabie, we output this percent in our CI logs, and soon will add a rule that prevents pull requests from being mergable if they decreases this percent.
+For us at Manabie, we output this percent in our CI logs, and we set a rule that prevents pull requests from being mergeable if they decrease this percent.
