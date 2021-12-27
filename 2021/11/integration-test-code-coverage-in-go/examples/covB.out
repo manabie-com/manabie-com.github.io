@@ -1,0 +1,6 @@
+mode: count
+covertest/main.go:13.13,16.2 1 0
+covertest/main.go:20.14,34.2 7 1
+covertest/main.go:36.55,39.2 2 0
+covertest/main.go:41.55,46.2 4 1
+covertest/main.go:48.58,51.2 2 1
