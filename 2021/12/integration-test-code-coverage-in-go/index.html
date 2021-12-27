@@ -7,12 +7,12 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2021/12/integration-test-code-coverage-in-go/">
 <meta property="article:published_time" content="2021-12-27T17:10:49+07:00">
-<meta property="article:modified_time" content="2021-12-27T17:14:18+07:00">
+<meta property="article:modified_time" content="2021-12-27T18:23:30+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Test Coverage of Go Services during Integration Tests">
 <meta name=twitter:description content="After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure">
 <meta name=generator content="Hugo 0.91.2">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Test Coverage of Go Services during Integration Tests","url":"/2021/12/integration-test-code-coverage-in-go/","wordCount":"966","datePublished":"2021-12-27T17:10:49+07:00","dateModified":"2021-12-27T17:14:18+07:00","author":{"@type":"Person","name":"ds0nt"},"keywords":"DevSecOps, Testing, Kubernetes, Docker, integration-test, Golang, microservices, code-coverage","description":"After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Test Coverage of Go Services during Integration Tests","url":"/2021/12/integration-test-code-coverage-in-go/","wordCount":"963","datePublished":"2021-12-27T17:10:49+07:00","dateModified":"2021-12-27T18:23:30+07:00","author":{"@type":"Person","name":"ds0nt"},"keywords":"DevSecOps, Testing, Kubernetes, Docker, integration-test, Golang, microservices, code-coverage","description":"After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure"}</script>
 <link rel=canonical href=/2021/12/integration-test-code-coverage-in-go/>
 <title>Test Coverage of Go Services during Integration Tests | Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -56,15 +56,19 @@ in
 <p>At Manabie we use Kubernetes for container orchestration. To perform integration tests, we deploy our services, and then run a test container with a go program with a whole lot of integration tests.</p>
 <p>On dev environments, we start up minikube, deploy the services, and then run the test container as well. In CI, we start a vcluster instead of a minikube.</p>
 <p>Collecting coverage in this setting is a little more complicated, but doable. The main idea is to compile the services with <code>go test -cover</code> instead of <code>go build</code>, and then get the services to exit in a timely manner after testing is finished.</p>
-<p>What&rsquo;s on the agenda:</p>
+<p><strong>What&rsquo;s Coming Up</strong></p>
 <p>Part 1:</p>
 <ul>
 <li>compile services with <code>go test -c</code>,</li>
-<li>add an http killswitch
-Part 2:</li>
+<li>add an http killswitch</li>
+</ul>
+<p>Part 2:</p>
+<ul>
 <li>run services & run tests</li>
-<li>stop the services by calling the http killswitch endpoint
-Part 3:</li>
+<li>stop the services by calling the http killswitch endpoint</li>
+</ul>
+<p>Part 3:</p>
+<ul>
 <li>collect coverage reports from containers</li>
 <li>merge them with gocovmerge.</li>
 <li>get a code coverage percent.
@@ -79,20 +83,19 @@ Conclusion & Example code</li>
 }
 </code></pre></div><p>becomes</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>run</span>() {
-	<span style=color:#a6e22e>server</span>.<span style=color:#a6e22e>Run</span>().
+	<span style=color:#a6e22e>server</span>.<span style=color:#a6e22e>Run</span>()
 }
 
 <span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
     <span style=color:#a6e22e>run</span>()
 }
-
 </code></pre></div><p>so that we can write a test like this that starts the server:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>TestRun</span>(<span style=color:#a6e22e>t</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>T</span>) {
     <span style=color:#a6e22e>run</span>()
 }
-</code></pre></div><p>For the coverage to be output, TestRun function needs to finish. We can&rsquo;t just kill the process, or go test will not output a coverage profile.</p>
+</code></pre></div><p>For the coverage to be output, <code>TestRun</code> function needs to finish. We can&rsquo;t just kill the process, or go test will not output a coverage profile.</p>
 <p>Because the service does not know when the tests are complete, we have to set up a mechanism to stop it remotely. We can set up a simple HTTP server. When it gets a request, it will gracefully terminate our service. Later, we can call it with curl.</p>
-<p>Our Kill HTTP server calls a context&rsquo;s CancelFunc when it receives a request.</p>
+<p>Our Kill HTTP server calls a context&rsquo;s <code>CancelFunc</code> when it receives a request.</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>killServer</span> <span style=color:#66d9ef>struct</span> {
 	<span style=color:#a6e22e>server</span> <span style=color:#a6e22e>http</span>.<span style=color:#a6e22e>Server</span>
 	<span style=color:#a6e22e>cancel</span> <span style=color:#a6e22e>context</span>.<span style=color:#a6e22e>CancelFunc</span>
@@ -191,7 +194,7 @@ go tool cover -func<span style=color:#f92672>=</span>cover/merged.cov | grep -E 
 <h3 id=conclusion>Conclusion</h3>
 <p>Now our build pipeline prints out our integration test coverage percent collected from all our go services, and combined into a final figure.</p>
 <p>For us at Manabie, we output this percent in our CI logs, and we set a rule that prevents pull requests from being mergeable if they decrease this percent.</p>
-<p><a href=https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples/README.md>Small Proof of Concept Code</a></p>
+<p><a href=https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples>Example on Github</a></p>
 <hr>
 <footer>
 <div class=meta_item>
