@@ -34,7 +34,8 @@ Part 2:
 Part 3:
 - collect coverage reports from containers
 - merge them with gocovmerge.
-- get a shiny code coverage percentage.
+- get a code coverage percent.
+Conclusion & Example code
 
 
 ## Part I: Compiling services with go test instrumentation
@@ -225,6 +226,8 @@ Inspect the contents of your new `merged.cov` file and try not to get drunk with
 
 ### Conclusion
 
-Now our build pipeline prints out our integration test coverage percentage collected from all our go services, and combined into a final figure. 
+Now our build pipeline prints out our integration test coverage percent collected from all our go services, and combined into a final figure. 
 
 For us at Manabie, we output this percent in our CI logs, and we set a rule that prevents pull requests from being mergeable if they decrease this percent.
+
+[Small Proof of Concept Code](https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples/README.md)
