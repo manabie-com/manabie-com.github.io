@@ -6,7 +6,7 @@
 <meta property="og:description" content="Sharing the humble technical knowledge we're using to improve education">
 <meta property="og:type" content="website">
 <meta property="og:url" content="/categories/devsecops/">
-<meta property="og:updated_time" content="2021-12-27T16:37:12+07:00">
+<meta property="og:updated_time" content="2021-12-13T14:42:05+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="DevSecOps">
 <meta name=twitter:description content="Sharing the humble technical knowledge we're using to improve education">
@@ -64,21 +64,17 @@ We write test to make sure our code work as expected, no matter that a Go code o
 </article>
 <article class=blog-post>
 <header>
-<h2 class=blog-post-title dir=auto><a href=/2021/11/integration-test-code-coverage-in-go/>Test Coverage of Go Services during Integration Tests</a></h2>
-<p class=blog-post-meta><time datetime=2021-11-05T17:10:49+07:00>Fri Nov 05, 2021</time> by ds0nt in
+<h2 class=blog-post-title dir=auto><a href=/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/>Snapshot test your Postgresql in Golang pgx driver</a></h2>
+<p class=blog-post-meta><time datetime=2021-10-20T14:28:23+07:00>Wed Oct 20, 2021</time> by nvcnvn in
 <span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/testing/ rel="category tag">Testing</a>
-<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/kubernetes/ rel=tag>Kubernetes</a>, <a href=/tags/docker/ rel=tag>Docker</a>, <a href=/tags/integration-test/ rel=tag>integration-test</a>, <a href=/tags/golang/ rel=tag>Golang</a>, <a href=/tags/microservices/ rel=tag>microservices</a>, <a href=/tags/code-coverage/ rel=tag>code-coverage</a>
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/postgresql/ rel=tag>Postgresql</a>, <a href=/tags/unit-test/ rel=tag>unit-test</a>, <a href=/tags/golang/ rel=tag>Golang</a>
 </p>
 </header>
-Test Coverage of Go Services during Integration Tests In Golang, getting code coverage with go test is easy. But it&rsquo;s still rather hard for integration tests.
-Here I want to introduce the method we used at Manabie to collect and measure code coverage on our servers from integration tests.
-About our integration tests At Manabie we use Kubernetes for container orchestration. To perform integration tests, we deploy our services, and then run a test container with a go program with a whole lot of integration tests.
-<a href=/2021/11/integration-test-code-coverage-in-go/>Read more →</a>
+If your unit-test understand SQL syntax, you can cover many behaviors of your code without the need of starting a real DB. Want to understand Postgresql syntax? just simply import Postgresql parser to your program, https://github.com/pganalyze/pg_query_go helps you to do that.
+How about using a containerized DB? Sometimes, the repository layer doesn&rsquo;t have much logic (maybe concat some WHERE conditions), only propagate the SQL statement to DB.
+Testing with a simple containerized DB is a good option where you can:
+<a href=/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/>Read more →</a>
 </article>
-<nav class=blog-pagination>
-<a class="btn btn-outline-primary disabled" href=# role=button aria-disabled=true>Previous page</a>
-<a class="btn btn-outline-primary" href=/categories/devsecops/page/2/ rel=next role=button>Next page</a>
-</nav>
 </div>
 <aside class="col-sm-3 ml-auto blog-sidebar">
 <section class=sidebar-module>
