@@ -23,14 +23,16 @@ On dev environments, we start up minikube, deploy the services, and then run the
 Collecting coverage in this setting is a little more complicated, but doable. The main idea is to compile the services with `go test -cover` instead of `go build`, and then get the services to exit in a timely manner after testing is finished.
 
 
-What's on the agenda:
+**What's Coming Up**
 
 Part 1:
 - compile services with `go test -c`,
 - add an http killswitch
+
 Part 2:
 - run services & run tests
 - stop the services by calling the http killswitch endpoint
+
 Part 3:
 - collect coverage reports from containers
 - merge them with gocovmerge.
@@ -57,13 +59,12 @@ becomes
 
 ```go
 func run() {
-	server.Run().
+	server.Run()
 }
 
 func main() {
     run()
 }
-
 ```
 
 so that we can write a test like this that starts the server:
@@ -74,11 +75,11 @@ func TestRun(t *testing.T) {
 }
 ```
 
-For the coverage to be output, TestRun function needs to finish. We can't just kill the process, or go test will not output a coverage profile.
+For the coverage to be output, `TestRun` function needs to finish. We can't just kill the process, or go test will not output a coverage profile.
 
 Because the service does not know when the tests are complete, we have to set up a mechanism to stop it remotely. We can set up a simple HTTP server. When it gets a request, it will gracefully terminate our service. Later, we can call it with curl.
 
-Our Kill HTTP server calls a context's CancelFunc when it receives a request.
+Our Kill HTTP server calls a context's `CancelFunc` when it receives a request.
 
 ```go
 type killServer struct {
@@ -230,4 +231,4 @@ Now our build pipeline prints out our integration test coverage percent collecte
 
 For us at Manabie, we output this percent in our CI logs, and we set a rule that prevents pull requests from being mergeable if they decrease this percent.
 
-[Small Proof of Concept Code](https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples/README.md)
+[Example on Github](https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples)
