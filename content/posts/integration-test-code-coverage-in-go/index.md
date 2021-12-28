@@ -12,7 +12,7 @@ slug = "integration-test-code-coverage-in-go"
 
 In Golang, getting code coverage with `go test` is easy. But it's still rather hard for integration tests. 
 
-Here I want to introduce the method we used at Manabie to collect and measure code coverage on our servers from integration tests.
+Here I want to introduce the method we used at Manabie to measure the code covered by our *integration* tests across many microservices.
 
 ## About our integration tests
 
@@ -37,7 +37,8 @@ Part 3:
 - collect coverage reports from containers
 - merge them with gocovmerge.
 - get a code coverage percent.
-Conclusion & Example code
+
+Conclusion & [Example Code](https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples)
 
 
 ## Part I: Compiling services with go test instrumentation
