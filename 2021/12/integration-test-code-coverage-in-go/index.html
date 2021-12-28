@@ -7,12 +7,12 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2021/12/integration-test-code-coverage-in-go/">
 <meta property="article:published_time" content="2021-12-27T17:10:49+07:00">
-<meta property="article:modified_time" content="2021-12-27T18:23:30+07:00">
+<meta property="article:modified_time" content="2021-12-28T09:37:41+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Test Coverage of Go Services during Integration Tests">
 <meta name=twitter:description content="After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure">
 <meta name=generator content="Hugo 0.91.2">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Test Coverage of Go Services during Integration Tests","url":"/2021/12/integration-test-code-coverage-in-go/","wordCount":"963","datePublished":"2021-12-27T17:10:49+07:00","dateModified":"2021-12-27T18:23:30+07:00","author":{"@type":"Person","name":"ds0nt"},"keywords":"DevSecOps, Testing, Kubernetes, Docker, integration-test, Golang, microservices, code-coverage","description":"After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Test Coverage of Go Services during Integration Tests","url":"/2021/12/integration-test-code-coverage-in-go/","wordCount":"963","datePublished":"2021-12-27T17:10:49+07:00","dateModified":"2021-12-28T09:37:41+07:00","author":{"@type":"Person","name":"ds0nt"},"keywords":"DevSecOps, Testing, Kubernetes, Docker, integration-test, Golang, microservices, code-coverage","description":"After we build our microservices to collect code coverage and run integration tests on them, we merge our code coverage from the kubernetes containers to get a final coverage figure"}</script>
 <link rel=canonical href=/2021/12/integration-test-code-coverage-in-go/>
 <title>Test Coverage of Go Services during Integration Tests | Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -51,7 +51,7 @@ in
 </header>
 <h1 id=test-coverage-of-go-services-during-integration-tests>Test Coverage of Go Services during Integration Tests</h1>
 <p>In Golang, getting code coverage with <code>go test</code> is easy. But it&rsquo;s still rather hard for integration tests.</p>
-<p>Here I want to introduce the method we used at Manabie to collect and measure code coverage on our servers from integration tests.</p>
+<p>Here I want to introduce the method we used at Manabie to measure the code covered by our <em>integration</em> tests across many microservices.</p>
 <h2 id=about-our-integration-tests>About our integration tests</h2>
 <p>At Manabie we use Kubernetes for container orchestration. To perform integration tests, we deploy our services, and then run a test container with a go program with a whole lot of integration tests.</p>
 <p>On dev environments, we start up minikube, deploy the services, and then run the test container as well. In CI, we start a vcluster instead of a minikube.</p>
@@ -71,9 +71,9 @@ in
 <ul>
 <li>collect coverage reports from containers</li>
 <li>merge them with gocovmerge.</li>
-<li>get a code coverage percent.
-Conclusion & Example code</li>
+<li>get a code coverage percent.</li>
 </ul>
+<p>Conclusion & <a href=https://github.com/manabie-com/manabie-com.github.io/blob/main/content/posts/integration-test-code-coverage-in-go/examples>Example Code</a></p>
 <h2 id=part-i-compiling-services-with-go-test-instrumentation>Part I: Compiling services with go test instrumentation</h2>
 <p>We want to run our service with <code>go test</code> so we can use it&rsquo;s <code>cover</code> flags to enable code coverage output.</p>
 <p>To do this, we need to first create a test function that works like our <code>func main()</code>, so that we can use <code>go test</code> to run our server.</p>
