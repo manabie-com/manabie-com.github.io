@@ -100,9 +100,7 @@ run-test:
 - If you see the following log after running the above command. You succeeded.
 
 ```
-flutter_android_docker_flutter-app_1 exited with code 0
-Aborting on container exit...
-Stopping flutter_android_docker_android-emulator_1 ... done
+All tests passed!
 ```
 
 ## Summary:
