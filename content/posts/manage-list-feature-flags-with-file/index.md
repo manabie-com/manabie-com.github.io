@@ -223,5 +223,5 @@ List of environment
 ![List of environments](./images/environments.png)
 
 #### Conclusion
-Above, I introduced how to create a list of feature toggles in Unleash using YAML file( can also use JSON file). This approach makes it possible for our developers to manage the list of feature flags in our source code.
+Overall, I introduced how to create a list of feature toggles in Unleash using YAML file( can also use JSON file). This approach makes it possible for our developers to manage the list of feature flags in our source code.
 You can read more about import and export in Unleash [here](https://docs.getunleash.io/deploy/import_export)
