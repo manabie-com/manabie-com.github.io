@@ -14,7 +14,7 @@ Feature toggle (Feature flag) is a technique that allows you to disable some fun
 #### What is Unleash?
 [Unleash](https://docs.getunleash.io/) is a feature toggle system, that gives you a great overview of all feature toggles across all your applications and services. It comes with official client implementations for Java, Node.js, Go, Ruby, Python and .Net.
 #### Why do we use file to create feature flags instead of Admin UI?
-In Manabie, we manage the addition and removal of feature flags with pull request, so we need a solution to manage the list of feature flags by file. Developers can see and change the list of feature flags by modifying this file, done't need to access the admin page. The list of feature flags will be updated after we deploy new code backend.
+In Manabie, we manage the addition and removal of feature flags with pull request, so we need a solution to manage the list of feature flags by file. Developers can see and change the list of feature flags by modifying this file, don't need to access the admin page. The list of feature flags will be updated after we deploy new code backend.
 #### How to use file to manage list of feature flags in Unleash?
 To run Unleash locally, we need:
 * [Node.js](https://nodejs.org/en/download/) (version 14 or later)
