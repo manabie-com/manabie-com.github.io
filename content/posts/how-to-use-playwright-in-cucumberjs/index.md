@@ -1,17 +1,18 @@
 +++
-date = ""
+date = "2021-12-29T10:45:33Z"
 author = "nploi"
-description = "How to use Playwright in cucumberjs"
+description = "This tutorial helps you run web automation tests, using Playwright in Cucumber."
 title = "How to use Playwright in cucumberjs"
 categories = ["DevSecOps", "Testing"]
 tags = ["bdd", "end-to-end", "cucumber", "automation", "test"]
 slug = "how-to-use-playwright-in-cucumberjs"
 +++
 
-This tutorial helps you run `web` automation tests by using Playwright in Cucumber.
+In our previous blog article [HERE](https://blog.manabie.io/2021/12/why-we-use-cucumber-for-end-to-end-testing/), we explained why we're using Cucumber for E2E test at Manabie, and provided a brief understanding about Cucumber.
 
-Before begin, we will give a brief introduction to Cucumber and Playwright.
+This time, let's dive a little bit deeper!
 
+Before we start, let's cover a brief introduction to Cucumber again, and afterward, about Playwright.
 ### [Cucumber](https://cucumber.io/)
 
 Cucumber is a tool that supports [Behaviour-Driven Development](https://cucumber.io/docs/bdd)(BDD), If you’re new to Behaviour-Driven Development read [BDD introduction](https://cucumber.io/docs/bdd/) first.
@@ -40,8 +41,6 @@ There are a few secondary keywords as well:
 - `|` (Data Tables)
 - `@` (Tags)
 - `#` (Comments)
-
-See [this one](https://blog.manabie.io/2021/12/why-we-use-cucumber-for-end-to-end-testing/), if you want know why we use Cucumber.
 
 ### [Playwright](https://github.com/microsoft/playwright)
 
@@ -149,7 +148,10 @@ Playwright is built to automate the broad and growing set of web browser capabil
         ```
 
 ### Conclusion
-Cucumber and Playwright is great framework. I hope this article will be of some use to you. [Here is source code](/content/posts/how-to-use-playwright-in-cucumberjs/example), thank you.
+
+Cucumber and Playwright are great frameworks. I hope this article will be of some use to you. [Here is source code](/content/posts/how-to-use-playwright-in-cucumberjs/example), thank you.
+
+Curious for more about how we're tackling testing problems at Manabie? Join us as an Engineer [HERE](https://manabie.breezy.hr/), or follow our blog for future articles.
 
 ### References
 
