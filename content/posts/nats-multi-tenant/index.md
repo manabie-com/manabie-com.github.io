@@ -92,14 +92,14 @@ of services that must work together to provide some functionality.
 
 ##### **Permission**
 
-NATS has concept [widlcard subject](https://docs.nats.io/nats-concepts/subjects#wildcards) will use a lot in our example, 
+NATS has concept [wildcard subject](https://docs.nats.io/nats-concepts/subjects#wildcards) will use a lot in our example, 
 so you should understand this concept before going next.
 
 Another concept is [Jetstream wire API Reference](https://docs.nats.io/reference/reference-protocols/nats_api_reference), 
 you can easily interact with the Jetstream infrastructure programmatically.
 
 In [permissions](https://docs.nats.io/running-a-nats-service/configuration/securing_nats/authorization#permission-map) 
-above we have two section *publish* and *subscribe*. 
+above we have two sections *publish* and *subscribe*. 
 * **Publish** consist of subject, list of subjects, API reference the user can publish. All users 
 need to have `$JS.API.INFO` permission, because this API allow user can send others API to NATS server.
 
@@ -166,7 +166,7 @@ and processing messages with subject `student.Created`. Go to consumer folder th
 2021/12/14 15:26:15 Student with StudentID:3 has been processed
 ```
 
-* What's happen when Tom don't have permission to ack messages? Let's test. We will remove `$JS.ACK.student.>` in user 
+* What's happen when Tom doesn't have permission to ack messages? Let's test. We will remove `$JS.ACK.student.>` in user 
 Tom. Then restart NATS server. As expected, Tom doesn't have permission to ack messages
 
 The logs in consumer will look like that.
@@ -285,7 +285,7 @@ Then we run command `nats server report accounts --json`, the result:
 ]
 ```
 You can see the result above, we have an account A and three users (Admin, Bob, Tom) are connecting to NATS. NATS say 
-`solating them from clients in other accounts`, so we can test by add account **B** in our configuration then connect NATS-box 
+`isolating them from clients in other accounts`, so we can test by add account **B** in our configuration then connect NATS-box 
 by **AdminB** then run `nats server report accounts --json`. 
 
 #### **Summary**
