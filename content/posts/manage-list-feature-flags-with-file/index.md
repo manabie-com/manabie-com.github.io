@@ -198,7 +198,9 @@ featureEnvironments:
 ```
 In this file, we have: 
 
-`features`: list of [feature toggles](https://docs.getunleash.io/user_guide/create_feature_toggle), a feature toggle includes *description*, *type*,[*variants*](https://docs.getunleash.io/advanced/toggle_variants) .... In this example, there are 2 feature toggles *feature_xxxx_v1* and *feature_yyyyy_v1*
+`features`: list of [feature toggles](https://docs.getunleash.io/user_guide/create_feature_toggle), a feature toggle includes *description*, *type*,[*variants*](https://docs.getunleash.io/advanced/toggle_variants).... If a toggle has *variants*, then the *variants* object can also contain an optional payload property. The payload will contain data about the variant's payload: what type it is, and what the content is.  In this example, there are 2 feature toggles *feature_xxxx_v1* and *feature_yyyyy_v1*.
+
+Note: *Unleash uses a fallback variant called "disabled" to indicate that a toggle has no variants. However, you are free to create a variant called "disabled" yourself. In that case you can tell them apart by checking the variant's enabled property: if the toggle has no variants, enabled will be false. If the toggle is the "disabled" variant that you created, it will have enabled set to true.*
 
 `strategies`: you can define your list of custom [*strategies*](https://docs.getunleash.io/user_guide/activation_strategy). Unleash comes with a few common activation strategies. Some of them require the client to provide the unleash-context, which gives the necessary context for Unleash.In this example, I create a strategy named *strategy_organization*
 
