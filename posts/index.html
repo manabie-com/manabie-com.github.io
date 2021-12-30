@@ -6,12 +6,12 @@
 <meta property="og:description" content="Sharing the humble technical knowledge we're using to improve education">
 <meta property="og:type" content="website">
 <meta property="og:url" content="/posts/">
-<meta property="og:updated_time" content="2021-12-28T09:37:41+07:00">
+<meta property="og:updated_time" content="2021-12-29T17:46:06+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Posts">
 <meta name=twitter:description content="Sharing the humble technical knowledge we're using to improve education">
 <meta name=generator content="Hugo 0.91.2">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"Blog","headline":"Manabie Tech Blog","url":"/posts/","author":{"@type":"Person","name":null},"dateModified":"2021-12-27T17:10:49+07:00","keywords":"ds0nt, nvcnvn, vctqs1, devsecops, infrastructure, security, testing, acme, automation, bdd, cert-manager, code-coverage, coredns, cucumber, docker, end-to-end, golang, http-01, integration-test, k8s, kubernetes, microservices, postgresql, test, unit-test","description":"Sharing the humble technical knowledge we're using to improve education"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"Blog","headline":"Manabie Tech Blog","url":"/posts/","author":{"@type":"Person","name":null},"dateModified":"2021-12-29T10:45:33+00:00","keywords":"ds0nt, nploi, nvcnvn, vctqs1, devsecops, infrastructure, security, testing, acme, automation, bdd, cert-manager, code-coverage, coredns, cucumber, docker, end-to-end, golang, http-01, integration-test, k8s, kubernetes, microservices, postgresql, test, unit-test","description":"Sharing the humble technical knowledge we're using to improve education"}</script>
 <link rel=canonical href=/posts/>
 <title>Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -42,6 +42,21 @@
 <div class="col-sm-8 blog-main">
 <article class=blog-post>
 <header>
+<h2 class=blog-post-title dir=auto><a href=/2021/12/how-to-use-playwright-in-cucumberjs/>How to use Playwright in cucumberjs</a></h2>
+<p class=blog-post-meta><time datetime=2021-12-29T10:45:33Z>Wed Dec 29, 2021</time> by nploi in
+<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/testing/ rel="category tag">Testing</a>
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/bdd/ rel=tag>bdd</a>, <a href=/tags/end-to-end/ rel=tag>end-to-end</a>, <a href=/tags/cucumber/ rel=tag>cucumber</a>, <a href=/tags/automation/ rel=tag>automation</a>, <a href=/tags/test/ rel=tag>test</a>
+</p>
+</header>
+In our previous blog article HERE, we explained why we&rsquo;re using Cucumber for E2E test at Manabie, and provided a brief understanding about Cucumber.
+This time, let&rsquo;s dive a little bit deeper!
+Before we start, let&rsquo;s cover a brief introduction to Cucumber again, and afterward, about Playwright.
+Cucumber Cucumber is a tool that supports Behaviour-Driven Development(BDD), If you’re new to Behaviour-Driven Development read BDD introduction first.
+Cucumberjs is an open-source software testing tool written in Javascript, while the tests are written in Gherkin, a non-technical and human-readable language.
+<a href=/2021/12/how-to-use-playwright-in-cucumberjs/>Read more →</a>
+</article>
+<article class=blog-post>
+<header>
 <h2 class=blog-post-title dir=auto><a href=/2021/12/integration-test-code-coverage-in-go/>Test Coverage of Go Services during Integration Tests</a></h2>
 <p class=blog-post-meta><time datetime=2021-12-27T17:10:49+07:00>Mon Dec 27, 2021</time> by ds0nt in
 <span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/testing/ rel="category tag">Testing</a>
@@ -65,17 +80,6 @@ Why we use Cucumber for end-to-end testing? Before getting to know why we use cu
 What is End to end testing? End to end testing (E2E testing) is a software testing method that validates the entire software. From the beginning to the end.
 The purpose of end-to-end testing is to simulate how a real user interacts with the application, list out the scenarios, and test the whole software for dependencies, data integrity and communication with other systems, interfaces, network connectivity and databases to exercise complete production like scenario.
 <a href=/2021/12/why-we-use-cucumber-for-end-to-end-testing/>Read more →</a>
-</article>
-<article class=blog-post>
-<header>
-<h2 class=blog-post-title dir=auto><a href=/2021/11/simulate-https-certificates-acme-k8s/>Simulate Let’s Encrypt certificate issuing in local Kubernetes</a></h2>
-<p class=blog-post-meta><time datetime=2021-11-23T14:28:23+07:00>Tue Nov 23, 2021</time> by nvcnvn in
-<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/infrastructure/ rel="category tag">Infrastructure</a>, <a href=/categories/security/ rel="category tag">Security</a>
-<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/cert-manager/ rel=tag>cert-manager</a>, <a href=/tags/coredns/ rel=tag>CoreDNS</a>, <a href=/tags/acme/ rel=tag>acme</a>, <a href=/tags/http-01/ rel=tag>http-01</a>
-</p>
-</header>
-We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS certificate issue flow to allow our Platform engineers to test their config and allow our Front-end engineers to connect their application to local server with a self-signed HTTPS certificate.
-<a href=/2021/11/simulate-https-certificates-acme-k8s/>Read more →</a>
 </article>
 <nav class=blog-pagination>
 <a class="btn btn-outline-primary disabled" href=# role=button aria-disabled=true>Previous page</a>
