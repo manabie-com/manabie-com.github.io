@@ -31,7 +31,7 @@ slug = "running-flutter-integration-tests-in-docker"
     - Allowing you to find and run the right version of the Emulator without the headache of dependency management, which makes it easy to scale automated tests as part of a CI/CD system without the upkeep cost of a physical device farm
     - https://github.com/google/android-emulator-container-scripts
 
-## The criteria that we use Docker for running automation tests
+## Why we use Docker to run automation tests
 
 - Scaling tests:
     - Docker provides the ability to package and run an application in a loosely isolated environment, so we can run multiple e2e tests parallel.
