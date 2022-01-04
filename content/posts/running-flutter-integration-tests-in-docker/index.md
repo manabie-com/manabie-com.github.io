@@ -39,7 +39,7 @@ slug = "running-flutter-integration-tests-in-docker"
 - Reusing:
     - Our Dockerfile file and docker-compose.yml file is simple because of reusing container from the community.
 
-- Consistent:
+- Consistency:
     - Allowing developers to work in standardized environments using local containers which provide applications and services
 
 - Responsive:
@@ -64,7 +64,7 @@ WORKDIR /project
 COPY . .
 ```
 
-- To run the Flutter integration test we need a process for Android Emulator and a process for Flutter drive. That is why we have 2 services is `flutter-app` and `android-emulator` in `docker-compose.yml` file.
+- To run the Flutter integration test we need a process for Android Emulator and a process for Flutter drive. That is why we have 2 services: `flutter-app` and `android-emulator` in `docker-compose.yml` file.
 ```
 version: "3.9"
 services:
@@ -80,9 +80,9 @@ services:
     command: make run-test
 ```
 
-- But `flutter-app` and `android-emulator` are services separately. It means they are not the same network, so we need to connect `flutter-app` to `android-emulator` by the following command: `adb connect android-emulator:5555`. Reference: https://developer.android.com/studio/command-line/adb#wireless
+- But `flutter-app` and `android-emulator` are 2 separate services. It means they are not the same network, so we need to connect `flutter-app` to `android-emulator` by the following command: `adb connect android-emulator:5555`. Reference: https://developer.android.com/studio/command-line/adb#wireless
 
-- After `flutter-app` connects to `android-emulator`, we can run the Flutter integration tests with `flutter drive` command. We combine connect emulator script and flutter drive script in `run-test` command in `Makefile`.
+- After `flutter-app` connected to `android-emulator`, we can run the Flutter integration tests with `flutter drive` command. We combine connect emulator script and flutter drive script in `run-test` command in `Makefile`.
 ```
 run-test:
 	sleep 10
@@ -104,9 +104,9 @@ All tests passed!
 ```
 
 ## Summary:
-- Using docker for automation tests is used widely in the software industry, not only Mobile field.
-- With Docker's ability, scaling tests are easier and faster, helping us detect breakings and bugs quickly to fix and maintain.
-- Maybe you have a question that almost all mobile developers use macOS to work. How can run the automation tests on macOS before shipping the source code to the cloud?
+- Using docker for automation tests is being used widely in the software industry, not only Mobile field.
+- With Docker's ability, scaling tests is far easier and faster, helping us to detect breakings and bugs quickly to fix and maintain.
+- Maybe you have the same question as almost all mobile developers who're using macOS to work. How can we run the automation tests on macOS before shipping the source code to the cloud?
     1. We can't run `android-emulator x64` container on macOS because the macOS doesn't have KVM.
     2. Actually, we can run `android-emulator arm` with `-no-accel` but the performance is very bad => can't use on Intel chip macOS
     3. Running `android-emulator arm` on ARM chip macOS:
