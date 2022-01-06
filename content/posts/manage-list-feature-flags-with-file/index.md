@@ -8,13 +8,15 @@ tags = ["Feature toggle", "Unleash", "Node.js"]
 slug = "manage-list-flags-with-file"
 +++
 
-In this blog, we will learn how to create a list of feature toggles in Unleash using file. First, let's learn some concept of feature toggle and Unleash 
+Have you ever struggle having an overview of the feature toggles across your services and applications, especially when you have a lot on the table? We've been there before!
+In this blog, let's learn how to create a list of feature toggles in Unleash using file.
+But first, let's learn some concept of feature toggle and Unleash
 #### What is feature toggle (feature flag)?
 Feature toggle (Feature flag) is a technique that allows you to disable some functionality of your application, through settings, without having to deploy new code.
 #### What is Unleash?
 [Unleash](https://docs.getunleash.io/) is a feature toggle system, that gives you a great overview of all feature toggles across all your applications and services. It comes with official client implementations for Java, Node.js, Go, Ruby, Python and .Net.
-#### Why do we use file to create feature flags instead of Admin UI?
-In Manabie, we manage the addition and removal of feature flags with pull request, so we need a solution to manage the list of feature flags by file. Developers can see and change the list of feature flags by modifying this file, don't need to access the admin page. The list of feature flags will be updated after we deploy new code backend.
+#### Why we use file to create feature flags instead of Admin UI?
+At Manabie, we manage the addition and removal of feature flags with pull request, so we need a solution to manage the list of feature flags by file. Developers can see and change the list of feature flags by modifying this file, don't need to access the admin page. The list of feature flags will be updated after we deploy new backend code.
 #### How to use file to manage list of feature flags in Unleash?
 To run Unleash locally, we need:
 * [Node.js](https://nodejs.org/en/download/) (version 14 or later)
@@ -59,7 +61,7 @@ Once the Unleash server has started, you will see the message:
 ```bash
 Unleash started on http://localhost:4242
 ```
-The first time Unleash starts it will create a default user which you can use to sign-in to you Unleash instance and add more users with:
+The first time Unleash starts, it will create a default user which you can use to sign-in to you Unleash instance and add more users with:
 * username: `admin`
 * password: `unleash4all`
 
@@ -204,7 +206,7 @@ Note: *Unleash uses a fallback variant called "disabled" to indicate that a togg
 
 `strategies`: you can define your list of custom [*strategies*](https://docs.getunleash.io/user_guide/activation_strategy). Unleash comes with a few common activation strategies. Some of them require the client to provide the unleash-context, which gives the necessary context for Unleash.In this example, I create a strategy named *strategy_organization*
 
-`environments`: list of custom [*environments*](https://docs.getunleash.io/user_guide/environments).Environments is a new way to organize activation strategy configurations for feature toggles into separate environments. In Unleash, a feature lives across all your environments — after all, the goal is to get the new feature released as soon as possible — but it makes sense to configure the activation differently per environment.(Environments are available in Unleash v4.3.x and later)
+`environments`: list of custom [*environments*](https://docs.getunleash.io/user_guide/environments).Environments is a new way to organize activation strategy configurations for feature toggles into separate environments. In Unleash, a feature lives across all your environments — after all, the goal is to get the new feature released as soon as possible — but it make sense to configure the activation differently per environment.(Environments are available in Unleash v4.3.x and later)
 
 `featureStrategies`: relationship between your custom feature flags, strategies, and environments.
 
@@ -225,5 +227,6 @@ List of environment
 ![List of environments](./images/environments.png)
 
 #### Conclusion
-Overall, I introduced how to create a list of feature toggles in Unleash using YAML file( can also use JSON file). This approach makes it possible for our developers to manage the list of feature flags in our source code.
+And that's all for now!
+I just introduced about how to create a list of feature toggles in Unleash using YAML file( can also use JSON file). This approach makes it possible for our developers to manage the list of feature flags in our source code.
 You can read more about import and export in Unleash [here](https://docs.getunleash.io/deploy/import_export)
