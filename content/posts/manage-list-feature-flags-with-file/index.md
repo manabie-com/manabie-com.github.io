@@ -1,5 +1,5 @@
 +++
-date = "2021-12-29T14:28:23+07:00"
+date = "2022-01-13T14:28:23+07:00"
 author = "nhattien.ho"
 description = "Manage list feature flags with file yaml/json."
 title = "Create feature flags using file in Unleash"
