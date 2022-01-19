@@ -1,5 +1,5 @@
 +++
-date = "2021-12-17T21:24:00+07:00"
+date = "2022-01-18T21:24:00+07:00"
 author = "anhpngt"
 description = "Self-hosting Unleash with Kubernetes"
 title = "Self-hosting Unleash with Kubernetes"
@@ -53,7 +53,26 @@ so we will use it here as well.
 
 For this guide, I am using the following versions
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d version >}}
+```shell
+$ kubectl version -o yaml
+clientVersion:
+  buildDate: "2021-12-07T18:16:20Z"
+  compiler: gc
+  gitCommit: ab69524f795c42094a6630298ff53f3c3ebab7f4
+  gitTreeState: clean
+  gitVersion: v1.23.0
+  goVersion: go1.17.3
+  major: "1"
+  minor: "23"
+  platform: linux/amd64
+
+$ minikube version
+minikube version: v1.24.0
+commit: 76b94fb3c4e8ac5062daf70d60cf03ddcc0a741b
+
+$ helm version
+version.BuildInfo{Version:"v3.7.1", GitCommit:"1d11fcb5d3f3bf00dbe6fe31b8412839a96b3dc4", GitTreeState:"clean", GoVersion:"go1.16.9"}
+```
 
 The versioning requirements are not strict. However, if you encounter any strange errors, you can
 try installing the listed versions first.
@@ -62,16 +81,40 @@ try installing the listed versions first.
 
 First, clone the example from Github repository:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d clone >}}
+```shell
+git clone https://github.com/manabie-com/manabie-com.github.io
+```
 
 Then, let's start `minikube` and cache some required images. With this, we will not have to
 re-download them everytime we start `minikube`.
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d cache-images >}}
+```shell
+minikube start
+minikube cache add postgres:14.1-alpine3.15
+minikube cache add unleashorg/unleash-server:4.4.4
+minikube cache add unleashorg/unleash-proxy:0.4.0
+```
 
 the output will be similar to this:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d minikube-output >}}
+```shell
+😄  minikube v1.24.0 on Ubuntu 21.10
+✨  Automatically selected the docker driver
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+🔥  Creating docker container (CPUs=2, Memory=7900MB) ...
+🐳  Preparing Kubernetes v1.22.3 on Docker 20.10.8 ...
+  ▪ Generating certificates and keys ...
+  ▪ Booting up control plane ...
+  ▪ Configuring RBAC rules ...
+🔎  Verifying Kubernetes components...
+  ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+❗  "minikube cache" will be deprecated in upcoming versions, please switch to "minikube image load"
+❗  "minikube cache" will be deprecated in upcoming versions, please switch to "minikube image load"
+❗  "minikube cache" will be deprecated in upcoming versions, please switch to "minikube image load"
+```
 
 #### 3. Deploying Unleash
 
@@ -80,18 +123,36 @@ the output will be similar to this:
 Because we have not installed anything yet, there should be nothing in the `default` namespace.
 Let's check:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d k-get-pods-empty >}}
+```shell
+$ kubectl get pods
+No resources found in default namespace.
+```
 
 If you encounter errors like `The connection to the server localhost:8080 was refused - did you specify the right host or port?`,
 then probably you have not run `minikube start` yet.
 
 If everything is fine, we can proceed to installing `unleash` in our cluster:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d helm-install >}}
+```shell
+$ cd manabie-com.github.io/content/posts/unleash-self-host/examples
+$ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml
+Release "unleash" does not exist. Installing it now.
+NAME: unleash
+LAST DEPLOYED: Fri Dec 17 14:55:30 2021
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+```
 
 Checking the pods again
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d k-get-pods-unleash >}}
+```shell
+$ kubectl get pods
+NAME                                READY   STATUS    RESTARTS      AGE
+unleash-5584bbcb89-lkb2c            1/1     Running   1 (80s ago)   82s
+unleash-postgres-5bd6969647-4g4sg   1/1     Running   0             82s
+```
 
 The Unleash server is deployed in pod `unleash-xxxxxxxxxx-yyyyy` (`unleash-5584bbcb89-lkb2c` in this case).
 Its status is `Running` and readiness is `1/1`, so it is ready to serve requests.
@@ -99,7 +160,11 @@ Its status is `Running` and readiness is `1/1`, so it is ready to serve requests
 To access the server, we need to expose it from within `minikube` cluster to our host machine
 by port-forwarding in a separate terminal:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d k-port-forward-4242 >}}
+```shell
+$ kubectl port-forward deploy/unleash 4242
+Forwarding from 127.0.0.1:4242 -> 4242
+Forwarding from [::1]:4242 -> 4242
+```
 
 Go to `http://localhost:4242/unleash` in your browser, you should see the Unleash login page:
 
@@ -131,7 +196,11 @@ token. I am adding a new API token with:
 Then, we can use the API token to make API requests to the server. In my case, my secret value is
 `*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e`.
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d curl-server-empty >}}
+```shell
+$ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+$ curl -H "Authorization: $UNLEASH_API_TOKEN" http://localhost:4242/unleash/api/client/features
+{"version":2,"features":[],"query":{"environment":"development"}}
+```
 
 It returns `"features":[]` because we have not added any feature toggles yet.
 In the Unleash features page `http://localhost:4242/unleash/features`, click on `Create feature toggle`.
@@ -145,7 +214,12 @@ then press `Create`. You should see `my-feature` toggle:
 
 ![my-feature toggle page](./unleash-my-feature.png)
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d curl-server-disabled-feature >}}
+```shell
+# If you are reusing the same terminal, skip the export step
+$ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+$ curl -H "Authorization: $UNLEASH_API_TOKEN" http://localhost:4242/unleash/api/client/features
+{"version":2,"features":[{"strategies":[],"enabled":false,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
+```
 
 We can see the toggle `my-feature` now. Let's enable it.
 Right now, `my-feature` cannot be enabled for `development` because it does not
@@ -165,7 +239,11 @@ Then, we can enable the feature by clicking on the toggle:
 
 ![Enable my-feature](./unleash-enable-feature.png)
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d curl-server-enabled-feature >}}
+```shell
+$ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+$ curl -H "Authorization: $UNLEASH_API_TOKEN" http://localhost:4242/unleash/api/client/features
+{"version":2,"features":[{"strategies":[{"name":"default","constraints":[],"parameters":{}}],"enabled":true,"name":"my-feature","description":"","project":"default","stale":false,"type":"release","variants":[]}],"query":{"environment":"development"}}
+```
 
 It is now enabled (`"enabled":true`).
 
@@ -185,7 +263,20 @@ would evaluate to true).
 
 With that in mind, let's redeploy Unleash with the proxy enabled:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d helm-install-proxy >}}
+```shell
+$ export UNLEASH_API_TOKEN="*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e"
+$ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml \
+    --set=unleashProxy.enabled=true \
+    --set=unleashProxy.secrets="proxy-secret" \
+    --set=unleashProxy.apiToken="$UNLEASH_API_TOKEN"
+Release "unleash" has been upgraded. Happy Helming!
+NAME: unleash
+LAST DEPLOYED: Fri Dec 17 20:42:28 2021
+NAMESPACE: default
+STATUS: deployed
+REVISION: 2
+TEST SUITE: None
+```
 
 Here, we are using the API token created in the previous step for the proxy.
 
@@ -193,11 +284,16 @@ The `unleashProxy.secrets` is the secret that clients use to make requests to th
 
 Then port-forward from port `4243` to access the proxy:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d k-port-forward-4243 >}}
+```shell
+kubectl port-forward deploy/unleash 4243
+```
 
 then you can make request to the proxy from your machine:
 
-{{< gist anhpngt 542f42d65d08d480a5860e8bb790624d curl-proxy >}}
+```shell
+$ curl -H "Authorization: proxy-secret" http://localhost:4243/proxy
+{"toggles":[{"name":"my-feature","enabled":true,"variant":{"name":"disabled","enabled":false}}]}
+```
 
 #### 4. Afterwords
 
