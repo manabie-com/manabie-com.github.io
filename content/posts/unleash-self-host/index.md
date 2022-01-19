@@ -79,13 +79,7 @@ try installing the listed versions first.
 
 #### 2. Setting up the project
 
-First, clone the example from Github repository:
-
-```shell
-git clone https://github.com/manabie-com/manabie-com.github.io
-```
-
-Then, let's start `minikube` and cache some required images. With this, we will not have to
+First, let's start `minikube` and cache some required images. With this, we will not have to
 re-download them everytime we start `minikube`.
 
 ```shell
@@ -134,7 +128,11 @@ then probably you have not run `minikube start` yet.
 If everything is fine, we can proceed to installing `unleash` in our cluster:
 
 ```shell
+# Clone the example repository
+$ git clone https://github.com/manabie-com/manabie-com.github.io
 $ cd manabie-com.github.io/content/posts/unleash-self-host/examples
+
+# Install the helm chart
 $ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml
 Release "unleash" does not exist. Installing it now.
 NAME: unleash
@@ -285,7 +283,7 @@ The `unleashProxy.secrets` is the secret that clients use to make requests to th
 Then port-forward from port `4243` to access the proxy:
 
 ```shell
-kubectl port-forward deploy/unleash 4243
+kubectl port-forward deploy/unleash-proxy 4243
 ```
 
 then you can make request to the proxy from your machine:

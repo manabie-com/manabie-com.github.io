@@ -44,6 +44,17 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "unleashProxy.labels" -}}
+helm.sh/chart: {{ include "unleash.chart" . }}
+app.kubernetes.io/name: {{ include "unleash.name" . }}-proxy
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "unleashProxy.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
 {{- define "postgres.labels" -}}
 helm.sh/chart: {{ include "unleash.chart" . }}
 app.kubernetes.io/name: {{ include "unleash.name" . }}-postgres
@@ -60,6 +71,11 @@ Selector labels
 */}}
 {{- define "unleash.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "unleash.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "unleashProxy.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "unleash.name" . }}-proxy
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 

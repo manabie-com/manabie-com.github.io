@@ -1,0 +1,44 @@
+{{- if .Values.unleashProxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "unleash.fullname" . }}-proxy
+  labels: {{- include "unleash.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "unleashProxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "unleashProxy.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: unleash-proxy
+          image: unleashorg/unleash-proxy:0.4.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: unleash-proxy
+              containerPort: {{ .Values.unleashProxy.service.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /proxy/health
+              port: {{ .Values.unleashProxy.service.port }}
+            timeoutSeconds: 5
+            periodSeconds: 5
+          env:
+            - name: UNLEASH_PROXY_SECRETS
+              value: "{{ .Values.unleashProxy.secrets }}"
+            - name: UNLEASH_URL
+              value: "http://unleash:{{ .Values.unleash.service.port }}/unleash/api"
+            - name: UNLEASH_API_TOKEN
+              value: "{{ .Values.unleashProxy.apiToken }}"
+            - name: PORT
+              value: "{{ .Values.unleashProxy.service.port }}"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: UNLEASH_INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+{{- end }}

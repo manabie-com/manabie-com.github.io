@@ -22,8 +22,6 @@ spec:
     matchLabels: {{- include "unleash.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      annotations:
-        checksum: {{ randAlphaNum 5 | quote }} # changes every installation, thus forces reinstalling the deployment
       labels: {{- include "unleash.selectorLabels" . | nindent 8 }}
     spec:
       volumes:
@@ -49,9 +47,7 @@ spec:
             httpGet:
               path: /unleash/health
               port: {{ .Values.unleash.service.port }}
-            initialDelaySeconds: 5
             timeoutSeconds: 5
-            successThreshold: 5
             periodSeconds: 5
           env:
             - name: BASE_URI_PATH
@@ -74,35 +70,19 @@ spec:
             - name: unleash-config
               mountPath: /unleash/node_modules/unleash-server/dist/lib/services/state-util.js
               subPath: state-util.js
-{{- if .Values.unleashProxy.enabled }}
-        - name: unleash-proxy
-          image: unleashorg/unleash-proxy:0.4.0
-          imagePullPolicy: IfNotPresent
-          ports:
-            - name: unleash-proxy
-              containerPort: {{ .Values.unleashProxy.service.port }}
-              protocol: TCP
-          readinessProbe:
-            httpGet:
-              path: /proxy/health
-              port: {{ .Values.unleashProxy.service.port }}
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
-            successThreshold: 5
-            periodSeconds: 5
-          env:
-            - name: UNLEASH_PROXY_SECRETS
-              value: "{{ .Values.unleashProxy.secrets }}"
-            - name: UNLEASH_URL
-              value: "http://localhost:{{ .Values.unleash.service.port }}/unleash/api"
-            - name: UNLEASH_API_TOKEN
-              value: "{{ .Values.unleashProxy.apiToken }}"
-            - name: PORT
-              value: "{{ .Values.unleashProxy.service.port }}"
-            - name: LOG_LEVEL
-              value: "debug"
-            - name: UNLEASH_INSTANCE_ID
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-{{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels:
+    {{- include "unleash.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.unleash.service.port }}
+      targetPort: unleash
+      protocol: TCP
+      name: unleash
+  selector:
+    {{- include "unleash.selectorLabels" . | nindent 4 }}
