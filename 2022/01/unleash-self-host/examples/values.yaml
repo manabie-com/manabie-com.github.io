@@ -1,0 +1,10 @@
+unleash:
+  service:
+    port: 4242
+
+unleashProxy:
+  enabled: false
+  secrets: ""
+  apiToken: ""
+  service:
+    port: 4243

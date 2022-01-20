@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels: {{- include "unleash.labels" . | nindent 4 }}
+data:
+  index.js: |
+{{ tpl (printf "index.js" | .Files.Get) . | indent 4 }}
+  stateUtils.js: |
+{{ tpl (printf "state-utils.js" | .Files.Get) . | indent 4 }}  
+  connection.txt: |-
+    postgres://postgres:postgres_password@unleash-postgres:5432/unleash?sslmode=disable
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels: {{- include "unleash.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "unleash.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "unleash.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: unleash-config
+          configMap:
+            name: {{ include "unleash.fullname" . }}
+            items:
+            - key: index.js
+              path: index.js
+            - key: connection.txt
+              path: connection.txt
+            - key: stateUtils.js
+              path: state-util.js
+      containers:
+        - name: unleash
+          image: unleashorg/unleash-server:4.4.4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: unleash
+              containerPort: {{ .Values.unleash.service.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /unleash/health
+              port: {{ .Values.unleash.service.port }}
+            timeoutSeconds: 5
+            periodSeconds: 5
+          env:
+            - name: BASE_URI_PATH
+              value: /unleash
+            - name: DATABASE_URL_FILE
+              value: ./connection.txt
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: CHECK_VERSION
+              value: "false"
+            - name: ADMIN_PASSWORD
+              value: "admin"
+          volumeMounts:
+            - name: unleash-config
+              mountPath: /unleash/index.js
+              subPath: index.js
+            - name: unleash-config
+              mountPath: /unleash/connection.txt
+              subPath: connection.txt
+            - name: unleash-config
+              mountPath: /unleash/node_modules/unleash-server/dist/lib/services/state-util.js
+              subPath: state-util.js
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels:
+    {{- include "unleash.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.unleash.service.port }}
+      targetPort: unleash
+      protocol: TCP
+      name: unleash
+  selector:
+    {{- include "unleash.selectorLabels" . | nindent 4 }}

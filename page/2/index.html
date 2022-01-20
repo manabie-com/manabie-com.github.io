@@ -6,12 +6,12 @@
 <meta property="og:description" content="Sharing the humble technical knowledge we're using to improve education">
 <meta property="og:type" content="website">
 <meta property="og:url" content="/">
-<meta property="og:updated_time" content="2022-01-13T18:05:22+07:00">
+<meta property="og:updated_time" content="2022-01-19T14:36:17+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Manabie Tech Blog">
 <meta name=twitter:description content="Sharing the humble technical knowledge we're using to improve education">
 <meta name=generator content="Hugo 0.92.0">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"Blog","headline":"Manabie Tech Blog","url":"/","author":{"@type":"Person","name":null},"dateModified":"2022-01-13T14:28:23+07:00","keywords":"ds0nt, nhattien.ho, nploi, nvcnvn, phamnhuvu-dev, vctqs1, devsecops, feature-toggle, infrastructure, security, testing, acme, automation, bdd, cert-manager, code-coverage, coredns, cucumber, dart, docker, end-to-end, feature-toggle, flutter, golang, http-01, integration-test, k8s, kubernetes, microservices, node.js, postgresql, test, unit-test, unleash","description":"Sharing the humble technical knowledge we're using to improve education"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"Blog","headline":"Manabie Tech Blog","url":"/","author":{"@type":"Person","name":null},"dateModified":"2022-01-18T21:24:00+07:00","keywords":"anhpngt, ds0nt, nhattien.ho, nploi, nvcnvn, phamnhuvu-dev, vctqs1, devsecops, feature, feature-toggle, infrastructure, security, testing, acme, automation, bdd, cert-manager, code-coverage, coredns, cucumber, dart, docker, end-to-end, feature-toggle, flutter, golang, helm, http-01, integration-test, k8s, kubernetes, microservices, node.js, postgresql, test, unit-test, unleash","description":"Sharing the humble technical knowledge we're using to improve education"}</script>
 <link rel=canonical href=/>
 <title>Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -42,6 +42,19 @@
 <div class="col-sm-8 blog-main">
 <article class=blog-post>
 <header>
+<h2 class=blog-post-title dir=auto><a href=/2021/12/running-flutter-integration-tests-in-docker/>Running Flutter integration tests in Docker</a></h2>
+<p class=blog-post-meta><time datetime=2021-12-28T09:49:36+07:00>Tue Dec 28, 2021</time> by phamnhuvu-dev in
+<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/testing/ rel="category tag">Testing</a>
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/docker/ rel=tag>docker</a>, <a href=/tags/integration-test/ rel=tag>integration-test</a>, <a href=/tags/flutter/ rel=tag>flutter</a>, <a href=/tags/dart/ rel=tag>dart</a>
+</p>
+</header>
+Running Flutter integration tests in Docker Prerequisite Linux OS Installing: Flutter Docker Docker compose KVM https://help.ubuntu.com/community/KVM/Installation Technologies Flutter:
+Google&rsquo;s SDK for crafting beautiful, fast user experiences for mobile, web, and desktop from a single codebase. Flutter works with existing code, is used by developers and organizations around the world, and is free and open source. https://github.com/flutter/flutter Docker:
+An open platform for developing, shipping, and running applications https://docs.
+<a href=/2021/12/running-flutter-integration-tests-in-docker/>Read more →</a>
+</article>
+<article class=blog-post>
+<header>
 <h2 class=blog-post-title dir=auto><a href=/2021/12/integration-test-code-coverage-in-go/>Test Coverage of Go Services during Integration Tests</a></h2>
 <p class=blog-post-meta><time datetime=2021-12-27T17:10:49+07:00>Mon Dec 27, 2021</time> by ds0nt in
 <span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/testing/ rel="category tag">Testing</a>
@@ -65,17 +78,6 @@ Why we use Cucumber for end-to-end testing? Before getting to know why we use cu
 What is End to end testing? End to end testing (E2E testing) is a software testing method that validates the entire software. From the beginning to the end.
 The purpose of end-to-end testing is to simulate how a real user interacts with the application, list out the scenarios, and test the whole software for dependencies, data integrity and communication with other systems, interfaces, network connectivity and databases to exercise complete production like scenario.
 <a href=/2021/12/why-we-use-cucumber-for-end-to-end-testing/>Read more →</a>
-</article>
-<article class=blog-post>
-<header>
-<h2 class=blog-post-title dir=auto><a href=/2021/11/simulate-https-certificates-acme-k8s/>Simulate Let’s Encrypt certificate issuing in local Kubernetes</a></h2>
-<p class=blog-post-meta><time datetime=2021-11-23T14:28:23+07:00>Tue Nov 23, 2021</time> by nvcnvn in
-<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/infrastructure/ rel="category tag">Infrastructure</a>, <a href=/categories/security/ rel="category tag">Security</a>
-<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/cert-manager/ rel=tag>cert-manager</a>, <a href=/tags/coredns/ rel=tag>CoreDNS</a>, <a href=/tags/acme/ rel=tag>acme</a>, <a href=/tags/http-01/ rel=tag>http-01</a>
-</p>
-</header>
-We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS certificate issue flow to allow our Platform engineers to test their config and allow our Front-end engineers to connect their application to local server with a self-signed HTTPS certificate.
-<a href=/2021/11/simulate-https-certificates-acme-k8s/>Read more →</a>
 </article>
 <nav class=blog-pagination>
 <a class="btn btn-outline-primary" href=/ rel=prev role=button>Previous page</a>

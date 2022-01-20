@@ -6,12 +6,12 @@
 <meta property="og:description" content="Sharing the humble technical knowledge we're using to improve education">
 <meta property="og:type" content="website">
 <meta property="og:url" content="/">
-<meta property="og:updated_time" content="2022-01-13T18:05:22+07:00">
+<meta property="og:updated_time" content="2022-01-19T14:36:17+07:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Manabie Tech Blog">
 <meta name=twitter:description content="Sharing the humble technical knowledge we're using to improve education">
 <meta name=generator content="Hugo 0.92.0">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"Blog","headline":"Manabie Tech Blog","url":"/","author":{"@type":"Person","name":null},"dateModified":"2022-01-13T14:28:23+07:00","keywords":"ds0nt, nhattien.ho, nploi, nvcnvn, phamnhuvu-dev, vctqs1, devsecops, feature-toggle, infrastructure, security, testing, acme, automation, bdd, cert-manager, code-coverage, coredns, cucumber, dart, docker, end-to-end, feature-toggle, flutter, golang, http-01, integration-test, k8s, kubernetes, microservices, node.js, postgresql, test, unit-test, unleash","description":"Sharing the humble technical knowledge we're using to improve education"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"Blog","headline":"Manabie Tech Blog","url":"/","author":{"@type":"Person","name":null},"dateModified":"2022-01-18T21:24:00+07:00","keywords":"anhpngt, ds0nt, nhattien.ho, nploi, nvcnvn, phamnhuvu-dev, vctqs1, devsecops, feature, feature-toggle, infrastructure, security, testing, acme, automation, bdd, cert-manager, code-coverage, coredns, cucumber, dart, docker, end-to-end, feature-toggle, flutter, golang, helm, http-01, integration-test, k8s, kubernetes, microservices, node.js, postgresql, test, unit-test, unleash","description":"Sharing the humble technical knowledge we're using to improve education"}</script>
 <link rel=canonical href=/>
 <title>Manabie Tech Blog</title>
 <link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
@@ -40,6 +40,17 @@
 <div class=container>
 <div class=row>
 <div class="col-sm-8 blog-main">
+<article class=blog-post>
+<header>
+<h2 class=blog-post-title dir=auto><a href=/2021/11/simulate-https-certificates-acme-k8s/>Simulate Let’s Encrypt certificate issuing in local Kubernetes</a></h2>
+<p class=blog-post-meta><time datetime=2021-11-23T14:28:23+07:00>Tue Nov 23, 2021</time> by nvcnvn in
+<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/infrastructure/ rel="category tag">Infrastructure</a>, <a href=/categories/security/ rel="category tag">Security</a>
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/cert-manager/ rel=tag>cert-manager</a>, <a href=/tags/coredns/ rel=tag>CoreDNS</a>, <a href=/tags/acme/ rel=tag>acme</a>, <a href=/tags/http-01/ rel=tag>http-01</a>
+</p>
+</header>
+We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS certificate issue flow to allow our Platform engineers to test their config and allow our Front-end engineers to connect their application to local server with a self-signed HTTPS certificate.
+<a href=/2021/11/simulate-https-certificates-acme-k8s/>Read more →</a>
+</article>
 <article class=blog-post>
 <header>
 <h2 class=blog-post-title dir=auto><a href=/2021/10/snapshot-test-your-postgresql-in-golang-pgx-driver/>Snapshot test your Postgresql in Golang pgx driver</a></h2>
