@@ -1,0 +1,213 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta property="og:title" content="Set up NATS multi-tenant in golang"><meta property="og:description" content="Write the way to set up NATS multi-tenant."><meta property="og:type" content="article"><meta property="og:url" content="/2022/03/set-up-nats-multi-tenant-in-golang/"><meta property="article:published_time" content="2022-03-18T10:00:00+07:00"><meta property="article:modified_time" content="2022-03-18T16:06:45+07:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Set up NATS multi-tenant in golang"><meta name=twitter:description content="Write the way to set up NATS multi-tenant."><meta name=generator content="Hugo 0.94.2"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Set up NATS multi-tenant in golang","url":"/2022/03/set-up-nats-multi-tenant-in-golang/","wordCount":"1398","datePublished":"2022-03-18T10:00:00+07:00","dateModified":"2022-03-18T16:06:45+07:00","author":{"@type":"Person","name":"duchh"},"keywords":"Golang, NATS-Jetstream, Multi-tenant","description":"Write the way to set up NATS multi-tenant."}</script><link rel=canonical href=/2022/03/set-up-nats-multi-tenant-in-golang/><title>Set up NATS multi-tenant in golang | Manabie Tech Blog</title><link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous><script defer src=/js/fontawesome.min.f5072c55a0721857184db93a50561d7dc13975b4de2e19db7f81eb5f3fa57270.js integrity="sha256-9QcsVaByGFcYTbk6UFYdfcE5dbTeLhnbf4HrXz+lcnA=" crossorigin=anonymous></script>
+<script src=/js/haven.umd.min.5f4a3edd16edd243f2a9b07dbf1b371f8f1b18fbb29319aba09431678609a175.js integrity="sha256-X0o+3Rbt0kPyqbB9vxs3H48bGPuykxmroJQxZ4YJoXU=" crossorigin=anonymous></script>
+<script>Haven.create({notification:{styles:{background:"#428bca",textColor:"#ffffff",buttonBackgroundColor:"#f71559",buttonTextColor:"#ffffff"}},translations:{en:{notification:{policy:"Learn more.",message:"This website uses cookies.",accept:"Agree",decline:"Disagree"}}},services:[{name:"google-analytics",options:{id:"G-EJ2GNQJNM6"},purposes:["analytics"],inject:!0}]})</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-EJ2GNQJNM6"></script>
+<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-EJ2GNQJNM6",{anonymize_ip:!1})}</script><style>div.highlight>pre{padding:1rem}</style></head><body><div class=blog-masthead><div class=container><nav class="nav blog-nav"><a class=nav-link href=/>Home</a></nav></div></div><header class=blog-header><div class=container><h1 class=blog-title dir=auto><a href=/ rel=home>Manabie Tech Blog</a></h1><p class="lead blog-description" dir=auto>Sharing the humble technical knowledge we&rsquo;re using to improve education</p></div></header><div class=container><div class=row><div class="col-sm-8 blog-main"><article class=blog-post><header><h2 class=blog-post-title dir=auto><a href=/2022/03/set-up-nats-multi-tenant-in-golang/>Set up NATS multi-tenant in golang</a></h2><p class=blog-post-meta><time datetime=2022-03-18T10:00:00+07:00>Fri Mar 18, 2022</time>
+in
+<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/golang/ rel="category tag">Golang</a>, <a href=/categories/nats-jetstream/ rel="category tag">NATS-Jetstream</a>
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/golang/ rel=tag>Golang</a>, <a href=/tags/nats-jetstream/ rel=tag>NATS-Jetstream</a>, <a href=/tags/multi-tenant/ rel=tag>Multi-tenant</a></p></header><p><em><strong>In this blog post, we will learn how to set up NATS Multi-tenancy in golang.</strong></em></p><h4 id=nats-jetstream><strong>NATS-Jetstream</strong></h4><p>NATS has a built-in distributed persistence system called Jetstream which features new functionalities and higher
+qualities of service on top of the base Core NATS functionalities and qualities of service.</p><p>Jetstream was created to solve the problems identified with streaming technologies today. Some technologies address
+these better than others, but no current streaming technology is truly multi-tenant, horizontally scalable,&mldr; Today I just
+talk how we can set up NATS multi-tenancy in golang.</p><h4 id=concepts><strong>Concepts</strong></h4><p>Look in this example, I will explain below.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>accounts <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>    A: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>        jetstream: enabled
+</span></span><span style=display:flex><span>        users <span style=color:#f92672>=</span> <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                user: <span style=color:#e6db74>&#34;Admin&#34;</span>,
+</span></span><span style=display:flex><span>                password: <span style=color:#e6db74>&#34;123456&#34;</span>,
+</span></span><span style=display:flex><span>                permissions: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                    publish: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                        allow: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.INFO&#34;</span>, <span style=color:#75715e># allow user can send request API to NATS server</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.STREAM.&gt;&#34;</span>, <span style=color:#75715e># allow user do anything with all streams in NATS server</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.CONSUMER.&gt;&#34;</span> <span style=color:#75715e># allow user do anything with all consumers in NATS server</span>
+</span></span><span style=display:flex><span>                        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>                    <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>                <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>}</span>,
+</span></span><span style=display:flex><span>            <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                user: <span style=color:#e6db74>&#34;Bob&#34;</span>,
+</span></span><span style=display:flex><span>                password: <span style=color:#e6db74>&#34;123456&#34;</span>,
+</span></span><span style=display:flex><span>                permissions: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                    publish: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                        allow: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.INFO&#34;</span>, <span style=color:#75715e># allow user can send request API to NATS server</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.STREAM.*.student&#34;</span>, <span style=color:#75715e># allow user interact with stream (example: create, delete,...)</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;student.Created&#34;</span> <span style=color:#75715e># allow user publish messages with subject `student.Created`</span>
+</span></span><span style=display:flex><span>                        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>                    <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>                <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>}</span>,
+</span></span><span style=display:flex><span>            <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                user: <span style=color:#e6db74>&#34;Tom&#34;</span>,
+</span></span><span style=display:flex><span>                password: <span style=color:#e6db74>&#34;123456&#34;</span>,
+</span></span><span style=display:flex><span>                permissions: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                    publish: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                        allow: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.INFO&#34;</span>, <span style=color:#75715e># allow user can send request API to NATS server</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.STREAM.NAMES&#34;</span>, <span style=color:#75715e># allow user get all stream&#39;s names</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.CONSUMER.*.student.*&#34;</span>, <span style=color:#75715e># allow user interact with consumer (example: create, delete,...)</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.API.CONSUMER.DURABLE.CREATE.student.*&#34;</span>, <span style=color:#75715e># allow user create consumer queue</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.&gt;&#34;</span> <span style=color:#75715e># allow user can ack messages in `student` stream</span>
+</span></span><span style=display:flex><span>                        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>                    <span style=color:#f92672>}</span>,
+</span></span><span style=display:flex><span>                    subscribe: <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>                        allow: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>                            <span style=color:#e6db74>&#34;_INBOX.&gt;&#34;</span>
+</span></span><span style=display:flex><span>                        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>                    <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>                <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>}</span>
+</span></span></code></pre></div><h5 id=accounts><strong>Accounts</strong></h5><p>Accounts allow grouping of clients, isolating them from clients in other accounts, thus enabling <em><strong>multi-tenant</strong></em> in
+the server. In the configuration above we have an account named <strong>A</strong> which has three users <em><strong>Admin, Bob and Tom</strong></em>. We
+can add one or more accounts to the configuration, an account has one or more users.</p><h5 id=users><strong>Users</strong></h5><p>User identified by the <strong>user</strong>, the <strong>password</strong>, the <strong>permissions</strong>. Users in the account are simply the minimum number
+of services that must work together to provide some functionality.</p><h5 id=permission><strong>Permission</strong></h5><p>NATS has concept <a href=https://docs.nats.io/nats-concepts/subjects#wildcards>wildcard subject</a> will use a lot in our example,
+so you should understand this concept before going next.</p><p>Another concept is <a href=https://docs.nats.io/reference/reference-protocols/nats_api_reference>Jetstream wire API Reference</a>,
+you can easily interact with the Jetstream infrastructure programmatically.</p><p>In <a href=https://docs.nats.io/running-a-nats-service/configuration/securing_nats/authorization#permission-map>permissions</a>
+above we have two sections <em>publish</em> and <em>subscribe</em>.</p><ul><li><p><strong>Publish</strong> consist of subject, list of subjects, API reference the user can publish. All users
+need to have <code>$JS.API.INFO</code> permission, because this API allow user can send others API to NATS server.</p></li><li><p><strong>Subscribe</strong> consist of subject, list of subjects, API reference the user can subscribe. To receiving messages
+published, the consumer needs to be able to subscribe to the request subjects. The request subject is an inbox. Typically
+inboxes start with the prefix <code>_INBOX.</code> followed by a generated string. The <code>_INBOX.></code> subject matches all subjects
+that begin with <code>_INBOX.</code>.</p></li></ul><p>In example above, Admin can do anything with streams and consumers (create, update, delete,&mldr;). Bob is a publisher,
+publishes messages to NATS with streams <code>student</code>. Bob can create streams by <code>$JS.API.STREAM.*.student</code> and publish
+messages by <code>student.Created</code>. Tom is a consumer, receives messages and processes them related streams <code>student</code>. Tom
+can create <em>consumer queue</em> by <code>$JS.API.CONSUMER.*.student.*</code> and <code>$JS.API.CONSUMER.DURABLE.CREATE.student.*</code>, then
+ack messages by <code>$JS.ACK.student.></code>.</p><h4 id=lets-make-a-test><strong>Let&rsquo;s make a test</strong></h4><p>You can go to <a href=https://github.com/manabie-com/manabie-com.github.io/tree/setup-nats-multi-tenant/content/posts/nats-multi-tenant/examples>my demo</a>
+for more detail.</p><h5 id=setup-config-and-docker-compose><strong>Setup config and docker-compose</strong></h5><p>In this demo I just configure one account and three users, you can custom the test with more than accounts. We run command
+<code>docker-compose up</code> to start NATS server, the logs when start NATS successfully.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709249 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> Starting nats-server
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709303 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Version:  2.6.6
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709306 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Git:      <span style=color:#f92672>[</span>878afad<span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709310 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Name:     NBWOQ2DYVAYSY3HXYVJXGGURKJY6TBPC2JCKEQYND7GTSSJODGYUCMLK
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709318 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Node:     Cq4JgPlu
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709321 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   ID:       NBWOQ2DYVAYSY3HXYVJXGGURKJY6TBPC2JCKEQYND7GTSSJODGYUCMLK
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709325 <span style=color:#f92672>[</span>WRN<span style=color:#f92672>]</span> Plaintext passwords detected, use nkeys or bcrypt
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.709336 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> Using configuration file: /jetstream.config
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710457 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> Starting JetStream
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710696 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>     _ ___ _____ ___ _____ ___ ___   _   __  __
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710708 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>  _ | | __|_   _/ __|_   _| _ <span style=color:#ae81ff>\ </span>__| /_<span style=color:#ae81ff>\ </span>|  <span style=color:#ae81ff>\/</span>  |
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710712 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> | <span style=color:#f92672>||</span> | _|  | | <span style=color:#ae81ff>\_</span>_ <span style=color:#ae81ff>\ </span>| | |   / _| / _ <span style=color:#ae81ff>\|</span> |<span style=color:#ae81ff>\/</span>| |
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710714 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>  <span style=color:#ae81ff>\_</span>_/|___| |_| |___/ |_| |_|_<span style=color:#ae81ff>\_</span>__/_/ <span style=color:#ae81ff>\_\_</span>|  |_|
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710717 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> 
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710720 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>          https://docs.nats.io/jetstream
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710722 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> 
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710725 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span> ---------------- JETSTREAM ----------------
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710737 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Max Memory:      4.00 GB
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710742 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Max Storage:     10.00 GB
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:12:08.710745 <span style=color:#f92672>[</span>INF<span style=color:#f92672>]</span>   Store Directory: <span style=color:#e6db74>&#34;/data/jetstream&#34;</span>
+</span></span></code></pre></div><h5 id=golang-code><strong>Golang code</strong></h5><ul><li><strong>Publisher</strong> folder try connect to NATS with user <em>Bob</em> then checking and creating streams <code>student</code> after that publish
+three messages with subject <code>student.Created</code>. Go to publisher folder then run command <code>go run publisher.go</code>.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>2021/12/14 15:21:02 Student with StudentID:1 has been published
+</span></span><span style=display:flex><span>2021/12/14 15:21:02 Student with StudentID:2 has been published
+</span></span><span style=display:flex><span>2021/12/14 15:21:02 Student with StudentID:3 has been published
+</span></span></code></pre></div><ul><li><strong>Consumer</strong> folder try connect to NATS with user <em>Tom</em> then <a href=https://github.com/manabie-com/manabie-com.github.io/blob/a9b1ec1f6b87c3b408516014a06850869c7b30f8/content/posts/nats-multi-tenant/examples/consumer/consumer.go#L29>creating subscription</a>
+and processing messages with subject <code>student.Created</code>. Go to consumer folder then run command <code>go run consumer.go</code>.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>2021/12/14 15:26:15 Student with StudentID:1 has been processed
+</span></span><span style=display:flex><span>2021/12/14 15:26:15 Student with StudentID:2 has been processed
+</span></span><span style=display:flex><span>2021/12/14 15:26:15 Student with StudentID:3 has been processed
+</span></span></code></pre></div><ul><li>What&rsquo;s happen when Tom doesn&rsquo;t have permission to ack messages? Let&rsquo;s test. We will remove <code>$JS.ACK.student.></code> in user
+Tom. Then restart NATS server. As expected, Tom doesn&rsquo;t have permission to ack messages</li></ul><p>The logs in consumer will look like that.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>nats: Permissions Violation <span style=color:#66d9ef>for</span> Publish to <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.durable-push.1.70.97.1639472208769956133.2&#34;</span> on connection <span style=color:#f92672>[</span>12<span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>nats: Permissions Violation <span style=color:#66d9ef>for</span> Publish to <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.durable-push.1.71.98.1639472208770655160.1&#34;</span> on connection <span style=color:#f92672>[</span>12<span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>nats: Permissions Violation <span style=color:#66d9ef>for</span> Publish to <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.durable-push.1.72.99.1639472208771104510.0&#34;</span> on connection <span style=color:#f92672>[</span>12<span style=color:#f92672>]</span>
+</span></span></code></pre></div><p>The logs in NATS server will look like that.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:56:56.427316 <span style=color:#f92672>[</span>ERR<span style=color:#f92672>]</span> 172.25.0.1:49916 - cid:12 - <span style=color:#e6db74>&#34;v1.13.0:go&#34;</span> - Publish Violation - User <span style=color:#e6db74>&#34;Tom&#34;</span>, Subject <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.durable-push.1.70.97.1639472208769956133.2&#34;</span>
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:56:56.427353 <span style=color:#f92672>[</span>ERR<span style=color:#f92672>]</span> 172.25.0.1:49916 - cid:12 - <span style=color:#e6db74>&#34;v1.13.0:go&#34;</span> - Publish Violation - User <span style=color:#e6db74>&#34;Tom&#34;</span>, Subject <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.durable-push.1.71.98.1639472208770655160.1&#34;</span>
+</span></span><span style=display:flex><span>n1    | <span style=color:#f92672>[</span>1<span style=color:#f92672>]</span> 2021/12/14 08:56:56.427369 <span style=color:#f92672>[</span>ERR<span style=color:#f92672>]</span> 172.25.0.1:49916 - cid:12 - <span style=color:#e6db74>&#34;v1.13.0:go&#34;</span> - Publish Violation - User <span style=color:#e6db74>&#34;Tom&#34;</span>, Subject <span style=color:#e6db74>&#34;</span>$JS<span style=color:#e6db74>.ACK.student.durable-push.1.72.99.1639472208771104510.0&#34;</span>
+</span></span></code></pre></div><h5 id=nats-box><strong>NATS-box</strong></h5><p>We can see the connection of users in account by <a href=https://github.com/nats-io/nats-box>nats-box</a>.
+Go to terminal and run <code>docker run -ti --network host natsio/nats-box</code>, then we will connect to NATS server by Admin
+<code>nats context save --server=nats://localhost:4223 --user=Admin --password=123456 --select server</code> if connect successfully, the result like this</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>NATS Configuration Context <span style=color:#e6db74>&#34;server&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      Server URLs: nats://localhost:4223
+</span></span><span style=display:flex><span>         Username: Admin
+</span></span><span style=display:flex><span>         Password: *********
+</span></span><span style=display:flex><span>             Path: /root/.config/nats/context/server.json
+</span></span><span style=display:flex><span>       Connection: OK
+</span></span></code></pre></div><p>Then we run command <code>nats server report accounts --json</code>, the result:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;account&#34;</span>: <span style=color:#e6db74>&#34;A&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;connections&#34;</span>: 3,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;connection_info&#34;</span>: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;cid&#34;</span>: 10,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;ip&#34;</span>: <span style=color:#e6db74>&#34;172.26.0.1&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;port&#34;</span>: 53406,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;start&#34;</span>: <span style=color:#e6db74>&#34;2021-12-15T01:58:17.622191984Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;last_activity&#34;</span>: <span style=color:#e6db74>&#34;2021-12-15T01:58:17.626455989Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rtt&#34;</span>: <span style=color:#e6db74>&#34;449µs&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;uptime&#34;</span>: <span style=color:#e6db74>&#34;16m32s&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;idle&#34;</span>: <span style=color:#e6db74>&#34;16m32s&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;pending_bytes&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;in_msgs&#34;</span>: 4,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;out_msgs&#34;</span>: 4,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;in_bytes&#34;</span>: 168,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;out_bytes&#34;</span>: 731,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;subscriptions&#34;</span>: 1,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;lang&#34;</span>: <span style=color:#e6db74>&#34;go&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;version&#34;</span>: <span style=color:#e6db74>&#34;1.13.0&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;authorized_user&#34;</span>: <span style=color:#e6db74>&#34;Bob&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;account&#34;</span>: <span style=color:#e6db74>&#34;A&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;subscriptions_list&#34;</span>: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#34;_INBOX.a1ZGIA7xxpq6odeC0nRjid.*&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>}</span>,
+</span></span><span style=display:flex><span>      <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;cid&#34;</span>: 13,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;ip&#34;</span>: <span style=color:#e6db74>&#34;172.26.0.1&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;port&#34;</span>: 53476,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;start&#34;</span>: <span style=color:#e6db74>&#34;2021-12-15T01:58:58.408294005Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;last_activity&#34;</span>: <span style=color:#e6db74>&#34;2021-12-15T01:59:02.421454384Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rtt&#34;</span>: <span style=color:#e6db74>&#34;530µs&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;uptime&#34;</span>: <span style=color:#e6db74>&#34;15m51s&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;idle&#34;</span>: <span style=color:#e6db74>&#34;15m47s&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;pending_bytes&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;in_msgs&#34;</span>: 26,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;out_msgs&#34;</span>: 26,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;in_bytes&#34;</span>: 125,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;out_bytes&#34;</span>: 2146,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;subscriptions&#34;</span>: 2,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;lang&#34;</span>: <span style=color:#e6db74>&#34;go&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;version&#34;</span>: <span style=color:#e6db74>&#34;1.13.0&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;authorized_user&#34;</span>: <span style=color:#e6db74>&#34;Tom&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;account&#34;</span>: <span style=color:#e6db74>&#34;A&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;subscriptions_list&#34;</span>: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#34;_INBOX.pAs3HKEavN4xPgq0R3ISuv.*&#34;</span>,
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#34;_INBOX.KUZs5Iu1AS627v4hxQDEDT&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>}</span>,
+</span></span><span style=display:flex><span>      <span style=color:#f92672>{</span>
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;cid&#34;</span>: 16,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;ip&#34;</span>: <span style=color:#e6db74>&#34;172.26.0.1&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;port&#34;</span>: 54208,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;start&#34;</span>: <span style=color:#e6db74>&#34;2021-12-15T02:14:50.121066448Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;last_activity&#34;</span>: <span style=color:#e6db74>&#34;2021-12-15T02:14:50.121668124Z&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;rtt&#34;</span>: <span style=color:#e6db74>&#34;602µs&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;uptime&#34;</span>: <span style=color:#e6db74>&#34;0s&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;idle&#34;</span>: <span style=color:#e6db74>&#34;0s&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;pending_bytes&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;in_msgs&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;out_msgs&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;in_bytes&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;out_bytes&#34;</span>: 0,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;subscriptions&#34;</span>: 1,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;name&#34;</span>: <span style=color:#e6db74>&#34;NATS CLI Version development&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;lang&#34;</span>: <span style=color:#e6db74>&#34;go&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;version&#34;</span>: <span style=color:#e6db74>&#34;1.11.0&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;authorized_user&#34;</span>: <span style=color:#e6db74>&#34;Admin&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;account&#34;</span>: <span style=color:#e6db74>&#34;A&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#e6db74>&#34;subscriptions_list&#34;</span>: <span style=color:#f92672>[</span>
+</span></span><span style=display:flex><span>          <span style=color:#e6db74>&#34;_INBOX.4FRAGOb5MzOIGS1ZsYAtYI&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>]</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>]</span>,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;in_msgs&#34;</span>: 30,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;out_msgs&#34;</span>: 30,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;in_bytes&#34;</span>: 293,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;out_bytes&#34;</span>: 2877,
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;subscriptions&#34;</span>: <span style=color:#ae81ff>4</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>}</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>]</span>
+</span></span></code></pre></div><p>You can see the result above, we have an account A and three users (Admin, Bob, Tom) are connecting to NATS. NATS say
+<code>isolating them from clients in other accounts</code>, so we can test by add account <strong>B</strong> in our configuration then connect NATS-box
+by <strong>AdminB</strong> then run <code>nats server report accounts --json</code>.</p><h4 id=summary><strong>Summary</strong></h4><p>Currently, the Manabie team are using this way to apply NATS multi-tenant in our backend code, this way quite easy to configure permission for users
+we just go to file config and add permission into a user you want. You can go to <a href=https://github.com/manabie-com/manabie-com.github.io/tree/setup-nats-multi-tenant/content/posts/nats-multi-tenant/examples>my demo</a>
+and try to run this example. Thank you for your reading!</p><hr><footer><div class=meta_item><span class=meta_text>About <a href=/author/duchh>duchh</a></span><br><i>I like building and solving problem in programing</i><br><span class=meta_text><a href=https://www.linkedin.com/in/%C4%91%E1%BB%A9c-ho%C3%A0ng-75aa04156/ target=_blank>https://www.linkedin.com/in/%C4%91%E1%BB%A9c-ho%C3%A0ng-75aa04156/</a></span></div><hr><section><h4>Share</h4><nav class="nav sharing-icons"><a class=nav-item href="https://www.facebook.com/sharer/sharer.php?u=%2f2022%2f03%2fset-up-nats-multi-tenant-in-golang%2f" title="Share on Facebook"><span class="fab fa-facebook-f fa-2x" aria-hidden=true></span></a>
+<a class=nav-item href="https://www.linkedin.com/shareArticle?mini=true&url=%2f2022%2f03%2fset-up-nats-multi-tenant-in-golang%2f" title="Share on LinkedIn"><span class="fab fa-linkedin-in fa-2x" aria-hidden=true></span></a>
+<a class=nav-item href="https://twitter.com/intent/tweet?url=%2f2022%2f03%2fset-up-nats-multi-tenant-in-golang%2f&text=Set%20up%20NATS%20multi-tenant%20in%20golang" title="Tweet this"><span class="fab fa-twitter fa-2x"></span></a></nav></section><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//manabie.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></div><aside class="col-sm-3 ml-auto blog-sidebar"><section class=sidebar-module><h4>Links</h4><ol class=list-unstyled><li><a href=https://manabie.com>About Us</a></li><li><a href=https://manabie.breezy.hr>Careers</a></li></ol></section></aside></div></div><footer class=blog-footer><p dir=auto>Except where otherwise noted, content on this site is licensed under a <a href=https://creativecommons.org/licenses/by-sa/4.0/>Creative Commons Attribution 4.0 International license</a>.</p><p><a href=#>Back to top</a></p></footer></body></html>

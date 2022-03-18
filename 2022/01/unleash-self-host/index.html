@@ -1,322 +1,131 @@
-<!doctype html><html lang=en>
-<head>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<meta property="og:title" content="Self-hosting Unleash with Kubernetes">
-<meta property="og:description" content="Self-hosting Unleash with Kubernetes">
-<meta property="og:type" content="article">
-<meta property="og:url" content="/2022/01/unleash-self-host/">
-<meta property="og:image" content="/2022/01/unleash-self-host/my-first-feature.png">
-<meta property="article:published_time" content="2022-01-18T21:24:00+07:00">
-<meta property="article:modified_time" content="2022-01-19T14:36:17+07:00">
-<meta name=twitter:card content="summary_large_image">
-<meta name=twitter:image content="/2022/01/unleash-self-host/my-first-feature.png">
-<meta name=twitter:title content="Self-hosting Unleash with Kubernetes">
-<meta name=twitter:description content="Self-hosting Unleash with Kubernetes">
-<meta name=generator content="Hugo 0.92.0">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Self-hosting Unleash with Kubernetes","url":"/2022/01/unleash-self-host/","wordCount":"1444","datePublished":"2022-01-18T21:24:00+07:00","dateModified":"2022-01-19T14:36:17+07:00","author":{"@type":"Person","name":"anhpngt"},"keywords":"DevSecOps, Feature, unleash, k8s, helm","description":"Self-hosting Unleash with Kubernetes"}</script>
-<link rel=canonical href=/2022/01/unleash-self-host/>
-<title>Self-hosting Unleash with Kubernetes | Manabie Tech Blog</title>
-<link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
-<script defer src=/js/fontawesome.min.f5072c55a0721857184db93a50561d7dc13975b4de2e19db7f81eb5f3fa57270.js integrity="sha256-9QcsVaByGFcYTbk6UFYdfcE5dbTeLhnbf4HrXz+lcnA=" crossorigin=anonymous></script>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta property="og:title" content="Self-hosting Unleash with Kubernetes"><meta property="og:description" content="Self-hosting Unleash with Kubernetes"><meta property="og:type" content="article"><meta property="og:url" content="/2022/01/unleash-self-host/"><meta property="og:image" content="/2022/01/unleash-self-host/my-first-feature.png"><meta property="article:published_time" content="2022-01-18T21:24:00+07:00"><meta property="article:modified_time" content="2022-01-19T14:36:17+07:00"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="/2022/01/unleash-self-host/my-first-feature.png"><meta name=twitter:title content="Self-hosting Unleash with Kubernetes"><meta name=twitter:description content="Self-hosting Unleash with Kubernetes"><meta name=generator content="Hugo 0.94.2"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Self-hosting Unleash with Kubernetes","url":"/2022/01/unleash-self-host/","wordCount":"1444","datePublished":"2022-01-18T21:24:00+07:00","dateModified":"2022-01-19T14:36:17+07:00","author":{"@type":"Person","name":"anhpngt"},"keywords":"DevSecOps, Feature, unleash, k8s, helm","description":"Self-hosting Unleash with Kubernetes"}</script><link rel=canonical href=/2022/01/unleash-self-host/><title>Self-hosting Unleash with Kubernetes | Manabie Tech Blog</title><link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous><script defer src=/js/fontawesome.min.f5072c55a0721857184db93a50561d7dc13975b4de2e19db7f81eb5f3fa57270.js integrity="sha256-9QcsVaByGFcYTbk6UFYdfcE5dbTeLhnbf4HrXz+lcnA=" crossorigin=anonymous></script>
 <script src=/js/haven.umd.min.5f4a3edd16edd243f2a9b07dbf1b371f8f1b18fbb29319aba09431678609a175.js integrity="sha256-X0o+3Rbt0kPyqbB9vxs3H48bGPuykxmroJQxZ4YJoXU=" crossorigin=anonymous></script>
-<script>Haven.create({notification:{styles:{background:'#428bca',textColor:'#ffffff',buttonBackgroundColor:'#f71559',buttonTextColor:'#ffffff'}},translations:{en:{notification:{policy:'Learn more.',message:'This website uses cookies.',accept:'Agree',decline:'Disagree'}}},services:[{name:'google-analytics',options:{id:"G-EJ2GNQJNM6"},purposes:['analytics'],inject:!0}]})</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EJ2GNQJNM6"></script>
-<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','G-EJ2GNQJNM6',{anonymize_ip:!1})}</script>
-<style>div.highlight>pre{padding:1rem}</style>
-</head>
-<body>
-<div class=blog-masthead>
-<div class=container>
-<nav class="nav blog-nav">
-<a class=nav-link href=/>Home</a>
-</nav>
-</div>
-</div>
-<header class=blog-header>
-<div class=container>
-<h1 class=blog-title dir=auto><a href=/ rel=home>Manabie Tech Blog</a></h1>
-<p class="lead blog-description" dir=auto>Sharing the humble technical knowledge we&rsquo;re using to improve education</p>
-</div>
-</header>
-<div class=container>
-<div class=row>
-<div class="col-sm-8 blog-main">
-<article class=blog-post>
-<header>
-<h2 class=blog-post-title dir=auto><a href=/2022/01/unleash-self-host/>Self-hosting Unleash with Kubernetes</a></h2>
-<p class=blog-post-meta>
-<time datetime=2022-01-18T21:24:00+07:00>Tue Jan 18, 2022</time>
+<script>Haven.create({notification:{styles:{background:"#428bca",textColor:"#ffffff",buttonBackgroundColor:"#f71559",buttonTextColor:"#ffffff"}},translations:{en:{notification:{policy:"Learn more.",message:"This website uses cookies.",accept:"Agree",decline:"Disagree"}}},services:[{name:"google-analytics",options:{id:"G-EJ2GNQJNM6"},purposes:["analytics"],inject:!0}]})</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-EJ2GNQJNM6"></script>
+<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-EJ2GNQJNM6",{anonymize_ip:!1})}</script><style>div.highlight>pre{padding:1rem}</style></head><body><div class=blog-masthead><div class=container><nav class="nav blog-nav"><a class=nav-link href=/>Home</a></nav></div></div><header class=blog-header><div class=container><h1 class=blog-title dir=auto><a href=/ rel=home>Manabie Tech Blog</a></h1><p class="lead blog-description" dir=auto>Sharing the humble technical knowledge we&rsquo;re using to improve education</p></div></header><div class=container><div class=row><div class="col-sm-8 blog-main"><article class=blog-post><header><h2 class=blog-post-title dir=auto><a href=/2022/01/unleash-self-host/>Self-hosting Unleash with Kubernetes</a></h2><p class=blog-post-meta><time datetime=2022-01-18T21:24:00+07:00>Tue Jan 18, 2022</time>
 in
 <span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/feature/ rel="category tag">Feature</a>
-<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/unleash/ rel=tag>unleash</a>, <a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/helm/ rel=tag>helm</a>
-</p>
-</header>
-<p>In this blog post, we will learn how to self-host Unleash in a Kubernetes cluster.</p>
-<h3 id=why-feature-toggles>Why feature toggles?</h3>
-<p>While developing new features for our end-users, we often encounter these 2 problems:</p>
-<ul>
-<li>Features are not developed and rolled out in a single night. It often takes several days or even
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/unleash/ rel=tag>unleash</a>, <a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/helm/ rel=tag>helm</a></p></header><p>In this blog post, we will learn how to self-host Unleash in a Kubernetes cluster.</p><h3 id=why-feature-toggles>Why feature toggles?</h3><p>While developing new features for our end-users, we often encounter these 2 problems:</p><ul><li>Features are not developed and rolled out in a single night. It often takes several days or even
 weeks before a feature is fully developed, tested, and deployed. In such cases, we usually have to
 deploy a piece of that feature to production, and we would need to hide that piece until the feature
-is fully completed and ready.</li>
-<li>Even after the feature reaches end-users, until we are fully confident in the feature, fail-safe
+is fully completed and ready.</li><li>Even after the feature reaches end-users, until we are fully confident in the feature, fail-safe
 methods are usually employed. One of such methods is to hide the feature away from the users to prevent
-it from being used.</li>
-</ul>
-<p>With the feature toggle, we then can simply turn the feature&rsquo;s flag off and on to hide or show the
-feature to users.</p>
-<h3 id=why-unleash>Why Unleash?</h3>
-<p>Before <a href=https://www.getunleash.io/>Unleash</a>, we have tried <a href=https://firebase.google.com/docs/remote-config>Firebase Remote Config</a>
+it from being used.</li></ul><p>With the feature toggle, we then can simply turn the feature&rsquo;s flag off and on to hide or show the
+feature to users.</p><h3 id=why-unleash>Why Unleash?</h3><p>Before <a href=https://www.getunleash.io/>Unleash</a>, we have tried <a href=https://firebase.google.com/docs/remote-config>Firebase Remote Config</a>
 to some success. However, what it did not have was <strong>a local deployment or an emulator</strong>.
-This feature was crucial to us, because:</p>
-<ol>
-<li>Local development: in Manabie, any developer can spin up the entire end-to-end infrastructure
+This feature was crucial to us, because:</p><ol><li>Local development: in Manabie, any developer can spin up the entire end-to-end infrastructure
 in their own machine and start working on their task without having to worry about breaking any
 of the production clusters. However, Firebase Remote Config is a shared instance. Using Firebase
-would not meet our separation-of-concerns standards.</li>
-<li>CI/CD: when running end-to-end tests, it is desirable to run the tests against different feature
+would not meet our separation-of-concerns standards.</li><li>CI/CD: when running end-to-end tests, it is desirable to run the tests against different feature
 toggle configurations. We need to ensure that our code works with both cases of the flag being turned
-on and off. It would be disastrous if it does not.</li>
-</ol>
-<h3 id=deploying-unleash-in-a-kubernetes-cluster>Deploying Unleash in a Kubernetes cluster</h3>
-<h4 id=1-prerequisites>1. Prerequisites</h4>
-<ul>
-<li><a href=https://kubernetes.io/docs/tasks/tools/#kubectl>kubectl</a></li>
-<li><a href=https://minikube.sigs.k8s.io/docs/>minikube</a></li>
-<li><a href=https://helm.sh/>helm</a></li>
-<li>curl</li>
-</ul>
-<p>Using <code>helm</code> is a bit of an overkill here. However, our Manabie&rsquo;s CI/CD pipeline uses <code>helm</code> to deploy
-so we will use it here as well.</p>
-<p>For this guide, I am using the following versions</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ kubectl version -o yaml
-clientVersion:
-  buildDate: <span style=color:#e6db74>&#34;2021-12-07T18:16:20Z&#34;</span>
-  compiler: gc
-  gitCommit: ab69524f795c42094a6630298ff53f3c3ebab7f4
-  gitTreeState: clean
-  gitVersion: v1.23.0
-  goVersion: go1.17.3
-  major: <span style=color:#e6db74>&#34;1&#34;</span>
-  minor: <span style=color:#e6db74>&#34;23&#34;</span>
-  platform: linux/amd64
-
-$ minikube version
-minikube version: v1.24.0
-commit: 76b94fb3c4e8ac5062daf70d60cf03ddcc0a741b
-
-$ helm version
-version.BuildInfo<span style=color:#f92672>{</span>Version:<span style=color:#e6db74>&#34;v3.7.1&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;1d11fcb5d3f3bf00dbe6fe31b8412839a96b3dc4&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;clean&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.16.9&#34;</span><span style=color:#f92672>}</span>
-</code></pre></div><p>The versioning requirements are not strict. However, if you encounter any strange errors, you can
-try installing the listed versions first.</p>
-<h4 id=2-setting-up-the-project>2. Setting up the project</h4>
-<p>First, let&rsquo;s start <code>minikube</code> and cache some required images. With this, we will not have to
-re-download them everytime we start <code>minikube</code>.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>minikube start
-minikube cache add postgres:14.1-alpine3.15
-minikube cache add unleashorg/unleash-server:4.4.4
-minikube cache add unleashorg/unleash-proxy:0.4.0
-</code></pre></div><p>the output will be similar to this:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>😄  minikube v1.24.0 on Ubuntu 21.10
-✨  Automatically selected the docker driver
-👍  Starting control plane node minikube in cluster minikube
-🚜  Pulling base image ...
-🔥  Creating docker container <span style=color:#f92672>(</span>CPUs<span style=color:#f92672>=</span>2, Memory<span style=color:#f92672>=</span>7900MB<span style=color:#f92672>)</span> ...
-🐳  Preparing Kubernetes v1.22.3 on Docker 20.10.8 ...
-  ▪ Generating certificates and keys ...
-  ▪ Booting up control plane ...
-  ▪ Configuring RBAC rules ...
-🔎  Verifying Kubernetes components...
-  ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
-🌟  Enabled addons: storage-provisioner, default-storageclass
-🏄  Done! kubectl is now configured to use <span style=color:#e6db74>&#34;minikube&#34;</span> cluster and <span style=color:#e6db74>&#34;default&#34;</span> namespace by default
-❗  <span style=color:#e6db74>&#34;minikube cache&#34;</span> will be deprecated in upcoming versions, please switch to <span style=color:#e6db74>&#34;minikube image load&#34;</span>
-❗  <span style=color:#e6db74>&#34;minikube cache&#34;</span> will be deprecated in upcoming versions, please switch to <span style=color:#e6db74>&#34;minikube image load&#34;</span>
-❗  <span style=color:#e6db74>&#34;minikube cache&#34;</span> will be deprecated in upcoming versions, please switch to <span style=color:#e6db74>&#34;minikube image load&#34;</span>
-</code></pre></div><h4 id=3-deploying-unleash>3. Deploying Unleash</h4>
-<h5 id=i-unleash-server>i. Unleash server</h5>
-<p>Because we have not installed anything yet, there should be nothing in the <code>default</code> namespace.
-Let&rsquo;s check:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ kubectl get pods
-No resources found in default namespace.
-</code></pre></div><p>If you encounter errors like <code>The connection to the server localhost:8080 was refused - did you specify the right host or port?</code>,
-then probably you have not run <code>minikube start</code> yet.</p>
-<p>If everything is fine, we can proceed to installing <code>unleash</code> in our cluster:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=color:#75715e># Clone the example repository</span>
-$ git clone https://github.com/manabie-com/manabie-com.github.io
-$ cd manabie-com.github.io/content/posts/unleash-self-host/examples
-
-<span style=color:#75715e># Install the helm chart</span>
-$ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml
-Release <span style=color:#e6db74>&#34;unleash&#34;</span> does not exist. Installing it now.
-NAME: unleash
-LAST DEPLOYED: Fri Dec <span style=color:#ae81ff>17</span> 14:55:30 <span style=color:#ae81ff>2021</span>
-NAMESPACE: default
-STATUS: deployed
-REVISION: <span style=color:#ae81ff>1</span>
-TEST SUITE: None
-</code></pre></div><p>Checking the pods again</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ kubectl get pods
-NAME                                READY   STATUS    RESTARTS      AGE
-unleash-5584bbcb89-lkb2c            1/1     Running   <span style=color:#ae81ff>1</span> <span style=color:#f92672>(</span>80s ago<span style=color:#f92672>)</span>   82s
-unleash-postgres-5bd6969647-4g4sg   1/1     Running   <span style=color:#ae81ff>0</span>             82s
-</code></pre></div><p>The Unleash server is deployed in pod <code>unleash-xxxxxxxxxx-yyyyy</code> (<code>unleash-5584bbcb89-lkb2c</code> in this case).
-Its status is <code>Running</code> and readiness is <code>1/1</code>, so it is ready to serve requests.</p>
-<p>To access the server, we need to expose it from within <code>minikube</code> cluster to our host machine
-by port-forwarding in a separate terminal:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ kubectl port-forward deploy/unleash <span style=color:#ae81ff>4242</span>
-Forwarding from 127.0.0.1:4242 -&gt; <span style=color:#ae81ff>4242</span>
-Forwarding from <span style=color:#f92672>[</span>::1<span style=color:#f92672>]</span>:4242 -&gt; <span style=color:#ae81ff>4242</span>
-</code></pre></div><p>Go to <code>http://localhost:4242/unleash</code> in your browser, you should see the Unleash login page:</p>
-<p><img src=./unleash-login.png alt="Unleash Login Page"></p>
-<p>Login with the default account that Unleash created for us:</p>
-<ul>
-<li>Username: <code>admin</code></li>
-<li>Password: <code>unleash4all</code></li>
-</ul>
-<p>then you will go to the <code>features</code> page (which is empty right now since we have not added
-any feature flags yet). We will add them in the next section.</p>
-<p><img src=./unleash-features-page.png alt="Unleash Features Page"></p>
-<h5 id=ii-add-new-feature-flags-and-retrieve-it-client-side>ii. Add new feature flags and retrieve it client-side</h5>
-<p>By default, clients do not have access to the server since we are enabling authentication for Unleash.
+on and off. It would be disastrous if it does not.</li></ol><h3 id=deploying-unleash-in-a-kubernetes-cluster>Deploying Unleash in a Kubernetes cluster</h3><h4 id=1-prerequisites>1. Prerequisites</h4><ul><li><a href=https://kubernetes.io/docs/tasks/tools/#kubectl>kubectl</a></li><li><a href=https://minikube.sigs.k8s.io/docs/>minikube</a></li><li><a href=https://helm.sh/>helm</a></li><li>curl</li></ul><p>Using <code>helm</code> is a bit of an overkill here. However, our Manabie&rsquo;s CI/CD pipeline uses <code>helm</code> to deploy
+so we will use it here as well.</p><p>For this guide, I am using the following versions</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ kubectl version -o yaml
+</span></span><span style=display:flex><span>clientVersion:
+</span></span><span style=display:flex><span>  buildDate: <span style=color:#e6db74>&#34;2021-12-07T18:16:20Z&#34;</span>
+</span></span><span style=display:flex><span>  compiler: gc
+</span></span><span style=display:flex><span>  gitCommit: ab69524f795c42094a6630298ff53f3c3ebab7f4
+</span></span><span style=display:flex><span>  gitTreeState: clean
+</span></span><span style=display:flex><span>  gitVersion: v1.23.0
+</span></span><span style=display:flex><span>  goVersion: go1.17.3
+</span></span><span style=display:flex><span>  major: <span style=color:#e6db74>&#34;1&#34;</span>
+</span></span><span style=display:flex><span>  minor: <span style=color:#e6db74>&#34;23&#34;</span>
+</span></span><span style=display:flex><span>  platform: linux/amd64
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>$ minikube version
+</span></span><span style=display:flex><span>minikube version: v1.24.0
+</span></span><span style=display:flex><span>commit: 76b94fb3c4e8ac5062daf70d60cf03ddcc0a741b
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>$ helm version
+</span></span><span style=display:flex><span>version.BuildInfo<span style=color:#f92672>{</span>Version:<span style=color:#e6db74>&#34;v3.7.1&#34;</span>, GitCommit:<span style=color:#e6db74>&#34;1d11fcb5d3f3bf00dbe6fe31b8412839a96b3dc4&#34;</span>, GitTreeState:<span style=color:#e6db74>&#34;clean&#34;</span>, GoVersion:<span style=color:#e6db74>&#34;go1.16.9&#34;</span><span style=color:#f92672>}</span>
+</span></span></code></pre></div><p>The versioning requirements are not strict. However, if you encounter any strange errors, you can
+try installing the listed versions first.</p><h4 id=2-setting-up-the-project>2. Setting up the project</h4><p>First, let&rsquo;s start <code>minikube</code> and cache some required images. With this, we will not have to
+re-download them everytime we start <code>minikube</code>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>minikube start
+</span></span><span style=display:flex><span>minikube cache add postgres:14.1-alpine3.15
+</span></span><span style=display:flex><span>minikube cache add unleashorg/unleash-server:4.4.4
+</span></span><span style=display:flex><span>minikube cache add unleashorg/unleash-proxy:0.4.0
+</span></span></code></pre></div><p>the output will be similar to this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>😄  minikube v1.24.0 on Ubuntu 21.10
+</span></span><span style=display:flex><span>✨  Automatically selected the docker driver
+</span></span><span style=display:flex><span>👍  Starting control plane node minikube in cluster minikube
+</span></span><span style=display:flex><span>🚜  Pulling base image ...
+</span></span><span style=display:flex><span>🔥  Creating docker container <span style=color:#f92672>(</span>CPUs<span style=color:#f92672>=</span>2, Memory<span style=color:#f92672>=</span>7900MB<span style=color:#f92672>)</span> ...
+</span></span><span style=display:flex><span>🐳  Preparing Kubernetes v1.22.3 on Docker 20.10.8 ...
+</span></span><span style=display:flex><span>  ▪ Generating certificates and keys ...
+</span></span><span style=display:flex><span>  ▪ Booting up control plane ...
+</span></span><span style=display:flex><span>  ▪ Configuring RBAC rules ...
+</span></span><span style=display:flex><span>🔎  Verifying Kubernetes components...
+</span></span><span style=display:flex><span>  ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+</span></span><span style=display:flex><span>🌟  Enabled addons: storage-provisioner, default-storageclass
+</span></span><span style=display:flex><span>🏄  Done! kubectl is now configured to use <span style=color:#e6db74>&#34;minikube&#34;</span> cluster and <span style=color:#e6db74>&#34;default&#34;</span> namespace by default
+</span></span><span style=display:flex><span>❗  <span style=color:#e6db74>&#34;minikube cache&#34;</span> will be deprecated in upcoming versions, please switch to <span style=color:#e6db74>&#34;minikube image load&#34;</span>
+</span></span><span style=display:flex><span>❗  <span style=color:#e6db74>&#34;minikube cache&#34;</span> will be deprecated in upcoming versions, please switch to <span style=color:#e6db74>&#34;minikube image load&#34;</span>
+</span></span><span style=display:flex><span>❗  <span style=color:#e6db74>&#34;minikube cache&#34;</span> will be deprecated in upcoming versions, please switch to <span style=color:#e6db74>&#34;minikube image load&#34;</span>
+</span></span></code></pre></div><h4 id=3-deploying-unleash>3. Deploying Unleash</h4><h5 id=i-unleash-server>i. Unleash server</h5><p>Because we have not installed anything yet, there should be nothing in the <code>default</code> namespace.
+Let&rsquo;s check:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ kubectl get pods
+</span></span><span style=display:flex><span>No resources found in default namespace.
+</span></span></code></pre></div><p>If you encounter errors like <code>The connection to the server localhost:8080 was refused - did you specify the right host or port?</code>,
+then probably you have not run <code>minikube start</code> yet.</p><p>If everything is fine, we can proceed to installing <code>unleash</code> in our cluster:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span><span style=color:#75715e># Clone the example repository</span>
+</span></span><span style=display:flex><span>$ git clone https://github.com/manabie-com/manabie-com.github.io
+</span></span><span style=display:flex><span>$ cd manabie-com.github.io/content/posts/unleash-self-host/examples
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Install the helm chart</span>
+</span></span><span style=display:flex><span>$ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml
+</span></span><span style=display:flex><span>Release <span style=color:#e6db74>&#34;unleash&#34;</span> does not exist. Installing it now.
+</span></span><span style=display:flex><span>NAME: unleash
+</span></span><span style=display:flex><span>LAST DEPLOYED: Fri Dec <span style=color:#ae81ff>17</span> 14:55:30 <span style=color:#ae81ff>2021</span>
+</span></span><span style=display:flex><span>NAMESPACE: default
+</span></span><span style=display:flex><span>STATUS: deployed
+</span></span><span style=display:flex><span>REVISION: <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>TEST SUITE: None
+</span></span></code></pre></div><p>Checking the pods again</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ kubectl get pods
+</span></span><span style=display:flex><span>NAME                                READY   STATUS    RESTARTS      AGE
+</span></span><span style=display:flex><span>unleash-5584bbcb89-lkb2c            1/1     Running   <span style=color:#ae81ff>1</span> <span style=color:#f92672>(</span>80s ago<span style=color:#f92672>)</span>   82s
+</span></span><span style=display:flex><span>unleash-postgres-5bd6969647-4g4sg   1/1     Running   <span style=color:#ae81ff>0</span>             82s
+</span></span></code></pre></div><p>The Unleash server is deployed in pod <code>unleash-xxxxxxxxxx-yyyyy</code> (<code>unleash-5584bbcb89-lkb2c</code> in this case).
+Its status is <code>Running</code> and readiness is <code>1/1</code>, so it is ready to serve requests.</p><p>To access the server, we need to expose it from within <code>minikube</code> cluster to our host machine
+by port-forwarding in a separate terminal:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ kubectl port-forward deploy/unleash <span style=color:#ae81ff>4242</span>
+</span></span><span style=display:flex><span>Forwarding from 127.0.0.1:4242 -&gt; <span style=color:#ae81ff>4242</span>
+</span></span><span style=display:flex><span>Forwarding from <span style=color:#f92672>[</span>::1<span style=color:#f92672>]</span>:4242 -&gt; <span style=color:#ae81ff>4242</span>
+</span></span></code></pre></div><p>Go to <code>http://localhost:4242/unleash</code> in your browser, you should see the Unleash login page:</p><p><img src=./unleash-login.png alt="Unleash Login Page"></p><p>Login with the default account that Unleash created for us:</p><ul><li>Username: <code>admin</code></li><li>Password: <code>unleash4all</code></li></ul><p>then you will go to the <code>features</code> page (which is empty right now since we have not added
+any feature flags yet). We will add them in the next section.</p><p><img src=./unleash-features-page.png alt="Unleash Features Page"></p><h5 id=ii-add-new-feature-flags-and-retrieve-it-client-side>ii. Add new feature flags and retrieve it client-side</h5><p>By default, clients do not have access to the server since we are enabling authentication for Unleash.
 You need to follow <a href=https://docs.getunleash.io/user_guide/api-token>this guide</a> to create an API
-token. I am adding a new API token with:</p>
-<ul>
-<li>Username: <code>myclient</code></li>
-<li>Token Type: <code>Client</code></li>
-<li>Project: <code>ALL</code></li>
-<li>Environment: <code>development</code></li>
-</ul>
-<p><img src=./unleash-api-token.png alt="API token"></p>
-<p>Then, we can use the API token to make API requests to the server. In my case, my secret value is
-<code>*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e</code>.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
-$ curl -H <span style=color:#e6db74>&#34;Authorization: </span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span> http://localhost:4242/unleash/api/client/features
-<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;version&#34;</span>:2,<span style=color:#e6db74>&#34;features&#34;</span>:<span style=color:#f92672>[]</span>,<span style=color:#e6db74>&#34;query&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;environment&#34;</span>:<span style=color:#e6db74>&#34;development&#34;</span><span style=color:#f92672>}}</span>
-</code></pre></div><p>It returns <code>"features":[]</code> because we have not added any feature toggles yet.
+token. I am adding a new API token with:</p><ul><li>Username: <code>myclient</code></li><li>Token Type: <code>Client</code></li><li>Project: <code>ALL</code></li><li>Environment: <code>development</code></li></ul><p><img src=./unleash-api-token.png alt="API token"></p><p>Then, we can use the API token to make API requests to the server. In my case, my secret value is
+<code>*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e</code>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
+</span></span><span style=display:flex><span>$ curl -H <span style=color:#e6db74>&#34;Authorization: </span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span> http://localhost:4242/unleash/api/client/features
+</span></span><span style=display:flex><span><span style=color:#f92672>{</span><span style=color:#e6db74>&#34;version&#34;</span>:2,<span style=color:#e6db74>&#34;features&#34;</span>:<span style=color:#f92672>[]</span>,<span style=color:#e6db74>&#34;query&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;environment&#34;</span>:<span style=color:#e6db74>&#34;development&#34;</span><span style=color:#f92672>}}</span>
+</span></span></code></pre></div><p>It returns <code>"features":[]</code> because we have not added any feature toggles yet.
 In the Unleash features page <code>http://localhost:4242/unleash/features</code>, click on <code>Create feature toggle</code>.
-Choose:</p>
-<ul>
-<li>Name: <code>my-feature</code></li>
-<li>Toggle type: <code>Release</code></li>
-<li>Description can be left empty</li>
-</ul>
-<p>then press <code>Create</code>. You should see <code>my-feature</code> toggle:</p>
-<p><img src=./unleash-my-feature.png alt="my-feature toggle page"></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=color:#75715e># If you are reusing the same terminal, skip the export step</span>
-$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
-$ curl -H <span style=color:#e6db74>&#34;Authorization: </span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span> http://localhost:4242/unleash/api/client/features
-<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;version&#34;</span>:2,<span style=color:#e6db74>&#34;features&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;strategies&#34;</span>:<span style=color:#f92672>[]</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:false,<span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;my-feature&#34;</span>,<span style=color:#e6db74>&#34;description&#34;</span>:<span style=color:#e6db74>&#34;&#34;</span>,<span style=color:#e6db74>&#34;project&#34;</span>:<span style=color:#e6db74>&#34;default&#34;</span>,<span style=color:#e6db74>&#34;stale&#34;</span>:false,<span style=color:#e6db74>&#34;type&#34;</span>:<span style=color:#e6db74>&#34;release&#34;</span>,<span style=color:#e6db74>&#34;variants&#34;</span>:<span style=color:#f92672>[]}]</span>,<span style=color:#e6db74>&#34;query&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;environment&#34;</span>:<span style=color:#e6db74>&#34;development&#34;</span><span style=color:#f92672>}}</span>
-</code></pre></div><p>We can see the toggle <code>my-feature</code> now. Let&rsquo;s enable it.
+Choose:</p><ul><li>Name: <code>my-feature</code></li><li>Toggle type: <code>Release</code></li><li>Description can be left empty</li></ul><p>then press <code>Create</code>. You should see <code>my-feature</code> toggle:</p><p><img src=./unleash-my-feature.png alt="my-feature toggle page"></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span><span style=color:#75715e># If you are reusing the same terminal, skip the export step</span>
+</span></span><span style=display:flex><span>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
+</span></span><span style=display:flex><span>$ curl -H <span style=color:#e6db74>&#34;Authorization: </span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span> http://localhost:4242/unleash/api/client/features
+</span></span><span style=display:flex><span><span style=color:#f92672>{</span><span style=color:#e6db74>&#34;version&#34;</span>:2,<span style=color:#e6db74>&#34;features&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;strategies&#34;</span>:<span style=color:#f92672>[]</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:false,<span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;my-feature&#34;</span>,<span style=color:#e6db74>&#34;description&#34;</span>:<span style=color:#e6db74>&#34;&#34;</span>,<span style=color:#e6db74>&#34;project&#34;</span>:<span style=color:#e6db74>&#34;default&#34;</span>,<span style=color:#e6db74>&#34;stale&#34;</span>:false,<span style=color:#e6db74>&#34;type&#34;</span>:<span style=color:#e6db74>&#34;release&#34;</span>,<span style=color:#e6db74>&#34;variants&#34;</span>:<span style=color:#f92672>[]}]</span>,<span style=color:#e6db74>&#34;query&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;environment&#34;</span>:<span style=color:#e6db74>&#34;development&#34;</span><span style=color:#f92672>}}</span>
+</span></span></code></pre></div><p>We can see the toggle <code>my-feature</code> now. Let&rsquo;s enable it.
 Right now, <code>my-feature</code> cannot be enabled for <code>development</code> because it does not
-have a <code>Strategy</code> for <code>development</code> environment yet.</p>
-<p>We need to:</p>
-<ul>
-<li>Go to <code>Strategies</code> tab</li>
-<li>Click on <code>Add new strategy</code></li>
-<li>Drag and drop the <code>Standard</code> strategy card from the left panel to the right.
-(you can also click on the <code>+</code> icon)</li>
-<li>Click <code>Save</code> to save the strategy</li>
-</ul>
-<p><img src=./unleash-add-strategies.png alt="Standard strategy added for development"></p>
-<p>Then, we can enable the feature by clicking on the toggle:</p>
-<p><img src=./unleash-enable-feature.png alt="Enable my-feature"></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
-$ curl -H <span style=color:#e6db74>&#34;Authorization: </span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span> http://localhost:4242/unleash/api/client/features
-<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;version&#34;</span>:2,<span style=color:#e6db74>&#34;features&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;strategies&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;default&#34;</span>,<span style=color:#e6db74>&#34;constraints&#34;</span>:<span style=color:#f92672>[]</span>,<span style=color:#e6db74>&#34;parameters&#34;</span>:<span style=color:#f92672>{}}]</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:true,<span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;my-feature&#34;</span>,<span style=color:#e6db74>&#34;description&#34;</span>:<span style=color:#e6db74>&#34;&#34;</span>,<span style=color:#e6db74>&#34;project&#34;</span>:<span style=color:#e6db74>&#34;default&#34;</span>,<span style=color:#e6db74>&#34;stale&#34;</span>:false,<span style=color:#e6db74>&#34;type&#34;</span>:<span style=color:#e6db74>&#34;release&#34;</span>,<span style=color:#e6db74>&#34;variants&#34;</span>:<span style=color:#f92672>[]}]</span>,<span style=color:#e6db74>&#34;query&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;environment&#34;</span>:<span style=color:#e6db74>&#34;development&#34;</span><span style=color:#f92672>}}</span>
-</code></pre></div><p>It is now enabled (<code>"enabled":true</code>).</p>
-<h5 id=iii-add-unleash-proxy>iii. Add Unleash proxy</h5>
-<p>Usually, we would use <a href=https://docs.getunleash.io/sdks>Unleash SDKs</a> to interact with Unleash.
-However, for the <a href=https://docs.getunleash.io/sdks#front-end-sdks>front-end SDKs</a>:</p>
-<blockquote>
-<p>For security and performance reasons, the front-end SDKs do not communicate directly with your Unleash instance. Instead, they go via the <a href=https://docs.getunleash.io/sdks/unleash-proxy>Unleash Proxy</a>.</p>
-</blockquote>
-<p>Therefore, in cases where we need, for example <a href=https://docs.getunleash.io/sdks/proxy-react>React SDK</a>,
-we need to also set up the proxy.</p>
-<p>I have already added the proxy in the deployment chart. We can enable deploying it
+have a <code>Strategy</code> for <code>development</code> environment yet.</p><p>We need to:</p><ul><li>Go to <code>Strategies</code> tab</li><li>Click on <code>Add new strategy</code></li><li>Drag and drop the <code>Standard</code> strategy card from the left panel to the right.
+(you can also click on the <code>+</code> icon)</li><li>Click <code>Save</code> to save the strategy</li></ul><p><img src=./unleash-add-strategies.png alt="Standard strategy added for development"></p><p>Then, we can enable the feature by clicking on the toggle:</p><p><img src=./unleash-enable-feature.png alt="Enable my-feature"></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
+</span></span><span style=display:flex><span>$ curl -H <span style=color:#e6db74>&#34;Authorization: </span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span> http://localhost:4242/unleash/api/client/features
+</span></span><span style=display:flex><span><span style=color:#f92672>{</span><span style=color:#e6db74>&#34;version&#34;</span>:2,<span style=color:#e6db74>&#34;features&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;strategies&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;default&#34;</span>,<span style=color:#e6db74>&#34;constraints&#34;</span>:<span style=color:#f92672>[]</span>,<span style=color:#e6db74>&#34;parameters&#34;</span>:<span style=color:#f92672>{}}]</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:true,<span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;my-feature&#34;</span>,<span style=color:#e6db74>&#34;description&#34;</span>:<span style=color:#e6db74>&#34;&#34;</span>,<span style=color:#e6db74>&#34;project&#34;</span>:<span style=color:#e6db74>&#34;default&#34;</span>,<span style=color:#e6db74>&#34;stale&#34;</span>:false,<span style=color:#e6db74>&#34;type&#34;</span>:<span style=color:#e6db74>&#34;release&#34;</span>,<span style=color:#e6db74>&#34;variants&#34;</span>:<span style=color:#f92672>[]}]</span>,<span style=color:#e6db74>&#34;query&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;environment&#34;</span>:<span style=color:#e6db74>&#34;development&#34;</span><span style=color:#f92672>}}</span>
+</span></span></code></pre></div><p>It is now enabled (<code>"enabled":true</code>).</p><h5 id=iii-add-unleash-proxy>iii. Add Unleash proxy</h5><p>Usually, we would use <a href=https://docs.getunleash.io/sdks>Unleash SDKs</a> to interact with Unleash.
+However, for the <a href=https://docs.getunleash.io/sdks#front-end-sdks>front-end SDKs</a>:</p><blockquote><p>For security and performance reasons, the front-end SDKs do not communicate directly with your Unleash instance. Instead, they go via the <a href=https://docs.getunleash.io/sdks/unleash-proxy>Unleash Proxy</a>.</p></blockquote><p>Therefore, in cases where we need, for example <a href=https://docs.getunleash.io/sdks/proxy-react>React SDK</a>,
+we need to also set up the proxy.</p><p>I have already added the proxy in the deployment chart. We can enable deploying it
 by setting <code>unleashProxy.enabled</code> to <code>true</code> (so that the blocks <code>{{- if .Values.unleashProxy.enabled }}</code>
-would evaluate to true).</p>
-<p>With that in mind, let&rsquo;s redeploy Unleash with the proxy enabled:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
-$ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>    --set<span style=color:#f92672>=</span>unleashProxy.enabled<span style=color:#f92672>=</span>true <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>    --set<span style=color:#f92672>=</span>unleashProxy.secrets<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;proxy-secret&#34;</span> <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>    --set<span style=color:#f92672>=</span>unleashProxy.apiToken<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;</span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span>
-Release <span style=color:#e6db74>&#34;unleash&#34;</span> has been upgraded. Happy Helming!
-NAME: unleash
-LAST DEPLOYED: Fri Dec <span style=color:#ae81ff>17</span> 20:42:28 <span style=color:#ae81ff>2021</span>
-NAMESPACE: default
-STATUS: deployed
-REVISION: <span style=color:#ae81ff>2</span>
-TEST SUITE: None
-</code></pre></div><p>Here, we are using the API token created in the previous step for the proxy.</p>
-<p>The <code>unleashProxy.secrets</code> is the secret that clients use to make requests to the proxy.</p>
-<p>Then port-forward from port <code>4243</code> to access the proxy:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>kubectl port-forward deploy/unleash-proxy <span style=color:#ae81ff>4243</span>
-</code></pre></div><p>then you can make request to the proxy from your machine:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ curl -H <span style=color:#e6db74>&#34;Authorization: proxy-secret&#34;</span> http://localhost:4243/proxy
-<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;toggles&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;my-feature&#34;</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:true,<span style=color:#e6db74>&#34;variant&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;disabled&#34;</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:false<span style=color:#f92672>}}]}</span>
-</code></pre></div><h4 id=4-afterwords>4. Afterwords</h4>
-<ul>
-<li><code>curl</code> is only used here for the sake of simplicity. In practice, we would use <a href=https://docs.getunleash.io/sdks>Unleash official
-SDKs</a></li>
-<li>Sensitive data such as Postgresql&rsquo;s password should be encrypted and stored in a secret.</li>
-<li>Do not use the admin account that Unleash created, or at least change its password.
-In our case, add an admin account with a safe password at bootstrap.</li>
-<li>When deploying the proxy, we need to manually create the API token using the UI. This can be
+would evaluate to true).</p><p>With that in mind, let&rsquo;s redeploy Unleash with the proxy enabled:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ export UNLEASH_API_TOKEN<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;*:development.1095962067dcb586929bdc7a118b1c2111cf3866649fe5c07e8bd71e&#34;</span>
+</span></span><span style=display:flex><span>$ helm upgrade --wait --timeout 1m --install unleash ./ -f values.yaml <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>    --set<span style=color:#f92672>=</span>unleashProxy.enabled<span style=color:#f92672>=</span>true <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>    --set<span style=color:#f92672>=</span>unleashProxy.secrets<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;proxy-secret&#34;</span> <span style=color:#ae81ff>\
+</span></span></span><span style=display:flex><span><span style=color:#ae81ff></span>    --set<span style=color:#f92672>=</span>unleashProxy.apiToken<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;</span>$UNLEASH_API_TOKEN<span style=color:#e6db74>&#34;</span>
+</span></span><span style=display:flex><span>Release <span style=color:#e6db74>&#34;unleash&#34;</span> has been upgraded. Happy Helming!
+</span></span><span style=display:flex><span>NAME: unleash
+</span></span><span style=display:flex><span>LAST DEPLOYED: Fri Dec <span style=color:#ae81ff>17</span> 20:42:28 <span style=color:#ae81ff>2021</span>
+</span></span><span style=display:flex><span>NAMESPACE: default
+</span></span><span style=display:flex><span>STATUS: deployed
+</span></span><span style=display:flex><span>REVISION: <span style=color:#ae81ff>2</span>
+</span></span><span style=display:flex><span>TEST SUITE: None
+</span></span></code></pre></div><p>Here, we are using the API token created in the previous step for the proxy.</p><p>The <code>unleashProxy.secrets</code> is the secret that clients use to make requests to the proxy.</p><p>Then port-forward from port <code>4243</code> to access the proxy:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>kubectl port-forward deploy/unleash-proxy <span style=color:#ae81ff>4243</span>
+</span></span></code></pre></div><p>then you can make request to the proxy from your machine:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ curl -H <span style=color:#e6db74>&#34;Authorization: proxy-secret&#34;</span> http://localhost:4243/proxy
+</span></span><span style=display:flex><span><span style=color:#f92672>{</span><span style=color:#e6db74>&#34;toggles&#34;</span>:<span style=color:#f92672>[{</span><span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;my-feature&#34;</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:true,<span style=color:#e6db74>&#34;variant&#34;</span>:<span style=color:#f92672>{</span><span style=color:#e6db74>&#34;name&#34;</span>:<span style=color:#e6db74>&#34;disabled&#34;</span>,<span style=color:#e6db74>&#34;enabled&#34;</span>:false<span style=color:#f92672>}}]}</span>
+</span></span></code></pre></div><h4 id=4-afterwords>4. Afterwords</h4><ul><li><code>curl</code> is only used here for the sake of simplicity. In practice, we would use <a href=https://docs.getunleash.io/sdks>Unleash official
+SDKs</a></li><li>Sensitive data such as Postgresql&rsquo;s password should be encrypted and stored in a secret.</li><li>Do not use the admin account that Unleash created, or at least change its password.
+In our case, add an admin account with a safe password at bootstrap.</li><li>When deploying the proxy, we need to manually create the API token using the UI. This can be
 tedious and error prone when deploying to a new environment. In practice, we also create
-an API token at bootstrap for the proxy, too.</li>
-</ul>
-<h3 id=conclusion>Conclusion</h3>
-<p>In this blog, we have covered:</p>
-<ul>
-<li>Deploying Unleash in a local Kubernetes cluster (using Minikube)</li>
-<li>Creating a simple feature toggle and use <code>curl</code> to retrieve it</li>
-<li>Deploying Unleash with the proxy enabled</li>
-</ul>
-<p>With that, our developers can install Unleash locally and start using it.</p>
-<hr>
-<footer>
-<div class=meta_item>
-<span class=meta_text>About <a href=/author/anhpngt>anhpngt</a></span>
-<br>
-<i>Backend Developer at Manabie</i>
-</div>
-<hr>
-<section>
-<h4>Share</h4>
-<nav class="nav sharing-icons">
-<a class=nav-item href="https://www.facebook.com/sharer/sharer.php?u=%2f2022%2f01%2funleash-self-host%2f" title="Share on Facebook"><span class="fab fa-facebook-f fa-2x" aria-hidden=true></span></a>
+an API token at bootstrap for the proxy, too.</li></ul><h3 id=conclusion>Conclusion</h3><p>In this blog, we have covered:</p><ul><li>Deploying Unleash in a local Kubernetes cluster (using Minikube)</li><li>Creating a simple feature toggle and use <code>curl</code> to retrieve it</li><li>Deploying Unleash with the proxy enabled</li></ul><p>With that, our developers can install Unleash locally and start using it.</p><hr><footer><div class=meta_item><span class=meta_text>About <a href=/author/anhpngt>anhpngt</a></span><br><i>Backend Developer at Manabie</i></div><hr><section><h4>Share</h4><nav class="nav sharing-icons"><a class=nav-item href="https://www.facebook.com/sharer/sharer.php?u=%2f2022%2f01%2funleash-self-host%2f" title="Share on Facebook"><span class="fab fa-facebook-f fa-2x" aria-hidden=true></span></a>
 <a class=nav-item href="https://www.linkedin.com/shareArticle?mini=true&url=%2f2022%2f01%2funleash-self-host%2f" title="Share on LinkedIn"><span class="fab fa-linkedin-in fa-2x" aria-hidden=true></span></a>
-<a class=nav-item href="https://twitter.com/intent/tweet?url=%2f2022%2f01%2funleash-self-host%2f&text=Self-hosting%20Unleash%20with%20Kubernetes" title="Tweet this"><span class="fab fa-twitter fa-2x"></span></a>
-</nav>
-</section>
-<div id=disqus_thread></div>
-<script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//manabie.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script>
-<noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript>
-<a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a>
-</footer>
-</article>
-</div>
-<aside class="col-sm-3 ml-auto blog-sidebar">
-<section class=sidebar-module>
-<h4>Links</h4>
-<ol class=list-unstyled>
-<li><a href=https://manabie.com>About Us</a></li>
-<li><a href=https://manabie.breezy.hr>Careers</a></li>
-</ol>
-</section>
-</aside>
-</div>
-</div>
-<footer class=blog-footer>
-<p dir=auto>
-Except where otherwise noted, content on this site is licensed under a <a href=https://creativecommons.org/licenses/by-sa/4.0/>Creative Commons Attribution 4.0 International license</a>.
-</p>
-<p>
-<a href=#>Back to top</a>
-</p>
-</footer>
-</body>
-</html>
+<a class=nav-item href="https://twitter.com/intent/tweet?url=%2f2022%2f01%2funleash-self-host%2f&text=Self-hosting%20Unleash%20with%20Kubernetes" title="Tweet this"><span class="fab fa-twitter fa-2x"></span></a></nav></section><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//manabie.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></div><aside class="col-sm-3 ml-auto blog-sidebar"><section class=sidebar-module><h4>Links</h4><ol class=list-unstyled><li><a href=https://manabie.com>About Us</a></li><li><a href=https://manabie.breezy.hr>Careers</a></li></ol></section></aside></div></div><footer class=blog-footer><p dir=auto>Except where otherwise noted, content on this site is licensed under a <a href=https://creativecommons.org/licenses/by-sa/4.0/>Creative Commons Attribution 4.0 International license</a>.</p><p><a href=#>Back to top</a></p></footer></body></html>

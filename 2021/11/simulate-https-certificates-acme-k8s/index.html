@@ -1,353 +1,157 @@
-<!doctype html><html lang=en>
-<head>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<meta property="og:title" content="Simulate Let’s Encrypt certificate issuing in local Kubernetes">
-<meta property="og:description" content="Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster">
-<meta property="og:type" content="article">
-<meta property="og:url" content="/2021/11/simulate-https-certificates-acme-k8s/">
-<meta property="article:published_time" content="2021-11-23T14:28:23+07:00">
-<meta property="article:modified_time" content="2021-11-25T01:46:15+07:00">
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Simulate Let’s Encrypt certificate issuing in local Kubernetes">
-<meta name=twitter:description content="Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster">
-<meta name=generator content="Hugo 0.92.0">
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Simulate Let’s Encrypt certificate issuing in local Kubernetes","url":"/2021/11/simulate-https-certificates-acme-k8s/","wordCount":"1649","datePublished":"2021-11-23T14:28:23+07:00","dateModified":"2021-11-25T01:46:15+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Infrastructure, Security, k8s, cert-manager, CoreDNS, acme, http-01","description":"Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"}</script>
-<link rel=canonical href=/2021/11/simulate-https-certificates-acme-k8s/>
-<title>Simulate Let’s Encrypt certificate issuing in local Kubernetes | Manabie Tech Blog</title>
-<link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous>
-<script defer src=/js/fontawesome.min.f5072c55a0721857184db93a50561d7dc13975b4de2e19db7f81eb5f3fa57270.js integrity="sha256-9QcsVaByGFcYTbk6UFYdfcE5dbTeLhnbf4HrXz+lcnA=" crossorigin=anonymous></script>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta property="og:title" content="Simulate Let’s Encrypt certificate issuing in local Kubernetes"><meta property="og:description" content="Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"><meta property="og:type" content="article"><meta property="og:url" content="/2021/11/simulate-https-certificates-acme-k8s/"><meta property="article:published_time" content="2021-11-23T14:28:23+07:00"><meta property="article:modified_time" content="2021-11-25T01:46:15+07:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Simulate Let’s Encrypt certificate issuing in local Kubernetes"><meta name=twitter:description content="Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"><meta name=generator content="Hugo 0.94.2"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Simulate Let’s Encrypt certificate issuing in local Kubernetes","url":"/2021/11/simulate-https-certificates-acme-k8s/","wordCount":"1649","datePublished":"2021-11-23T14:28:23+07:00","dateModified":"2021-11-25T01:46:15+07:00","author":{"@type":"Person","name":"nvcnvn"},"keywords":"DevSecOps, Infrastructure, Security, k8s, cert-manager, CoreDNS, acme, http-01","description":"Simulate Let’s Encrypt HTTPS certificate issuing with HTTP-01 challenge in your local k8s cluster"}</script><link rel=canonical href=/2021/11/simulate-https-certificates-acme-k8s/><title>Simulate Let’s Encrypt certificate issuing in local Kubernetes | Manabie Tech Blog</title><link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous><script defer src=/js/fontawesome.min.f5072c55a0721857184db93a50561d7dc13975b4de2e19db7f81eb5f3fa57270.js integrity="sha256-9QcsVaByGFcYTbk6UFYdfcE5dbTeLhnbf4HrXz+lcnA=" crossorigin=anonymous></script>
 <script src=/js/haven.umd.min.5f4a3edd16edd243f2a9b07dbf1b371f8f1b18fbb29319aba09431678609a175.js integrity="sha256-X0o+3Rbt0kPyqbB9vxs3H48bGPuykxmroJQxZ4YJoXU=" crossorigin=anonymous></script>
-<script>Haven.create({notification:{styles:{background:'#428bca',textColor:'#ffffff',buttonBackgroundColor:'#f71559',buttonTextColor:'#ffffff'}},translations:{en:{notification:{policy:'Learn more.',message:'This website uses cookies.',accept:'Agree',decline:'Disagree'}}},services:[{name:'google-analytics',options:{id:"G-EJ2GNQJNM6"},purposes:['analytics'],inject:!0}]})</script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EJ2GNQJNM6"></script>
-<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date),gtag('config','G-EJ2GNQJNM6',{anonymize_ip:!1})}</script>
-<style>div.highlight>pre{padding:1rem}</style>
-</head>
-<body>
-<div class=blog-masthead>
-<div class=container>
-<nav class="nav blog-nav">
-<a class=nav-link href=/>Home</a>
-</nav>
-</div>
-</div>
-<header class=blog-header>
-<div class=container>
-<h1 class=blog-title dir=auto><a href=/ rel=home>Manabie Tech Blog</a></h1>
-<p class="lead blog-description" dir=auto>Sharing the humble technical knowledge we&rsquo;re using to improve education</p>
-</div>
-</header>
-<div class=container>
-<div class=row>
-<div class="col-sm-8 blog-main">
-<article class=blog-post>
-<header>
-<h2 class=blog-post-title dir=auto><a href=/2021/11/simulate-https-certificates-acme-k8s/>Simulate Let’s Encrypt certificate issuing in local Kubernetes</a></h2>
-<p class=blog-post-meta>
-<time datetime=2021-11-23T14:28:23+07:00>Tue Nov 23, 2021</time>
+<script>Haven.create({notification:{styles:{background:"#428bca",textColor:"#ffffff",buttonBackgroundColor:"#f71559",buttonTextColor:"#ffffff"}},translations:{en:{notification:{policy:"Learn more.",message:"This website uses cookies.",accept:"Agree",decline:"Disagree"}}},services:[{name:"google-analytics",options:{id:"G-EJ2GNQJNM6"},purposes:["analytics"],inject:!0}]})</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-EJ2GNQJNM6"></script>
+<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-EJ2GNQJNM6",{anonymize_ip:!1})}</script><style>div.highlight>pre{padding:1rem}</style></head><body><div class=blog-masthead><div class=container><nav class="nav blog-nav"><a class=nav-link href=/>Home</a></nav></div></div><header class=blog-header><div class=container><h1 class=blog-title dir=auto><a href=/ rel=home>Manabie Tech Blog</a></h1><p class="lead blog-description" dir=auto>Sharing the humble technical knowledge we&rsquo;re using to improve education</p></div></header><div class=container><div class=row><div class="col-sm-8 blog-main"><article class=blog-post><header><h2 class=blog-post-title dir=auto><a href=/2021/11/simulate-https-certificates-acme-k8s/>Simulate Let’s Encrypt certificate issuing in local Kubernetes</a></h2><p class=blog-post-meta><time datetime=2021-11-23T14:28:23+07:00>Tue Nov 23, 2021</time>
 in
 <span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/infrastructure/ rel="category tag">Infrastructure</a>, <a href=/categories/security/ rel="category tag">Security</a>
-<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/cert-manager/ rel=tag>cert-manager</a>, <a href=/tags/coredns/ rel=tag>CoreDNS</a>, <a href=/tags/acme/ rel=tag>acme</a>, <a href=/tags/http-01/ rel=tag>http-01</a>
-</p>
-</header>
-<p>We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/k8s/ rel=tag>k8s</a>, <a href=/tags/cert-manager/ rel=tag>cert-manager</a>, <a href=/tags/coredns/ rel=tag>CoreDNS</a>, <a href=/tags/acme/ rel=tag>acme</a>, <a href=/tags/http-01/ rel=tag>http-01</a></p></header><p>We write test to make sure our code work as expected, no matter that a Go code or YAML config. In this series, we will
 show how we develop and do integration tests using local k8s. The first part will show how we simulate the HTTPS certificate issue
 flow to allow our Platform engineers to test their config and allow our Front-end engineers to connect their application
-to local server with a self-signed HTTPS certificate.</p>
-<h4 id=lets-encrypt-acme--http-01-challenge-for-dummy>Let’s Encrypt ACME & HTTP-01 challenge for dummy</h4>
-<p>Let&rsquo;s Encrypt is an internet goodie. Talk to them nicely, and they will give you a free HTTPS certificate. We&rsquo;re using
-cert-manager to speak to them, the process can simplify as:</p>
-<ul>
-<li><strong>You</strong>: buy and then point <code>example.com</code> to your server.</li>
-<li><strong>Our cert-manager</strong> (via API requests): Hello Mr. Let&rsquo;s Encrypt, can I have a free HTTPS certificate do my <code>example.com</code> domain?</li>
-<li><strong>Let&rsquo;s Encrypt</strong> (via API responses): Sure thing! But first, I need to know if you owned <code>example.com.</code> Here I have a secure-random-token, put this secure-random-token to this path <code>http://example.com/.well-known/acme-challenge/&lt;SECURE-RANDOM-TOKEN></code> and make sure I can access and view it.</li>
-<li><strong>Our cert-manager</strong>: It is done, sir, can you check?</li>
-<li><strong>Let&rsquo;s Encrypt</strong>: Open <code>http://example.com/.well-known/acme-challenge/&lt;SECURE-RANDOM-TOKEN></code> in my browser. It seems legit. OK, here is the key for your HTTPS certificate.</li>
-</ul>
-<p>Let&rsquo;s Encrypt provide a better description or you can read the RFC 8555 for not so dummy:</p>
-<ul>
-<li><a href=https://letsencrypt.org/docs/challenge-types/#http-01-challenge>https://letsencrypt.org/docs/challenge-types/#http-01-challenge</a></li>
-<li><a href=https://datatracker.ietf.org/doc/html/rfc8555#section-4>https://datatracker.ietf.org/doc/html/rfc8555#section-4</a></li>
-</ul>
-<h4 id=setup-your-minikube>Setup your minikube</h4>
-<p><em>Example code at the end of the post</em>.<br>
-Cert-manager have a great tutorial here:</p>
-<ul>
-<li><a href=https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller>https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller</a></li>
-</ul>
-<p>You should follow the post. They provide many explanations.<br>
-Their post assumes you&rsquo;re testing on a real k8s cluster (GKE or any public cloud provider offers some free resource for testing).
-Our post is for minikube. Some dependencies required:</p>
-<ul>
-<li>minikube (we&rsquo;re using v1.24.0)</li>
-<li>helm (v3.7.0)</li>
-</ul>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>minikube start <span style=color:#75715e># then wait</span>
-minikube addons enable ingress
-<span style=color:#75715e># you can find this kuard.yaml in examples folder of this post</span>
-kubectl apply -f ./examples/kuard.yaml
-kubectl apply -f ./examples/http-only-ingress.yaml
-</code></pre></div><p>Everything should work as expected. Note that we install everything in the same namespace for the simplicity of the post.<br>
-Run <code>kubectl get pod -n default</code>, and you should get everything ready and running like this:</p>
-<pre tabindex=0><code>kuard-5cd5556bc9-kxt6p                                 1/1     Running   0          14m
-</code></pre><p>Checking the network services created by <code>kubectl get svc -n default</code>:</p>
-<pre tabindex=0><code>NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+to local server with a self-signed HTTPS certificate.</p><h4 id=lets-encrypt-acme--http-01-challenge-for-dummy>Let’s Encrypt ACME & HTTP-01 challenge for dummy</h4><p>Let&rsquo;s Encrypt is an internet goodie. Talk to them nicely, and they will give you a free HTTPS certificate. We&rsquo;re using
+cert-manager to speak to them, the process can simplify as:</p><ul><li><strong>You</strong>: buy and then point <code>example.com</code> to your server.</li><li><strong>Our cert-manager</strong> (via API requests): Hello Mr. Let&rsquo;s Encrypt, can I have a free HTTPS certificate do my <code>example.com</code> domain?</li><li><strong>Let&rsquo;s Encrypt</strong> (via API responses): Sure thing! But first, I need to know if you owned <code>example.com.</code> Here I have a secure-random-token, put this secure-random-token to this path <code>http://example.com/.well-known/acme-challenge/&lt;SECURE-RANDOM-TOKEN></code> and make sure I can access and view it.</li><li><strong>Our cert-manager</strong>: It is done, sir, can you check?</li><li><strong>Let&rsquo;s Encrypt</strong>: Open <code>http://example.com/.well-known/acme-challenge/&lt;SECURE-RANDOM-TOKEN></code> in my browser. It seems legit. OK, here is the key for your HTTPS certificate.</li></ul><p>Let&rsquo;s Encrypt provide a better description or you can read the RFC 8555 for not so dummy:</p><ul><li><a href=https://letsencrypt.org/docs/challenge-types/#http-01-challenge>https://letsencrypt.org/docs/challenge-types/#http-01-challenge</a></li><li><a href=https://datatracker.ietf.org/doc/html/rfc8555#section-4>https://datatracker.ietf.org/doc/html/rfc8555#section-4</a></li></ul><h4 id=setup-your-minikube>Setup your minikube</h4><p><em>Example code at the end of the post</em>.<br>Cert-manager have a great tutorial here:</p><ul><li><a href=https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller>https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller</a></li></ul><p>You should follow the post. They provide many explanations.<br>Their post assumes you&rsquo;re testing on a real k8s cluster (GKE or any public cloud provider offers some free resource for testing).
+Our post is for minikube. Some dependencies required:</p><ul><li>minikube (we&rsquo;re using v1.24.0)</li><li>helm (v3.7.0)</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>minikube start <span style=color:#75715e># then wait</span>
+</span></span><span style=display:flex><span>minikube addons enable ingress
+</span></span><span style=display:flex><span><span style=color:#75715e># you can find this kuard.yaml in examples folder of this post</span>
+</span></span><span style=display:flex><span>kubectl apply -f ./examples/kuard.yaml
+</span></span><span style=display:flex><span>kubectl apply -f ./examples/http-only-ingress.yaml
+</span></span></code></pre></div><p>Everything should work as expected. Note that we install everything in the same namespace for the simplicity of the post.<br>Run <code>kubectl get pod -n default</code>, and you should get everything ready and running like this:</p><pre tabindex=0><code>kuard-5cd5556bc9-kxt6p                                 1/1     Running   0          14m
+</code></pre><p>Checking the network services created by <code>kubectl get svc -n default</code>:</p><pre tabindex=0><code>NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
 kuard        ClusterIP      10.101.81.156   &lt;none&gt;        80/TCP                       22m
 kubernetes   ClusterIP      10.96.0.1       &lt;none&gt;        443/TCP                      61m
-
-</code></pre><p>Also, we should check the ingress by <code>kubectl get svc -n ingress-nginx</code>:</p>
-<pre tabindex=0><code>NAME                                 TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+</code></pre><p>Also, we should check the ingress by <code>kubectl get svc -n ingress-nginx</code>:</p><pre tabindex=0><code>NAME                                 TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
 ingress-nginx-controller             NodePort    10.99.82.10      &lt;none&gt;        80:31563/TCP,443:30703/TCP   4m39s
 ingress-nginx-controller-admission   ClusterIP   10.111.186.145   &lt;none&gt;        443/TCP                      4m39s
-</code></pre><p>We have:</p>
-<ul>
-<li>kuard: for the demo application</li>
-<li>ingress-nginx: play the role of network LoadBalancer for your cluster</li>
-</ul>
-<p>If you&rsquo;re working with a cluster on GKE or EKS, they will create a real IP, a network LB and assign that to your cluster.</p>
-<p>Then you can test the thing out with <code>curl -H 'Host: example.example.com' "http://$(minikube ip)"</code> to check the output.<br>
-Above command is equivalent with you modifying your <code>hosts</code> file to access localhost via example.example.com in browser.<br>
-Next, let install cert-manager in the same namespace:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>helm repo add jetstack https://charts.jetstack.io
-helm install cert-manager jetstack/cert-manager --version v1.6.0 --set installCRDs<span style=color:#f92672>=</span>true
-</code></pre></div><p>Check if stuff installed correctly:</p>
-<pre tabindex=0><code>NAME                                                   READY   STATUS    RESTARTS   AGE
+</code></pre><p>We have:</p><ul><li>kuard: for the demo application</li><li>ingress-nginx: play the role of network LoadBalancer for your cluster</li></ul><p>If you&rsquo;re working with a cluster on GKE or EKS, they will create a real IP, a network LB and assign that to your cluster.</p><p>Then you can test the thing out with <code>curl -H 'Host: example.example.com' "http://$(minikube ip)"</code> to check the output.<br>Above command is equivalent with you modifying your <code>hosts</code> file to access localhost via example.example.com in browser.<br>Next, let install cert-manager in the same namespace:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>helm repo add jetstack https://charts.jetstack.io
+</span></span><span style=display:flex><span>helm install cert-manager jetstack/cert-manager --version v1.6.0 --set installCRDs<span style=color:#f92672>=</span>true
+</span></span></code></pre></div><p>Check if stuff installed correctly:</p><pre tabindex=0><code>NAME                                                   READY   STATUS    RESTARTS   AGE
 cert-manager-6c576bddcf-hjdts                          1/1     Running   0          32m
 cert-manager-cainjector-669c966b86-ggs9v               1/1     Running   0          32m
 cert-manager-webhook-7d6cf57d55-mchqj                  1/1     Running   0          32m
 kuard-5cd5556bc9-kxt6p                                 1/1     Running   0          46m
-</code></pre><p>Normally, if you are on a real cluster, you can create an <code>Issuer</code> object point to Let&rsquo;s Encrypt staging environment like this:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>cert-manager.io/v1</span>
-<span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Issuer</span>
-<span style=color:#f92672>metadata</span>:
-    <span style=color:#f92672>name</span>: <span style=color:#ae81ff>letsencrypt-staging</span>
-<span style=color:#f92672>spec</span>:
-    <span style=color:#f92672>acme</span>:
-    <span style=color:#75715e># The ACME server URL</span>
-    <span style=color:#f92672>server</span>: <span style=color:#ae81ff>https://acme-staging-v02.api.letsencrypt.org/directory</span>
-    <span style=color:#75715e># Email address used for ACME registration</span>
-    <span style=color:#f92672>email</span>: <span style=color:#ae81ff>user@example.com</span>
-    <span style=color:#75715e># Name of a secret used to store the ACME account private key</span>
-    <span style=color:#f92672>privateKeySecretRef</span>:
-        <span style=color:#f92672>name</span>: <span style=color:#ae81ff>letsencrypt-staging</span>
-    <span style=color:#75715e># Enable the HTTP-01 challenge provider</span>
-    <span style=color:#f92672>solvers</span>:
-    - <span style=color:#f92672>http01</span>:
-        <span style=color:#f92672>ingress</span>:
-            <span style=color:#f92672>class</span>:  <span style=color:#ae81ff>nginx</span>
-</code></pre></div><p>Based on this configuration, cert-manager will speak to Let&rsquo;s Encrypt (staging in this case) to get the certificate.<br>
-But Let&rsquo;s Encrypt cannot access your server since everything is just your local IP. Also, the staging environment has
-some kind of rate limit. You cannot use it if your CI/CD runs really frequently.<br>
-One solution for this, believe it or not, is to deploy your own fake Let&rsquo;s Encrypt to simulate the flow.</p>
-<h4 id=introducing-pebble>Introducing Pebble</h4>
-<p><a href=https://github.com/letsencrypt/pebble>https://github.com/letsencrypt/pebble</a></p>
-<blockquote>
-<p>A miniature version of Boulder, Pebble is a small ACME test server not suited for use as a production CA.</p>
-</blockquote>
-<p>We have prepared for you a minimal installation of Pebble already (link at the end of post).<br>
-Let&rsquo;s install it in another namespace to simulate a different network 😂</p>
-<pre tabindex=0><code>kubectl create ns emulator
+</code></pre><p>Normally, if you are on a real cluster, you can create an <code>Issuer</code> object point to Let&rsquo;s Encrypt staging environment like this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>cert-manager.io/v1</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Issuer</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>name</span>: <span style=color:#ae81ff>letsencrypt-staging</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>acme</span>:
+</span></span><span style=display:flex><span>    <span style=color:#75715e># The ACME server URL</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>server</span>: <span style=color:#ae81ff>https://acme-staging-v02.api.letsencrypt.org/directory</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># Email address used for ACME registration</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>email</span>: <span style=color:#ae81ff>user@example.com</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># Name of a secret used to store the ACME account private key</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>privateKeySecretRef</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>name</span>: <span style=color:#ae81ff>letsencrypt-staging</span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># Enable the HTTP-01 challenge provider</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>solvers</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>http01</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>ingress</span>:
+</span></span><span style=display:flex><span>            <span style=color:#f92672>class</span>:  <span style=color:#ae81ff>nginx</span>
+</span></span></code></pre></div><p>Based on this configuration, cert-manager will speak to Let&rsquo;s Encrypt (staging in this case) to get the certificate.<br>But Let&rsquo;s Encrypt cannot access your server since everything is just your local IP. Also, the staging environment has
+some kind of rate limit. You cannot use it if your CI/CD runs really frequently.<br>One solution for this, believe it or not, is to deploy your own fake Let&rsquo;s Encrypt to simulate the flow.</p><h4 id=introducing-pebble>Introducing Pebble</h4><p><a href=https://github.com/letsencrypt/pebble>https://github.com/letsencrypt/pebble</a></p><blockquote><p>A miniature version of Boulder, Pebble is a small ACME test server not suited for use as a production CA.</p></blockquote><p>We have prepared for you a minimal installation of Pebble already (link at the end of post).<br>Let&rsquo;s install it in another namespace to simulate a different network 😂</p><pre tabindex=0><code>kubectl create ns emulator
 kubectl apply -f ./examples/pebble.yaml -n emulator
 kubectl get pod -n emulator
-</code></pre><p>and if everything run normally:</p>
-<pre tabindex=0><code>NAME                     READY   STATUS    RESTARTS   AGE
+</code></pre><p>and if everything run normally:</p><pre tabindex=0><code>NAME                     READY   STATUS    RESTARTS   AGE
 pebble-885bdd44c-cpv6r   1/1     Running   0          19s
-</code></pre><p>Now go back to default namespace and install the issuer point to our local Pebble:</p>
-<ul>
-<li>kubectl apply -f ./examples/pebble-issuer.yaml -n default</li>
-</ul>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>cert-manager.io/v1</span>
-<span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Issuer</span>
-<span style=color:#f92672>metadata</span>:
-  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>pebble-issuer</span>
-<span style=color:#f92672>spec</span>:
-  <span style=color:#f92672>acme</span>:
-    <span style=color:#f92672>skipTLSVerify</span>: <span style=color:#66d9ef>true</span>
-    <span style=color:#f92672>email</span>: <span style=color:#ae81ff>example@example.com</span>
-    <span style=color:#f92672>server</span>: <span style=color:#ae81ff>https://pebble.emulator:14000/dir</span>
-    <span style=color:#f92672>privateKeySecretRef</span>:
-      <span style=color:#f92672>name</span>: <span style=color:#ae81ff>pk-pebble-issuer</span>
-    <span style=color:#f92672>solvers</span>:
-      - <span style=color:#f92672>selector</span>:
-        <span style=color:#f92672>http01</span>:
-          <span style=color:#f92672>ingress</span>:
-            <span style=color:#f92672>class</span>: <span style=color:#ae81ff>nginx</span>
-</code></pre></div><p>Chicken and eggs issue here, our Pebble itself don&rsquo;t have valid cert =]] so we <code>skipTLSVerify: true</code>.<br>
-The <code>server</code> now pointed to <code>pebble</code> service an <code>emulator</code> namespace.<br>
-We should check if the issuer config correctly by <code>kubectl get issuer</code>:</p>
-<pre tabindex=0><code>NAME            READY   AGE
+</code></pre><p>Now go back to default namespace and install the issuer point to our local Pebble:</p><ul><li>kubectl apply -f ./examples/pebble-issuer.yaml -n default</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>cert-manager.io/v1</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Issuer</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>pebble-issuer</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>acme</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>skipTLSVerify</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>email</span>: <span style=color:#ae81ff>example@example.com</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>server</span>: <span style=color:#ae81ff>https://pebble.emulator:14000/dir</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>privateKeySecretRef</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>name</span>: <span style=color:#ae81ff>pk-pebble-issuer</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>solvers</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>selector</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>http01</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>ingress</span>:
+</span></span><span style=display:flex><span>            <span style=color:#f92672>class</span>: <span style=color:#ae81ff>nginx</span>
+</span></span></code></pre></div><p>Chicken and eggs issue here, our Pebble itself don&rsquo;t have valid cert =]] so we <code>skipTLSVerify: true</code>.<br>The <code>server</code> now pointed to <code>pebble</code> service an <code>emulator</code> namespace.<br>We should check if the issuer config correctly by <code>kubectl get issuer</code>:</p><pre tabindex=0><code>NAME            READY   AGE
 pebble-issuer   True    10s
 </code></pre><p>We should modify the installed http-only-ingress to have https:
-<code>kubectl apply -f ./examples/https-ingress.yaml</code>, you can see:</p>
-<ul>
-<li>kubectl get svc</li>
-</ul>
-<pre tabindex=0><code>NAME                        TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+<code>kubectl apply -f ./examples/https-ingress.yaml</code>, you can see:</p><ul><li>kubectl get svc</li></ul><pre tabindex=0><code>NAME                        TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
 cert-manager                ClusterIP      10.108.69.104   &lt;none&gt;          9402/TCP                     135m
 cert-manager-webhook        ClusterIP      10.98.30.215    &lt;none&gt;          443/TCP                      135m
 cm-acme-http-solver-8fm5v   NodePort       10.103.74.213   &lt;none&gt;          8089:30783/TCP               24m
 kuard                       ClusterIP      10.101.81.156   &lt;none&gt;          80/TCP                       149m
-</code></pre><p>cert-manager create a new <code>cm-acme-http-solver</code> service to handle the challenge verification, let check the challenge:</p>
-<ul>
-<li>kubectl get challenge</li>
-</ul>
-<pre tabindex=0><code>NAME                                           STATE     DOMAIN                AGE
+</code></pre><p>cert-manager create a new <code>cm-acme-http-solver</code> service to handle the challenge verification, let check the challenge:</p><ul><li>kubectl get challenge</li></ul><pre tabindex=0><code>NAME                                           STATE     DOMAIN                AGE
 quickstart-example-tls-rbxhn-3378267180-4102043678   pending   example.example.com   3m43s
-</code></pre><ul>
-<li>kubectl describe challenge quickstart-example-tls-rbxhn-3378267180-4102043678</li>
-</ul>
-<pre tabindex=0><code>Status:
+</code></pre><ul><li>kubectl describe challenge quickstart-example-tls-rbxhn-3378267180-4102043678</li></ul><pre tabindex=0><code>Status:
   Presented:   true
   Processing:  true
-  Reason:      Waiting for HTTP-01 challenge propagation: failed to perform self check GET request 'http://example.example.com/.well-known/acme-challenge/AfneYTxNeVkw25W2OPUcRPB0byhKfCwxisDFb9QJ9dw': Get &quot;http://example.example.com/.well-known/acme-challenge/AfneYTxNeVkw25W2OPUcRPB0byhKfCwxisDFb9QJ9dw&quot;: dial tcp: lookup example.example.com on 10.96.0.10:53: no such host
+  Reason:      Waiting for HTTP-01 challenge propagation: failed to perform self check GET request &#39;http://example.example.com/.well-known/acme-challenge/AfneYTxNeVkw25W2OPUcRPB0byhKfCwxisDFb9QJ9dw&#39;: Get &#34;http://example.example.com/.well-known/acme-challenge/AfneYTxNeVkw25W2OPUcRPB0byhKfCwxisDFb9QJ9dw&#34;: dial tcp: lookup example.example.com on 10.96.0.10:53: no such host
   State:       pending
 Events:
   Type    Reason     Age    From          Message
   ----    ------     ----   ----          -------
   Normal  Started    4m42s  cert-manager  Challenge scheduled for processing
   Normal  Presented  4m42s  cert-manager  Presented challenge using HTTP-01 challenge mechanism
-</code></pre><p>Hmmm, I forgot. Still, the <code>example.example.com</code> is just a fake domain. Another hack is needed for this blog post.<br>
-We can modify the CoreDNS config so the internal cluster can resolve to our internal IP. I call this a good hack
+</code></pre><p>Hmmm, I forgot. Still, the <code>example.example.com</code> is just a fake domain. Another hack is needed for this blog post.<br>We can modify the CoreDNS config so the internal cluster can resolve to our internal IP. I call this a good hack
 because it&rsquo;s similar to how the domain owner needs to point the domain to the server&rsquo;s IP.
-I hope that when some one reading this post, k8s still use <code>CoreDNS</code> and installed it in the <code>kube-system</code> namespace:</p>
-<ul>
-<li>kubectl -n kube-system describe configmap coredns</li>
-</ul>
-<p>You will see the config file somewhat like what we&rsquo;re trying to modify below</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>ip<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>kubectl get svc ingress-nginx-controller --no-headers -n ingress-nginx | awk <span style=color:#e6db74>&#39;{print$3}&#39;</span><span style=color:#66d9ef>)</span>
-cat <span style=color:#e6db74>&lt;&lt;EOF | kubectl apply -f -
-</span><span style=color:#e6db74>kind: ConfigMap
-</span><span style=color:#e6db74>metadata:
-</span><span style=color:#e6db74>  name: coredns
-</span><span style=color:#e6db74>  namespace: kube-system
-</span><span style=color:#e6db74>apiVersion: v1
-</span><span style=color:#e6db74>data:
-</span><span style=color:#e6db74>  Corefile: |
-</span><span style=color:#e6db74>    .:53 {
-</span><span style=color:#e6db74>        errors
-</span><span style=color:#e6db74>        health {
-</span><span style=color:#e6db74>           lameduck 5s
-</span><span style=color:#e6db74>        }
-</span><span style=color:#e6db74>        ready
-</span><span style=color:#e6db74>        kubernetes cluster.local in-addr.arpa ip6.arpa {
-</span><span style=color:#e6db74>           pods insecure
-</span><span style=color:#e6db74>           fallthrough in-addr.arpa ip6.arpa
-</span><span style=color:#e6db74>           ttl 30
-</span><span style=color:#e6db74>        }
-</span><span style=color:#e6db74>        prometheus :9153
-</span><span style=color:#e6db74>        forward . 1.1.1.1
-</span><span style=color:#e6db74>        cache 30
-</span><span style=color:#e6db74>        loop
-</span><span style=color:#e6db74>        reload
-</span><span style=color:#e6db74>        loadbalance
-</span><span style=color:#e6db74>    }
-</span><span style=color:#e6db74>    example.example.com {
-</span><span style=color:#e6db74>       hosts {
-</span><span style=color:#e6db74>         $ip example.example.com
-</span><span style=color:#e6db74>         fallthrough
-</span><span style=color:#e6db74>       }
-</span><span style=color:#e6db74>       whoami
-</span><span style=color:#e6db74>    }
-</span><span style=color:#e6db74>EOF</span>
-  kubectl delete pod -n kube-system --wait <span style=color:#66d9ef>$(</span>kubectl get pods -n kube-system | grep coredns | awk <span style=color:#e6db74>&#39;{print$1}&#39;</span><span style=color:#66d9ef>)</span>
-</code></pre></div><p>Delete everything (just for make sure):</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>kubectl delete -f ./examples/https-ingress.yaml
-kubectl delete -f ./examples/pebble-issuer.yaml
-kubectl delete -f ./examples/pebble.yaml -n emulator
-</code></pre></div><p>and try again:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>kubectl apply -f ./examples/pebble.yaml -n emulator
-kubectl apply -f ./examples/pebble-issuer.yaml
-kubectl apply -f ./examples/https-ingress.yaml
-</code></pre></div><p>Applying the new ingress with correct annotation will trigger a webhook to create new certificate (you can check for resources like Cert, Order, Challenge&mldr; status)</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml>  <span style=color:#f92672>annotations</span>:
-    <span style=color:#f92672>kubernetes.io/ingress.class</span>: <span style=color:#e6db74>&#34;nginx&#34;</span>    
-    <span style=color:#f92672>cert-manager.io/issuer</span>: <span style=color:#e6db74>&#34;pebble-issuer&#34;</span>
-</code></pre></div><ul>
-<li>kubectl get order</li>
-</ul>
-<pre tabindex=0><code>NAME                                      STATE   AGE
+I hope that when some one reading this post, k8s still use <code>CoreDNS</code> and installed it in the <code>kube-system</code> namespace:</p><ul><li>kubectl -n kube-system describe configmap coredns</li></ul><p>You will see the config file somewhat like what we&rsquo;re trying to modify below</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>ip<span style=color:#f92672>=</span><span style=color:#66d9ef>$(</span>kubectl get svc ingress-nginx-controller --no-headers -n ingress-nginx | awk <span style=color:#e6db74>&#39;{print$3}&#39;</span><span style=color:#66d9ef>)</span>
+</span></span><span style=display:flex><span>cat <span style=color:#e6db74>&lt;&lt;EOF | kubectl apply -f -
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>kind: ConfigMap
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>metadata:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  name: coredns
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  namespace: kube-system
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>apiVersion: v1
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>data:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  Corefile: |
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    .:53 {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        errors
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        health {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>           lameduck 5s
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        ready
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        kubernetes cluster.local in-addr.arpa ip6.arpa {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>           pods insecure
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>           fallthrough in-addr.arpa ip6.arpa
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>           ttl 30
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        prometheus :9153
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        forward . 1.1.1.1
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        cache 30
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        loop
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        reload
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>        loadbalance
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    example.example.com {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>       hosts {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>         $ip example.example.com
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>         fallthrough
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>       }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>       whoami
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>    }
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>EOF</span>
+</span></span><span style=display:flex><span>  kubectl delete pod -n kube-system --wait <span style=color:#66d9ef>$(</span>kubectl get pods -n kube-system | grep coredns | awk <span style=color:#e6db74>&#39;{print$1}&#39;</span><span style=color:#66d9ef>)</span>
+</span></span></code></pre></div><p>Delete everything (just for make sure):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>kubectl delete -f ./examples/https-ingress.yaml
+</span></span><span style=display:flex><span>kubectl delete -f ./examples/pebble-issuer.yaml
+</span></span><span style=display:flex><span>kubectl delete -f ./examples/pebble.yaml -n emulator
+</span></span></code></pre></div><p>and try again:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>kubectl apply -f ./examples/pebble.yaml -n emulator
+</span></span><span style=display:flex><span>kubectl apply -f ./examples/pebble-issuer.yaml
+</span></span><span style=display:flex><span>kubectl apply -f ./examples/https-ingress.yaml
+</span></span></code></pre></div><p>Applying the new ingress with correct annotation will trigger a webhook to create new certificate (you can check for resources like Cert, Order, Challenge&mldr; status)</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>  <span style=color:#f92672>annotations</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>kubernetes.io/ingress.class</span>: <span style=color:#e6db74>&#34;nginx&#34;</span>    
+</span></span><span style=display:flex><span>    <span style=color:#f92672>cert-manager.io/issuer</span>: <span style=color:#e6db74>&#34;pebble-issuer&#34;</span>
+</span></span></code></pre></div><ul><li>kubectl get order</li></ul><pre tabindex=0><code>NAME                                      STATE   AGE
 quickstart-example-tls-7k6zs-3378267180   valid   41s
-</code></pre><ul>
-<li>kubectl get cert</li>
-</ul>
-<pre tabindex=0><code>NAME                     READY   SECRET                   AGE
+</code></pre><ul><li>kubectl get cert</li></ul><pre tabindex=0><code>NAME                     READY   SECRET                   AGE
 quickstart-example-tls   True    quickstart-example-tls   37s
-</code></pre><p>Now let try to dial with HTTPS:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>curl -H <span style=color:#e6db74>&#39;Host: example.example.com&#39;</span> https://<span style=color:#66d9ef>$(</span>minikube ip<span style=color:#66d9ef>)</span>
-</code></pre></div><p>We should see some error:</p>
-<pre tabindex=0><code>curl: (60) SSL certificate problem: unable to get local issuer certificate
+</code></pre><p>Now let try to dial with HTTPS:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>curl -H <span style=color:#e6db74>&#39;Host: example.example.com&#39;</span> https://<span style=color:#66d9ef>$(</span>minikube ip<span style=color:#66d9ef>)</span>
+</span></span></code></pre></div><p>We should see some error:</p><pre tabindex=0><code>curl: (60) SSL certificate problem: unable to get local issuer certificate
 More details here: https://curl.haxx.se/docs/sslcerts.html
 </code></pre><p>When you make HTTPS requests, the process invokes much more complex steps. The OS or browser use a pre-installed certificate
 to validate your server cert - one of them is Let&rsquo;s Encrypt root cert, and of course, our pebble install have a test cert
-no one trust (no one should trust the cert using in this example - if you&rsquo;re not lazy like me, generate your own).<br>
-For now, just add an option to ignore the validation <code>curl -k -H 'Host: example.example.com' https://$(minikube ip)</code> and
-you will see some HTML.</p>
-<h4 id=testing-things-in-your-browser>Testing things in your browser</h4>
-<p>For this, you need to modify your host&rsquo;s files to point the domain to <code>minikube ip</code>.<br>
-We need to get the intermediate cert and use it to make the call successful:</p>
-<pre tabindex=0><code>kubectl exec -n emulator deploy/pebble -- sh -c &quot;apk add curl &gt; /dev/null; curl -ksS https://localhost:15000/intermediates/0&quot; &gt; pebble.intermediate.pem.crt
+no one trust (no one should trust the cert using in this example - if you&rsquo;re not lazy like me, generate your own).<br>For now, just add an option to ignore the validation <code>curl -k -H 'Host: example.example.com' https://$(minikube ip)</code> and
+you will see some HTML.</p><h4 id=testing-things-in-your-browser>Testing things in your browser</h4><p>For this, you need to modify your host&rsquo;s files to point the domain to <code>minikube ip</code>.<br>We need to get the intermediate cert and use it to make the call successful:</p><pre tabindex=0><code>kubectl exec -n emulator deploy/pebble -- sh -c &#34;apk add curl &gt; /dev/null; curl -ksS https://localhost:15000/intermediates/0&#34; &gt; pebble.intermediate.pem.crt
 curl --cacert pebble.intermediate.pem.crt -v https://example.example.com
-</code></pre><p>And you should see some HTML. If you really want to, you can add the certificate to your chrome via:</p>
-<ul>
-<li>Settings > Privacy and security > Security > Manage certificates > Authorities tab</li>
-</ul>
-<p>Choose the option for using it to verify the website, then you finally can access <a href=https://example.example.com>https://example.example.com</a> without
-a red warning, remember to remove that cert after you finish testing.</p>
-<h4 id=too-much-for-a-post-already>Too much for a post already</h4>
-<p>I admit that a lot of effort just for preparing this, Pebble provide you tool to inject some chaos into the flow and
-designed for cert-manager and other competing teams to test their ACME client implementation.<br>
-For our team, we need to spend time (mostly writing bash script) to make this process of setting up a new
+</code></pre><p>And you should see some HTML. If you really want to, you can add the certificate to your chrome via:</p><ul><li>Settings > Privacy and security > Security > Manage certificates > Authorities tab</li></ul><p>Choose the option for using it to verify the website, then you finally can access <a href=https://example.example.com>https://example.example.com</a> without
+a red warning, remember to remove that cert after you finish testing.</p><h4 id=too-much-for-a-post-already>Too much for a post already</h4><p>I admit that a lot of effort just for preparing this, Pebble provide you tool to inject some chaos into the flow and
+designed for cert-manager and other competing teams to test their ACME client implementation.<br>For our team, we need to spend time (mostly writing bash script) to make this process of setting up a new
 local cluster with only one command, and we have chance to testing out many different Ingress implementations
-(actually we&rsquo;re using Istio Gateway).<br>
-We see this as an opportunity to simulate the production environment, bring the
-development closer to the production environment and it is worth every single line of code.</p>
-<p>Almost forgot to add link to example here:</p>
-<ul>
-<li><a href=https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples>https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples</a></li>
-</ul>
-<hr>
-<footer>
-<div class=meta_item>
-<span class=meta_text>About <a href=/author/nvcnvn>nvcnvn</a></span>
-<br>
-<i>I like automation and infrastructure topics</i>
-<br>
-<span class=meta_text><a href=https://www.linkedin.com/in/nvcnvn target=_blank>https://www.linkedin.com/in/nvcnvn</a></span>
-</div>
-<hr>
-<section>
-<h4>Share</h4>
-<nav class="nav sharing-icons">
-<a class=nav-item href="https://www.facebook.com/sharer/sharer.php?u=%2f2021%2f11%2fsimulate-https-certificates-acme-k8s%2f" title="Share on Facebook"><span class="fab fa-facebook-f fa-2x" aria-hidden=true></span></a>
+(actually we&rsquo;re using Istio Gateway).<br>We see this as an opportunity to simulate the production environment, bring the
+development closer to the production environment and it is worth every single line of code.</p><p>Almost forgot to add link to example here:</p><ul><li><a href=https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples>https://github.com/manabie-com/manabie-com.github.io/tree/main/content%2Fposts%2Fsimulate-https-certificates-acme-k8s%2Fexamples</a></li></ul><hr><footer><div class=meta_item><span class=meta_text>About <a href=/author/nvcnvn>nvcnvn</a></span><br><i>I like automation and infrastructure topics</i><br><span class=meta_text><a href=https://www.linkedin.com/in/nvcnvn target=_blank>https://www.linkedin.com/in/nvcnvn</a></span></div><hr><section><h4>Share</h4><nav class="nav sharing-icons"><a class=nav-item href="https://www.facebook.com/sharer/sharer.php?u=%2f2021%2f11%2fsimulate-https-certificates-acme-k8s%2f" title="Share on Facebook"><span class="fab fa-facebook-f fa-2x" aria-hidden=true></span></a>
 <a class=nav-item href="https://www.linkedin.com/shareArticle?mini=true&url=%2f2021%2f11%2fsimulate-https-certificates-acme-k8s%2f" title="Share on LinkedIn"><span class="fab fa-linkedin-in fa-2x" aria-hidden=true></span></a>
-<a class=nav-item href="https://twitter.com/intent/tweet?url=%2f2021%2f11%2fsimulate-https-certificates-acme-k8s%2f&text=Simulate%20Let%e2%80%99s%20Encrypt%20certificate%20issuing%20in%20local%20Kubernetes" title="Tweet this"><span class="fab fa-twitter fa-2x"></span></a>
-</nav>
-</section>
-<div id=disqus_thread></div>
-<script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return}var b=document,a=b.createElement('script');a.async=!0,a.src='//manabie.disqus.com/embed.js',a.setAttribute('data-timestamp',+new Date),(b.head||b.body).appendChild(a)})()</script>
-<noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript>
-<a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a>
-</footer>
-</article>
-</div>
-<aside class="col-sm-3 ml-auto blog-sidebar">
-<section class=sidebar-module>
-<h4>Links</h4>
-<ol class=list-unstyled>
-<li><a href=https://manabie.com>About Us</a></li>
-<li><a href=https://manabie.breezy.hr>Careers</a></li>
-</ol>
-</section>
-</aside>
-</div>
-</div>
-<footer class=blog-footer>
-<p dir=auto>
-Except where otherwise noted, content on this site is licensed under a <a href=https://creativecommons.org/licenses/by-sa/4.0/>Creative Commons Attribution 4.0 International license</a>.
-</p>
-<p>
-<a href=#>Back to top</a>
-</p>
-</footer>
-</body>
-</html>
+<a class=nav-item href="https://twitter.com/intent/tweet?url=%2f2021%2f11%2fsimulate-https-certificates-acme-k8s%2f&text=Simulate%20Let%e2%80%99s%20Encrypt%20certificate%20issuing%20in%20local%20Kubernetes" title="Tweet this"><span class="fab fa-twitter fa-2x"></span></a></nav></section><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//manabie.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></div><aside class="col-sm-3 ml-auto blog-sidebar"><section class=sidebar-module><h4>Links</h4><ol class=list-unstyled><li><a href=https://manabie.com>About Us</a></li><li><a href=https://manabie.breezy.hr>Careers</a></li></ol></section></aside></div></div><footer class=blog-footer><p dir=auto>Except where otherwise noted, content on this site is licensed under a <a href=https://creativecommons.org/licenses/by-sa/4.0/>Creative Commons Attribution 4.0 International license</a>.</p><p><a href=#>Back to top</a></p></footer></body></html>
