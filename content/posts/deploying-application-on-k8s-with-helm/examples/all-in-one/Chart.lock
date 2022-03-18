@@ -1,0 +1,9 @@
+dependencies:
+- name: another-nginx
+  repository: file://../another-nginx
+  version: 0.1.0
+- name: mynginx
+  repository: file://../mynginx
+  version: 0.1.0
+digest: sha256:7fd5f319b4ae8a45e97f6b9806022d226b785149297a9487acc2a7551cddeff1
+generated: "2021-12-15T15:14:37.612073449+07:00"
