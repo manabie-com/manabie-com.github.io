@@ -1,0 +1,12 @@
+
+version: '3'
+services:
+  n1:
+    container_name: n1
+    image: nats:2.6.6-alpine3.14
+    command: "--config /jetstream.config"
+    ports:
+      - 4223:4223
+    volumes:
+      - ./jetstream.config:/jetstream.config
+      - ./persistent-data/server-n1/:/data/jetstream
