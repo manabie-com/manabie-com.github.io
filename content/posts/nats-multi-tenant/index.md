@@ -1,5 +1,5 @@
 +++
-date = "2021-12-10T14:28:23+07:00"
+date = "2022-03-18T10:00:00+07:00"
 author = "duchh"
 description = "Write the way to set up NATS multi-tenant."
 title = "Set up NATS multi-tenant in golang"
