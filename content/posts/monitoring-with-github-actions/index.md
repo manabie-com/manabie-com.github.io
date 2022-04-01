@@ -27,6 +27,7 @@ To do this, were going to use three Github actions.
 
 ```yaml
 # github/workflows/check_weather.yml`
+
 name: check_weather
 on:
   schedule: # run at 010:45 UTC daily
@@ -38,14 +39,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-	  # checkout code
+      # checkout code
       - uses: actions/checkout@v2
      
       # run script
       - name: Check Weather
         shell: bash
-        run: |
-		  ./check-weather.sh
+        run: ./check-weather.sh
       
       # post results
       - if: failure()
@@ -68,6 +68,8 @@ We're using this action [rtCamp/action-slack-notify](https://github.com/rtCamp/a
 We need to perform some check (like the weather), and exit with status 0 if it's ok, or exit with a non-zero status if theres a problem.
 
 ```bash
+# check-weather.sh
+
 #!/bin/bash
 
 # fetch the temperature
