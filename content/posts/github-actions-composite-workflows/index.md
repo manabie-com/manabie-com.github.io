@@ -9,7 +9,7 @@ slug = "create-a-reusable-workflow-for-github-actions"
 +++
 
 This blog post focuses on how we can create a reusable workflow for GitHub Actions.
-The do's and don'ts will be elaborate along the way.
+The do's and don'ts will be elaborated along the way.
 
 ### **1. What are the available options?**
 
@@ -69,7 +69,7 @@ cd reusing-workflows
 
 #### 2.2. Creating a new composite action
 
-A composite action must have its own folder, preferrably inside `.github` directory.
+A composite action must have its own folder, preferably inside `.github` directory.
 We will create a new action called `setup-kubectl` in the following path.
 
 ```bash
@@ -210,7 +210,7 @@ inputs:
 ##### **Handling different configurations for different environments**
 
 Assuming the environments have already been set up, the project ID,
-cluster name, etc... will not changed for each environment.
+cluster name, etc... will be the same for an environment.
 
 Thus, we can implement a simple switch case to tell the action which
 parameters to use:
@@ -303,7 +303,7 @@ Error: Unhandled error: SyntaxError: Invalid or unexpected token
 ```
 
 Remember that the service account key is a JSON. There are a lof of special characters in the key.
-We have not escape those characters yet, so we cannot directly input it into the javascript.
+We have not escaped those characters yet, so we cannot directly input it into the javascript.
 
 Luckily, the action [google-github-actions/auth@v0](https://github.com/google-github-actions/auth)
 allows us to input the key in a base64 format instead. After encoded, the key will look like this:
@@ -422,7 +422,7 @@ Time to commit and push the update
 
 ```bash
 git add .
-git commit -m "Allow to setup kubectl for different environments"
+git commit -m "Handle different environments for setup-kubectl"
 ```
 
 Finally, we can trigger the workflow `gke` using the Github UI. If using the CLI, the command would be:
