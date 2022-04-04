@@ -12,7 +12,7 @@ slug = "github-actions-for-monitoring-tasks"
 
 Github actions has a CRON schedule trigger we can use run scripts on a custom schedule. It's pretty cool that Github Actions can run jobs on a CRON schedule, and we can use this ability to cover some of our dev-ops needs.
 
-At Manabie, we used this to check if any of our domain certificates were close to their expiry. Each day, a job is starts at 10:45AM, checks the certificates of each cluster, and posts to our `#monitoring` Slack if any certificate is too close to expiring.
+For example, we used this to check if any of our domain certificates were close to their expiry. Each day, a github action  runs at 10:45, checks if our certificates are dangerously close to expiring, and posts to our `#monitoring` Slack if any of them are.
 
 
 ### The Workflow
