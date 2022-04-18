@@ -13,7 +13,7 @@
 or
     ```bash
     git clone <this repo>
-    git submodule update --recursive
+    git submodule update --init --recursive
     ```
 
 2. Run hugo with
