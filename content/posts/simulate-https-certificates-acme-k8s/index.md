@@ -29,7 +29,7 @@ Let's Encrypt provide a better description or you can read the RFC 8555 for not 
 #### Setup your minikube
 *Example code at the end of the post*.  
 Cert-manager have a great tutorial here:
-- https://cert-manager.io/docs/tutorials/acme/ingress/#step-2-deploy-the-nginx-ingress-controller
+- https://cert-manager.io/docs/tutorials/acme/nginx-ingress/#step-2---deploy-the-nginx-ingress-controller
 
 You should follow the post. They provide many explanations.  
 Their post assumes you're testing on a real k8s cluster (GKE or any public cloud provider offers some free resource for testing). 
