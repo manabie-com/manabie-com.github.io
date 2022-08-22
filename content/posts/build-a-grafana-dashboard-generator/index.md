@@ -386,6 +386,14 @@ func MakeConfig() error {
 }
 ```
 
+- Project's structure will look like:
+```
+my-repo/
+├─ grafonnet/
+├─ dashboard.jsonnet
+├─ main.go
+```
+
 ## More
 When you are able to config dashboard as code, in particular: using golang to make config base Grafonnet lib, you can totally add more feature such as :
 - Create and manage dashboard config files with jsonnet format instead of raw json files.
