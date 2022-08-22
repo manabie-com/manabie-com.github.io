@@ -1,6 +1,6 @@
 +++
-title: "Build a Grafana dashboard using Grafonnet"
-date: 2022-08-22T16:19:32+07:00
+title = "Build a Grafana dashboard using Grafonnet"
+date = "2022-08-22T16:19:32+07:00"
 author = "buivuanh"
 description = "This tutorial helps you build Grafana dashboard config by using Grafonnet and golang."
 categories = ["Monitoring", "Automation"]
