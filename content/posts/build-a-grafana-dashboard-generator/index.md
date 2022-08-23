@@ -213,7 +213,6 @@ func MakeConfig() error {
 ```
 
 - Result will look like:
-
 ```
 {
    "__inputs": [ ],
@@ -385,6 +384,7 @@ func MakeConfig() error {
    "version": 0
 }
 ```
+![Dashboard](graph.png)
 
 - Project's structure will look like:
 ```
@@ -393,6 +393,8 @@ my-repo/
 ├─ dashboard.jsonnet
 ├─ main.go
 ```
+
+### [Full source code](https://github.com/manabie-com/manabie-com.github.io/tree/main/content/posts/build-a-grafana-dashboard-generator/examples)
 
 ## More
 When you are able to config dashboard as code, in particular: using golang to make config base Grafonnet lib, you can totally add more feature such as :
