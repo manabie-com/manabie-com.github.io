@@ -1,16 +1,16 @@
 +++
 date = "2022-08-23T17:10:49+07:00"
 author = "duongcongtoai"
-description = "TODO"
+description = "An incubating stress test framework written in Golang"
 title = "J4 stress test framework"
 categories = ["DevSecOps", "Testing"]
-tags = ["Kubernetes", "integration-test", "Golang", "microservices"]
+tags = ["Stress Test","Kubernetes","Golang","Raft"]
 slug = "j4-stress-test-framework"
 +++
 ## Why stress test
 
-At Manabie, we have already implemented bunch of features for the business, mostly to support ERP in education domain. The traffic on production is not that high. For each cluster (of each clients), it barely reach 100 rpc on our Grafana dashboard, and everything looks safe. 
-But no, we realize that in our roadmap, even though each cluster traffic is not that significant, but when they all combined into one single multi-tenant cluster (which is a topic for another day), we may encouter performance issues unprepared. And thus we have an epic to plan for stress test developing in our Kanban dashboard.
+At Manabie, we have already implemented bunch of features for the business, mostly to support ERP in education domain. The traffic on production is not that high. For each cluster (of each clients), it barely reaches 100 rpc on our Grafana dashboard, and everything looks safe. 
+But no, we realize that in our roadmap, we have a plan to merge all the cluster into a multi-tenant cluster. We don't know if the cluster merge will affect some resources, maybe there are extensively used features that we will not be aware of (features team are rapidly adding more APIs, as the business grows) and we may encouter performance issues unprepared. And thus we have an epic to plan for stress test in our Kanban dashboard.
 
 ## Why another framework
 
