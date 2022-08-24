@@ -15,14 +15,15 @@ But no, we realize that in our roadmap, even though each cluster traffic is not 
 ## Why another framework
 
 What we want:
-- Programmable interface (Golang): In Manabie, we write a lot of integration test using Golang, it is already a normal routine of every developer, and stress testing script is just another integration test script, but with high load and orchestrated by the stress test framework. Thus, we want our developer to feel indifference between writing an integration test and stress test. Another reason for using programmable interface is that we want to inject custom metadata into the stressed test requests such as prometheus client side metrics, or Jaeger trace.
+- Programmable interface (Golang): In Manabie, we write a lot of integration test using Golang, it is already a normal routine of every developer, and stress testing script is just another integration test script, but with high load and orchestrated by the stress test framework. Thus, we want our developer to feel indifference between writing integration test and stress test. Another reason for using programmable interface is that we want to inject custom metadata into the stressed test requests such as prometheus client side metrics, or Jaeger trace.
 - Freedom of protocol: In Manabie we use different types of protocol: Grpc/Restful/Graphql. The framework should support or allow us to provide implementation for those protocols.
-- Scalable deployment together with K8S: this is a quality we want in a framework (even though we may don't need it right now), that it can scaled and integrate well with K8S eco-system. We want to provide utility to our developer to stress test their service without complex setup: how many request to simulate, how fast the rpc increase, gradually or exponentially,... And the framework should behave correctly with what it promise. In order to do that, it must be deployed in cluster mode, into multiple containers with certain level of fault tolerant (aka one worker goes down, the workload must be handled by another newly spawned worker)
+- Scalable deployment together with K8S: this is a quality we want in a framework (even though we may don't need it right now), that it can scale and integrate well with K8S ecosystem. We want to provide utility to our developer to stress test their service without complex setup: how many request to simulate, how fast the rpc increase, gradually or exponentially,... And the framework should behave correctly with what it promise. In order to do that, it must be deployed in cluster mode, into multiple containers with certain level of fault tolerant (aka one worker goes down, the workload must be handled by another newly spawned worker)
 
 
 K6s and Locust are good options but they do not provide the option for a Golang friendly programmable interface. You may argue that language does not matter, but for us in this case it does.
 
-## J4 (Jarvan)
+Thus, J4 (Jarvan IV) was born
+## Incubating J4 the stress test framework 
 ![J4](./images/j4-icon.png)
 ### Core concept
 #### Scenario:
@@ -39,11 +40,12 @@ A scenario needs to (partially) make simulating requests, aka the requests the s
 
 There are several issues with this approach is that:
 - The framework must spam requests really fast, thus it need a pool of precreated user accounts. Else, by stress testing chat module, we accidentally stress test other modules (user module, firebase, ....). 
-- The stream can be disconnected during the stress test, the scenario must be written to cover this case, that it will reconnect to the server if the stream is disconnected. The logic is not simple, and it is hard for a generic framework do support us this requirement from end to end.
+- The stream can be disconnected during the stress test, the scenario must be written to cover this case, that it will reconnect to the server if the stream is disconnected. 
+=> The logic is not simple, and it is hard for a generic framework do support us this requirement from end to end.
 
 #### Worker
 
-A for loop inside Golang that simultatneously execute a user defined function, something like:
+This is an execution unit of J4 framework, it is just a for loop inside Golang that simultaneously executes a user defined function, something like:
 ```go
 for {
     select {
@@ -54,6 +56,30 @@ for {
     }
 }
 ```
+J4 also provides user option to use closure to create the scenario function, to initialize some customized logic. We may need more sophisticated hooks later, but for now we only provide a simple closure to framework user.
+
+```go
+
+func myscenarioClosure(ctx context.Context) return func(context.Context) {
+	userID := getSomeUserFromPool(ctx)
+	streamID := createChatStreamForUser(userID)
+	go pingToKeepStreamAlive(userID,streamID)
+	return func(ctx context.Context) {
+		sendMessageToChat(userID)
+	}
+}
+
+myscenarioFunction := myscenarioClosure(ctx)
+for {
+    select {
+        case <-ctx.Done():
+            return
+        default:
+            myscenarioFunction(childCtx)
+    }
+}
+```
+
 #### Cycles
 
 J4 organizes a scenario lifetime into 3 phases:
