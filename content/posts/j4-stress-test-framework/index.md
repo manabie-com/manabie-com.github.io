@@ -92,7 +92,7 @@ This looks bad, because we layer above should not make assumption about the impl
 J4 tries to support multiple protocol, including Grpc/HTTP/Grahql. The developers that write the stress test script must use the library provided by platform team, so that we can help them gather client side metrics in a generic fashion, for example, this is the code sample that inject some grpc client side metrics:
 
 ```go
-    import 	"go.opencensus.io/tag"
+import 	"go.opencensus.io/tag"
 
 func injectCustomTagInterceptor(tagKey tag.Key, value string) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{},
@@ -145,7 +145,7 @@ For every J4 node, no matter what role it is (distributor or executor) we always
 - 10 nodes in a healthy RAFT cluster means that the leader node needs to send heart beat to 9 other nodes, if if any data mutation happen, the leader also has to replicate its state change to those nodes. 
 - J4 storage layer uses rqlite to retrieve data of scenario, tasks to execute,.. But after all, read requests always go to the leader node => the replicated data in the follower rqlite is only used for high availability in case the leader fails to connect. 10 backup nodes are unnecesary.
 
-Although we may need many J4 nodes to execute the tasks, we don't actually need that much node to be highly-available. We realized that we have misunderstood 2 types of high-availability we want:
+Although we may need many J4 nodes to execute the tasks, we don't actually need that much node to be highly-available. We realized that we have misunderstood some types of high-availability we want:
 - highly available storage (rqlite)
 - highly available task allocator (currently also the rqlite node that is firstly elected as leader)
 - somewhat highly available workers
@@ -155,3 +155,8 @@ So, the enhanced version of J4 should be able to answer, what happen if one of t
 
 At runtime, tasks executor can also fail (either crash or network partition). The task distributor need to recognize such event and redistribute tasks to the rest of current avaiable executors, or maybe spawn new ones if needed.
 
+
+## Reference
+
+- [RAFT paper](https://raft.github.io/raft.pdf)
+- [K6S](https://k6.io/)
