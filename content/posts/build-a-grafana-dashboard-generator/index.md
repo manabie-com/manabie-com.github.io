@@ -11,7 +11,7 @@ slug = "build-a-grafana-dashboard-using-grafonnet"
 ## Overview
 
 - Currently, if we want to create a Grafana dashboard, we often use UI and copy json config into our repo.
-- And We have to manager folder which contains dashboard configs JSON files.
+- And We have to manage folder which contains dashboard configs JSON files.
 
 => Maintain a set of dashboards for people with conflicting preferences and goals. Or you’re dealing with confusion
 because one graph shows errors in one color and a new one uses a different color. Or there’s a new feature in Grafana
