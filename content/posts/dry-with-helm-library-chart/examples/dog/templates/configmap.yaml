@@ -1,0 +1,5 @@
+{{- include "animal.configmap" (list . "dog.configmap") -}}
+{{- define "dog.configmap" -}}
+data:
+  speak: "bow wow"
+{{- end -}}
