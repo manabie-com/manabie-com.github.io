@@ -1,0 +1,6 @@
+dependencies:
+- name: animal
+  repository: file://../animal
+  version: 0.1.0
+digest: sha256:e527733b67bfe8dc2bc6f0f1275a09b35febb0f6404271c4853c724b6f970a5e
+generated: "2022-08-25T14:46:34.212337189+07:00"
