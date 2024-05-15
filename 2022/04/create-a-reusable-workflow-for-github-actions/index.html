@@ -1,0 +1,270 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta property="og:title" content="Create a reusable workflow for GitHub Actions"><meta property="og:description" content="Create a reusable workflow for GitHub Actions"><meta property="og:type" content="article"><meta property="og:url" content="/2022/04/create-a-reusable-workflow-for-github-actions/"><meta property="article:published_time" content="2022-04-01T12:00:00+07:00"><meta property="article:modified_time" content="2022-04-01T13:54:44+07:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Create a reusable workflow for GitHub Actions"><meta name=twitter:description content="Create a reusable workflow for GitHub Actions"><meta name=generator content="Hugo 0.126.0"><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Create a reusable workflow for GitHub Actions","url":"/2022/04/create-a-reusable-workflow-for-github-actions/","wordCount":"1462","datePublished":"2022-04-01T12:00:00+07:00","dateModified":"2022-04-01T13:54:44+07:00","author":{"@type":"Person","name":"anhpngt"},"keywords":"DevSecOps, CI/CD, GitHub Actions, GitHub, github, github action","description":"Create a reusable workflow for GitHub Actions"}</script><link rel=canonical href=/2022/04/create-a-reusable-workflow-for-github-actions/><title>Create a reusable workflow for GitHub Actions | Manabie Tech Blog</title>
+<link href=/css/style.beb8012edc08ba10be012f079d618dc243812267efe62e11f22fe49618f976a4.css rel=stylesheet integrity="sha256-vrgBLtwIuhC+AS8HnWGNwkOBImfv5i4R8i/klhj5dqQ=" crossorigin=anonymous><script defer src=/js/fontawesome.min.f5072c55a0721857184db93a50561d7dc13975b4de2e19db7f81eb5f3fa57270.js integrity="sha256-9QcsVaByGFcYTbk6UFYdfcE5dbTeLhnbf4HrXz+lcnA=" crossorigin=anonymous></script><script src=/js/haven.umd.min.5f4a3edd16edd243f2a9b07dbf1b371f8f1b18fbb29319aba09431678609a175.js integrity="sha256-X0o+3Rbt0kPyqbB9vxs3H48bGPuykxmroJQxZ4YJoXU=" crossorigin=anonymous></script><script>Haven.create({notification:{styles:{background:"#428bca",textColor:"#ffffff",buttonBackgroundColor:"#f71559",buttonTextColor:"#ffffff"}},translations:{en:{notification:{policy:"Learn more.",message:"This website uses cookies.",accept:"Agree",decline:"Disagree"}}},services:[{name:"google-analytics",options:{id:"G-EJ2GNQJNM6"},purposes:["analytics"],inject:!0}]})</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-EJ2GNQJNM6"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-EJ2GNQJNM6")}</script><style>div.highlight>pre{padding:1rem}</style></head><body><div class=blog-masthead><div class=container><nav class="nav blog-nav"><a class=nav-link href=/>Home</a></nav></div></div><header class=blog-header><div class=container><h1 class=blog-title dir=auto><a href=/ rel=home>Manabie Tech Blog</a></h1><p class="lead blog-description" dir=auto>Sharing the humble technical knowledge we&rsquo;re using to improve education</p></div></header><div class=container><div class=row><div class="col-sm-8 blog-main"><article class=blog-post><header><h2 class=blog-post-title dir=auto><a href=/2022/04/create-a-reusable-workflow-for-github-actions/>Create a reusable workflow for GitHub Actions</a></h2><p class=blog-post-meta><time datetime=2022-04-01T12:00:00+07:00>Fri Apr 01, 2022</time>
+in
+<span class="fas fa-folder" aria-hidden=true></span>&nbsp;<a href=/categories/devsecops/ rel="category tag">DevSecOps</a>, <a href=/categories/ci/cd/ rel="category tag">CI/CD</a>, <a href=/categories/github-actions/ rel="category tag">GitHub Actions</a>, <a href=/categories/github/ rel="category tag">GitHub</a>
+<span class="fas fa-tag" aria-hidden=true></span>&nbsp;<a href=/tags/github/ rel=tag>github</a>, <a href=/tags/github-action/ rel=tag>github action</a></p></header><p>This blog post focuses on how we can create a reusable workflow for GitHub Actions.
+The do&rsquo;s and don&rsquo;ts will be elaborated along the way.</p><h3 id=1-what-are-the-available-options><strong>1. What are the available options?</strong></h3><p>There are two major types of workflows that can be reused in Github Actions:</p><ul><li><a href=https://docs.github.com/en/actions/using-workflows/reusing-workflows>Custom actions</a></li><li><a href=https://docs.github.com/en/actions/creating-actions/about-custom-actions>Reusable workflows</a></li></ul><p>Reusable workflows are quite new. In this blog, we decide to use <em>custom actions</em>
+(or more specifically, composite actions). The main reason is because we want
+to run the workflow inside a job, along with other steps (to share caches, tokens, etc&mldr;).
+Meanwhile, <strong>reusable workflow must be run in a separate job</strong>, so it is not desirable for our use-case.</p><h3 id=2-reusing-an-action><strong>2. Reusing an action</strong></h3><p>In Manabie, we are using Google Kubernetes Engine (GKE) to host our services, and
+Github Action for CI/CD. We have a lot of Github Action workflows (deployment, testing,
+monitoring, etc&mldr;), and in every workflow, we have to keep copying-and-pasting the same
+step to grant Github Action access to our GKE cluster.</p><p>It looks something like this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>...
+</span></span><span style=display:flex><span>  - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Authenticate to Google Cloud</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/auth@v0</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>credentials_json</span>: <span style=color:#ae81ff>${{ env.SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>manabie-stag</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>create_credentials_file</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup Cloud SDK</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/setup-gcloud@v0</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>manabie-stag</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup kubectl</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>run</span>: <span style=color:#ae81ff>gcloud container clusters get-credentials manabie-stag-cluster --region asia-southeast1</span>
+</span></span><span style=display:flex><span>...
+</span></span></code></pre></div><p>As copying-and-pasting is troublesome and error prone (you know, DRY principle),
+in this blog, we explore how to create an action that can be reused for many workflows.</p><h4 id=21-initializing-a-new-repository>2.1. Initializing a new repository</h4><p>To run the workflow, we need a Github repository. In this blog, the
+example repository will be <code>manabie-com/reusing-workflows</code>. Replace
+the name of the repository with your own.</p><p>Clone the repository:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>git clone manabie-com/reusing-workflows
+</span></span><span style=display:flex><span>cd reusing-workflows
+</span></span></code></pre></div><h4 id=22-creating-a-new-composite-action>2.2. Creating a new composite action</h4><p>A composite action must have its own folder, preferably inside <code>.github</code> directory.
+We will create a new action called <code>setup-kubectl</code> in the following path.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>touch -p .github/actions/setup-kubectl/action.yaml
+</span></span></code></pre></div><p>Note that the file name must be <code>action.yaml</code> or <code>action.yml</code>. Other names will not work.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/actions/setup-kubectl/action.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;setup-kubectl&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Setup gcloud and kubenetes&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>inputs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>service_account_key</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Service account key&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>runs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>using</span>: <span style=color:#e6db74>&#34;composite&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>steps</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Authenticate to Google Cloud</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/auth@v0</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>credentials_json</span>: <span style=color:#ae81ff>${{ inputs.SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>manabie-stag</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>create_credentials_file</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup Cloud SDK</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/setup-gcloud@v0</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>manabie-stag</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup kubectl</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>shell</span>: <span style=color:#ae81ff>bash</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>run</span>: <span style=color:#ae81ff>gcloud container clusters get-credentials manabie-stag-cluster --region asia-southeast1</span>
+</span></span></code></pre></div><p>A few things to note:</p><ul><li>We cannot use directly use Github secrets inside a composite action.
+The only way to access secrets is to input it via <code>inputs</code> fields. In this case,
+we ask the caller to input the secret key to <code>service_account_key</code> field.</li></ul><h4 id=23-using-the-composite-action>2.3. Using the composite action</h4><p>In this example, we use <code>setup-kubectl</code> in an action name <code>gke</code> from <strong>the same repository</strong>.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>touch -p .github/workflows/gke.yaml
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/workflows/gke.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#ae81ff>gke</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>on</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>workflow_dispatch</span>:
+</span></span><span style=display:flex><span><span style=color:#f92672>jobs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>manabie-stag</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>runs-on</span>: <span style=color:#ae81ff>ubuntu-20.04</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>steps</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Checkout source</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/checkout@v3</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup kubectl</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>./.github/actions/setup-kubectl</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>service_account_key</span>: <span style=color:#ae81ff>${{ secrets.SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Run some kubectl commands</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>run</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          kubectl get namespaces
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          kubectl get nodes</span>          
+</span></span></code></pre></div><p>We also need to add the <code>SERVICE_ACCOUNT_KEY</code> to the Github secrets
+(in the Github repository <code>Settings</code> -> <code>Secrets</code> -> <code>Actions</code>).
+The key can be retrieved from the GCP console, in the <code>IAM and admin</code> -> <code>Service accounts</code> section.
+The key is a JSON file that looks like:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;type&#34;</span>: <span style=color:#e6db74>&#34;service_account&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;project_id&#34;</span>: <span style=color:#e6db74>&#34;manabie-stag&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;private_key_id&#34;</span>: <span style=color:#e6db74>&#34;...&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;private_key&#34;</span>: <span style=color:#e6db74>&#34;-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;client_email&#34;</span>: <span style=color:#e6db74>&#34;manabie@manabie-stag.iam.gserviceaccount.com&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;client_id&#34;</span>: <span style=color:#e6db74>&#34;...&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;auth_uri&#34;</span>: <span style=color:#e6db74>&#34;https://...&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;token_uri&#34;</span>: <span style=color:#e6db74>&#34;https://...&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;auth_provider_x509_cert_url&#34;</span>: <span style=color:#e6db74>&#34;https://...&#34;</span>,
+</span></span><span style=display:flex><span>  <span style=color:#f92672>&#34;client_x509_cert_url&#34;</span>: <span style=color:#e6db74>&#34;https://...&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Then, time to commit the changes.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>git add .
+</span></span><span style=display:flex><span>git commit -m <span style=color:#e6db74>&#34;Add setup-kubectl action&#34;</span>
+</span></span><span style=display:flex><span>git push
+</span></span></code></pre></div><p>Then, go to the repository UI -> <code>Actions</code> tab -> Choose <code>gke</code> action -> Choose <code>Run workflow</code>.</p><p>Or, using the <a href=https://cli.github.com/>Github CLI</a>, the command is:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>gh workflow run gke
+</span></span></code></pre></div><p>If everything goes right, you should see the workflow accessing
+to GKE cluster and printing out the k8s namespaces.</p><h4 id=24-improving-the-action>2.4. Improving the action</h4><p>In the previous example, we used Manabie Staging environment.
+What if we have other environments, in a different GKE cluster of
+a different GCP project.</p><p><strong>Let&rsquo;s try to make the action reusable for both Staging and Production.</strong></p><p>There are a few things we would need to consider:</p><ol><li>We need to allow the caller to choose the environment</li><li>All the parameters between Staging and Production are different
+(GCP project ID, GKE cluster name, region, etc&mldr;)</li></ol><h5 id=allowing-caller-to-choose-the-environment><strong>Allowing caller to choose the environment</strong></h5><p>It is quite simple, since Github Action has built-in support for it,
+using the <code>inputs</code> field.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/actions/setup-kubectl/action.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>inputs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Environment (stag or prod)&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span></code></pre></div><h5 id=handling-different-configurations-for-different-environments><strong>Handling different configurations for different environments</strong></h5><p>Assuming the environments have already been set up, the project ID,
+cluster name, etc&mldr; will be the same for an environment.</p><p>Thus, we can implement a simple switch case to tell the action which
+parameters to use:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/actions/setup-kubectl/action.yaml</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>steps</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Get configuration</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/github-script@v5</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>script</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          const env = &#39;${{ inputs.environment }};
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          switch (env) {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            case &#39;stag&#39;:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;PROJECT_ID&#39;, &#39;manabie-stag&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;CLUSTER&#39;, &#39;manabie-stag-cluster&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;REGION&#39;, &#39;asia-southeast1&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            case &#39;prod&#39;:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;PROJECT_ID&#39;, &#39;manabie-prod&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;CLUSTER&#39;, &#39;manabie-prod-cluster&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;REGION&#39;, &#39;asia-northeast1&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          }</span>          
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Authenticate to Google Cloud</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/auth@v0</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>credentials_json</span>: <span style=color:#ae81ff>${{ inputs.SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>${{ env.PROJECT_ID }}</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>create_credentials_file</span>: <span style=color:#66d9ef>true</span>
+</span></span></code></pre></div><p><code>core.exportVariable</code> exports the value to the environment variables, so that
+the next steps can use them (with <code>${{ env.PROJECT_ID }}</code>)</p><h5 id=handling-different-secrets-for-different-environments><strong>Handling different secrets for different environments</strong></h5><p>The only secret we&rsquo;ve been using now is the service account key (<code>${{ secrets.SERVICE_ACCOUNT_KEY }}</code>
+in the previous step).</p><p>But since we have an additional environment, the number of keys is increased to 2, namely:</p><ul><li><code>${{ secrets.STAG_SERVICE_ACCOUNT_KEY }}</code></li><li><code>${{ secrets.PROD_SERVICE_ACCOUNT_KEY }}</code></li></ul><p>Since Github&rsquo;s composite actions cannot access secrets directly,
+we need to have <code>gke</code> workflow input them to the composite action <code>setup-kubectl</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/workflows/gke.yaml</span>
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup kubectl</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>./.github/actions/setup-kubectl</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>stag_service_account_key</span>: <span style=color:#ae81ff>${{ secrets.STAG_SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>prod_service_account_key</span>: <span style=color:#ae81ff>${{ secrets.PROD_SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># .github/actions/setup-kubectl/action.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;setup-kubectl&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Setup gcloud and kubenetes&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>inputs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>stag_service_account_key</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Manabie Staging service account key&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>prod_service_account_key</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Manabie Production service account key&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span></code></pre></div><p>Then, again, inside the <code>setup-kubectl</code>, we can choose which secrets to use
+with a simple script:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/actions/setup-kubectl/action.yaml</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>steps</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Get configuration</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/github-script@v5</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>script</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          const env = &#39;${{ inputs.environment }};
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          switch (env) {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            case &#39;stag&#39;:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;SERVICE_ACCOUNT_KEY&#39;, &#39;${{ inputs.stag_service_account_key }}&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            case &#39;prod&#39;:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;SERVICE_ACCOUNT_KEY&#39;, &#39;${{ inputs.prod_service_account_key }}&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          }</span>          
+</span></span></code></pre></div><p><strong>However</strong>, if you run this javascript script in Github Action, you&rsquo;ll encounter an error:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>Error: Unhandled error: SyntaxError: Invalid or unexpected token
+</span></span></code></pre></div><p>Remember that the service account key is a JSON. There are a lof of special characters in the key.
+We have not escaped those characters yet, so we cannot directly input it into the javascript.</p><p>Luckily, the action <a href=https://github.com/google-github-actions/auth>google-github-actions/auth@v0</a>
+allows us to input the key in a base64 format instead. After encoded, the key will look like this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>echo <span style=color:#e6db74>&#39;{ &lt;service_account_key&gt; }&#39;</span> | base64
+</span></span><span style=display:flex><span>ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibWFuYWJpZS1z
+</span></span><span style=display:flex><span>dGFnIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAiLi4uIiwKICAicHJpdmF0ZV9rZXkiOiAiLS0tLS1C
+</span></span><span style=display:flex><span>RUdJTiBQUklWQVRFIEtFWS0tLS0tXG4uLi5cbi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS1cbiIs
+</span></span><span style=display:flex><span>CiAgImNsaWVudF9lbWFpbCI6ICJtYW5hYmllQG1hbmFiaWUtc3RhZy5pYW0uZ3NlcnZpY2VhY2Nv
+</span></span><span style=display:flex><span>dW50LmNvbSIsCiAgImNsaWVudF9pZCI6ICIuLi4iLAogICJhdXRoX3VyaSI6ICJodHRwczovLy4u
+</span></span><span style=display:flex><span>LiIsCiAgInRva2VuX3VyaSI6ICJodHRwczovLy4uLiIsCiAgImF1dGhfcHJvdmlkZXJfeDUwOV9j
+</span></span><span style=display:flex><span>ZXJ0X3VybCI6ICJodHRwczovLy4uLiIsCiAgImNsaWVudF94NTA5X2NlcnRfdXJsIjogImh0dHBz
+</span></span><span style=display:flex><span>Oi8vLi4uIgp9Cg<span style=color:#f92672>==</span>
+</span></span></code></pre></div><p>No more special characters! Let&rsquo;s use these base64 encoded key instead for our secrets.</p><h5 id=combining-everything><strong>Combining everything</strong></h5><p>We combine all the previous ideas:</p><ul><li>Adding inputs for workflow</li><li>Adding script to handle different configs for different environments</li><li>Base64 encode the service account key</li></ul><p>With that in mind, we update the <code>setup-kubectl</code> action to:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/actions/setup-kubectl/action.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#e6db74>&#34;setup-kubectl&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Setup gcloud and kubenetes&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>inputs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Environment (stag or prod)&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>stag_service_account_key</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Manabie Staging service account key&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>prod_service_account_key</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Manabie Production service account key&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>required</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>runs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>using</span>: <span style=color:#e6db74>&#34;composite&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>steps</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Get configuration</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/github-script@v5</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>script</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          const env = &#39;${{ inputs.environment }};
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          switch (env) {
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            case &#39;stag&#39;:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;PROJECT_ID&#39;, &#39;manabie-stag&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;CLUSTER&#39;, &#39;manabie-stag-cluster&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;REGION&#39;, &#39;asia-southeast1&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;SERVICE_ACCOUNT_KEY&#39;, &#39;${{ inputs.stag_service_account_key }}&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>            case &#39;prod&#39;:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;PROJECT_ID&#39;, &#39;manabie-prod&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;CLUSTER&#39;, &#39;manabie-prod-cluster&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;REGION&#39;, &#39;asia-northeast1&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>              core.exportVariable(&#39;SERVICE_ACCOUNT_KEY&#39;, &#39;${{ inputs.prod_service_account_key }}&#39;);
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          }</span>          
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Authenticate to Google Cloud</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/auth@v0</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>credentials_json</span>: <span style=color:#ae81ff>${{ env.SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>${{ env.PROJECT_ID }}</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>create_credentials_file</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup Cloud SDK</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>google-github-actions/setup-gcloud@v0</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>project_id</span>: <span style=color:#ae81ff>${{ env.PROJECT_ID }}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup kubectl</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>shell</span>: <span style=color:#ae81ff>bash</span>
+</span></span><span style=display:flex><span>      <span style=color:#f92672>run</span>: <span style=color:#ae81ff>gcloud container clusters get-credentials ${{ env.CLUSTER }} --region ${{ env.REGION }}</span>
+</span></span></code></pre></div><p>and in the caller workflow <code>gke</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#75715e># .github/workflows/gke.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>name</span>: <span style=color:#ae81ff>gke</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>on</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>workflow_dispatch</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>inputs</span>:
+</span></span><span style=display:flex><span>      <span style=color:#f92672>environment</span>:
+</span></span><span style=display:flex><span>        <span style=color:#f92672>type</span>: <span style=color:#ae81ff>choice</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>description</span>: <span style=color:#e6db74>&#34;Environment&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>require</span>: <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>options</span>:
+</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>stag</span>
+</span></span><span style=display:flex><span>          - <span style=color:#ae81ff>prod</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>jobs</span>:
+</span></span><span style=display:flex><span>  <span style=color:#f92672>manabie-stag</span>:
+</span></span><span style=display:flex><span>    <span style=color:#f92672>runs-on</span>: <span style=color:#ae81ff>ubuntu-20.04</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>steps</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Checkout source</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/checkout@v3</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup kubectl</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>./.github/actions/setup-kubectl</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>with</span>:
+</span></span><span style=display:flex><span>          <span style=color:#f92672>environment</span>: <span style=color:#ae81ff>${{ inputs.environment }}</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>stag_service_account_key</span>: <span style=color:#ae81ff>${{ secrets.STAG_SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>          <span style=color:#f92672>prod_service_account_key</span>: <span style=color:#ae81ff>${{ secrets.PROD_SERVICE_ACCOUNT_KEY }}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Run some kubectl commands</span>
+</span></span><span style=display:flex><span>        <span style=color:#f92672>run</span>: |<span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          kubectl get namespaces
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>          kubectl get nodes</span>          
+</span></span></code></pre></div><p>Time to commit and push the update</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>git add .
+</span></span><span style=display:flex><span>git commit -m <span style=color:#e6db74>&#34;Handle different environments for setup-kubectl&#34;</span>
+</span></span></code></pre></div><p>Finally, we can trigger the workflow <code>gke</code> using the Github UI. If using the CLI, the command would be:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>gh workflow run gke -f environment<span style=color:#f92672>=</span>stag
+</span></span><span style=display:flex><span><span style=color:#75715e># or</span>
+</span></span><span style=display:flex><span>gh workflow run gke -f environment<span style=color:#f92672>=</span>prod
+</span></span></code></pre></div><h3 id=3-conclusion><strong>3. Conclusion</strong></h3><p>In this blog, we have:</p><ul><li>Discussed how to reuse a Github Action workflow using a composite action</li><li>Extended and improved the composite action to include more features</li><li>Run the created workflow on Github Action</li></ul><hr><footer><div class=meta_item><span class=meta_text>About <a href=/author/anhpngt>anhpngt</a></span><br><i>Backend Developer at Manabie</i></div><hr><section><h4>Share</h4><nav class="nav sharing-icons"><a class=nav-item href="https://www.facebook.com/sharer/sharer.php?u=%2f2022%2f04%2fcreate-a-reusable-workflow-for-github-actions%2f" title="Share on Facebook"><span class="fab fa-facebook-f fa-2x" aria-hidden=true></span></a>
+<a class=nav-item href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2f2022%2f04%2fcreate-a-reusable-workflow-for-github-actions%2f" title="Share on LinkedIn"><span class="fab fa-linkedin-in fa-2x" aria-hidden=true></span></a>
+<a class=nav-item href="https://twitter.com/intent/tweet?url=%2f2022%2f04%2fcreate-a-reusable-workflow-for-github-actions%2f&amp;text=Create%20a%20reusable%20workflow%20for%20GitHub%20Actions" title="Tweet this"><span class="fab fa-twitter fa-2x"></span></a></nav></section><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//manabie.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></footer></article></div><aside class="col-sm-3 ml-auto blog-sidebar"><section class=sidebar-module><h4>Links</h4><ol class=list-unstyled><li><a href=https://manabie.com>About Us</a></li><li><a href=https://manabie.breezy.hr>Careers</a></li></ol></section></aside></div></div><footer class=blog-footer><p dir=auto>Except where otherwise noted, content on this site is licensed under a <a href=https://creativecommons.org/licenses/by-sa/4.0/>Creative Commons Attribution 4.0 International license</a>.</p><p><a href=#>Back to top</a></p></footer></body></html>
